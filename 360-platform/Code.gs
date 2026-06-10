@@ -13,6 +13,15 @@ var CONFIG = {
 
 function doGet(e) {
   var params = (e && e.parameter) ? e.parameter : {};
+
+  if (params.action === 'image' && params.id) {
+    try {
+      return serveDriveImage_(params.id);
+    } catch (err) {
+      return ContentService.createTextOutput('Image not found').setMimeType(ContentService.MimeType.TEXT);
+    }
+  }
+
   var template = HtmlService.createTemplateFromFile('Index');
   template.loadError = 'null';
   template.scriptUrl = JSON.stringify(getScriptUrl_());
@@ -155,6 +164,18 @@ function listProjects() {
   return listAllProjects_();
 }
 
+function getImageAsDataUrl(fileId) {
+  var id = extractDriveId_(fileId);
+  var file = DriveApp.getFileById(id);
+  var maxBytes = 12 * 1024 * 1024;
+  if (file.getSize() > maxBytes) {
+    throw new Error('התמונה גדולה מדי (מעל 12MB). דחוס אותה לפני העלאה.');
+  }
+  var blob = file.getBlob();
+  var mime = blob.getContentType() || 'image/jpeg';
+  return 'data:' + mime + ';base64,' + Utilities.base64Encode(blob.getBytes());
+}
+
 function uploadImage(base64Data, fileName, projectId) {
   var folder = getOrCreateDriveFolder_();
   if (projectId) {
@@ -291,6 +312,25 @@ function getOrCreateDriveFolder_() {
     return folders.next();
   }
   return DriveApp.createFolder(CONFIG.DRIVE_FOLDER_NAME);
+}
+
+function serveDriveImage_(fileId) {
+  var id = extractDriveId_(fileId);
+  var file = DriveApp.getFileById(id);
+  var blob = file.getBlob();
+  return ContentService.createBlobOutput(blob).setMimeType(blob.getContentType() || 'image/jpeg');
+}
+
+function extractDriveId_(ref) {
+  if (!ref) throw new Error('מזהה קובץ חסר');
+  var str = String(ref);
+  var patterns = [/[?&]id=([^&]+)/, /\/file\/d\/([^/]+)/, /\/d\/([^/]+)/];
+  for (var i = 0; i < patterns.length; i++) {
+    var m = str.match(patterns[i]);
+    if (m) return m[1];
+  }
+  if (/^[a-zA-Z0-9_-]{20,}$/.test(str)) return str;
+  throw new Error('מזהה Drive לא תקין');
 }
 
 function uploadBase64ToDrive_(base64Data, fileName, folder) {

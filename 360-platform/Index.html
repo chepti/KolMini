@@ -612,18 +612,37 @@
             return null;
         }
 
-        function toViewableImageUrl(url) {
+        function getProxiedImageUrl(url) {
             if (!url || url.indexOf('data:') === 0) return url;
             const id = extractDriveFileId(url);
-            if (id) return 'https://drive.google.com/thumbnail?id=' + id + '&sz=w4000';
+            if (id) return SCRIPT_URL + '?action=image&id=' + encodeURIComponent(id);
             return url;
         }
 
-        function toCatalogThumbUrl(url) {
-            if (!url) return '';
-            const id = extractDriveFileId(url);
-            if (id) return 'https://drive.google.com/thumbnail?id=' + id + '&sz=w600';
-            return url;
+        function resolveImageForTexture(rawUrl, onSuccess, onError) {
+            if (!rawUrl) { if (onError) onError(); return; }
+            if (rawUrl.indexOf('data:') === 0) {
+                onSuccess(rawUrl);
+                return;
+            }
+            const fileId = extractDriveFileId(rawUrl);
+            if (fileId && IS_APPS_SCRIPT) {
+                updateLoadingProgress(12, 'מוריד תמונה מהענן...');
+                google.script.run
+                    .withSuccessHandler(onSuccess)
+                    .withFailureHandler(function(err) {
+                        console.error('Server image fetch failed:', err);
+                        if (onError) onError(err);
+                    })
+                    .getImageAsDataUrl(fileId);
+            } else {
+                onSuccess(rawUrl);
+            }
+        }
+
+        function resolveDisplayImageUrl(url) {
+            if (!url || url.indexOf('data:') === 0) return url;
+            return getProxiedImageUrl(url);
         }
 
         function updateLoadingProgress(percent, text) {
@@ -971,28 +990,24 @@
             hideLoadingOverlay();
         }
 
-        function loadTextureFromUrl(url, isFallback) {
+        function loadTextureFromUrl(url) {
+            updateLoadingProgress(20, 'מעבד תמונת רקע...');
             textureLoader.load(
                 url,
                 function(texture) { applyTextureToSphere(texture); },
                 function(xhr) {
                     if (xhr.lengthComputable) {
-                        const pct = 10 + Math.round((xhr.loaded / xhr.total) * 85);
+                        const pct = 20 + Math.round((xhr.loaded / xhr.total) * 75);
                         updateLoadingProgress(pct, 'טוען תמונת רקע... ' + pct + '%');
                     } else {
-                        updateLoadingProgress(40, 'טוען תמונת רקע...');
+                        updateLoadingProgress(50, 'טוען תמונת רקע...');
                     }
                 },
                 function(err) {
                     console.error('Texture load error:', err);
-                    if (!isFallback && url !== state.image1) {
-                        updateLoadingProgress(20, 'מנסה מקור חלופי...');
-                        loadTextureFromUrl(state.image1, true);
-                    } else {
-                        isTextureLoading = false;
-                        updateLoadingProgress(100, 'שגיאה בטעינת התמונה');
-                        setTimeout(hideLoadingOverlay, 1200);
-                    }
+                    isTextureLoading = false;
+                    updateLoadingProgress(100, 'שגיאה בטעינת התמונה');
+                    setTimeout(hideLoadingOverlay, 1200);
                 }
             );
         }
@@ -1008,8 +1023,13 @@
             showLoadingOverlay();
             updateLoadingProgress(5, 'מכין תמונת רקע...');
 
-            const url = toViewableImageUrl(raw);
-            loadTextureFromUrl(url, false);
+            resolveImageForTexture(raw, function(dataUrl) {
+                loadTextureFromUrl(dataUrl);
+            }, function() {
+                isTextureLoading = false;
+                updateLoadingProgress(100, 'שגיאה בהורדת התמונה מהענן');
+                setTimeout(hideLoadingOverlay, 1200);
+            });
         }
 
         // ==========================================
@@ -1521,7 +1541,7 @@
                 placeholder.innerHTML = normalizeEmbedContent(hs.content);
                 embedCont.classList.remove('hidden');
             } else if (hs.type === 'image') {
-                document.getElementById('display-image-el').src = hs.content;
+                document.getElementById('display-image-el').src = resolveDisplayImageUrl(hs.content);
                 imageCont.classList.remove('hidden');
             }
 
@@ -1631,13 +1651,22 @@
                     img.className = 'w-full h-full object-cover';
                     img.alt = p.title || '';
                     img.referrerPolicy = 'no-referrer';
-                    img.crossOrigin = 'anonymous';
-                    const thumbUrl = toCatalogThumbUrl(p.image1);
-                    img.src = thumbUrl;
+                    img.src = getProxiedImageUrl(p.image1);
                     img.onerror = function() {
-                        if (img.src !== p.image1) {
-                            img.src = p.image1;
-                        } else {
+                        if (IS_APPS_SCRIPT && p.image1.indexOf('data:') !== 0) {
+                            const fid = extractDriveFileId(p.image1);
+                            if (fid) {
+                                google.script.run
+                                    .withSuccessHandler(function(dataUrl) { img.src = dataUrl; })
+                                    .withFailureHandler(function() {
+                                        thumbWrap.innerHTML = '<div class="w-full h-full flex items-center justify-center text-slate-600"><i data-lucide="image-off" class="w-8 h-8"></i></div>';
+                                        lucide.createIcons();
+                                    })
+                                    .getImageAsDataUrl(fid);
+                                return;
+                            }
+                        }
+                        {
                             thumbWrap.innerHTML = '<div class="w-full h-full flex items-center justify-center text-slate-600"><i data-lucide="image-off" class="w-8 h-8"></i></div>';
                             lucide.createIcons();
                         }
