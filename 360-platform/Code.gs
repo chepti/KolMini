@@ -210,13 +210,15 @@ function getProjectData_(id, editToken) {
     hotspots = [];
   }
 
+  hotspots = inlineDriveImagesInHotspots_(hotspots);
+
   return {
     id: String(row[0]),
     title: String(row[1]),
     createdAt: row[2],
     updatedAt: row[3],
-    image1: String(row[4] || ''),
-    image2: String(row[5] || ''),
+    image1: inlineImageIfDrive_(String(row[4] || '')),
+    image2: inlineImageIfDrive_(String(row[5] || '')),
     activeImage: parseInt(row[6], 10) || 1,
     hotspots: hotspots,
     canEdit: canEdit,
@@ -312,6 +314,31 @@ function getOrCreateDriveFolder_() {
     return folders.next();
   }
   return DriveApp.createFolder(CONFIG.DRIVE_FOLDER_NAME);
+}
+
+function inlineImageIfDrive_(imageUrl) {
+  if (!imageUrl) return '';
+  var str = String(imageUrl);
+  if (str.indexOf('data:') === 0) return str;
+  if (str.indexOf('drive.google') === -1 && str.indexOf('googleusercontent') === -1) {
+    return str;
+  }
+  try {
+    return getImageAsDataUrl(str);
+  } catch (e) {
+    Logger.log('inlineImageIfDrive failed: ' + e.message);
+    return str;
+  }
+}
+
+function inlineDriveImagesInHotspots_(hotspots) {
+  if (!hotspots || !hotspots.length) return hotspots || [];
+  for (var i = 0; i < hotspots.length; i++) {
+    if (hotspots[i].type === 'image' && hotspots[i].content) {
+      hotspots[i].content = inlineImageIfDrive_(hotspots[i].content);
+    }
+  }
+  return hotspots;
 }
 
 function serveDriveImage_(fileId) {

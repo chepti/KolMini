@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>יוצר מרחבי 360° — מחולל</title>
+    <!-- APP_VERSION: 2.1-drive-proxy -->
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Three.js -->
@@ -529,13 +530,14 @@
         // ==========================================
 
         const IS_APPS_SCRIPT = typeof google !== 'undefined' && google.script && google.script.run;
-        const INITIAL_PROJECT = null;
-        const SERVER_IS_EDIT = true;
-        const SCRIPT_URL = 'https://script.google.com/a/macros/jerschools.org.il/s/AKfycbwg3LisOKMy1MPYclGzsvbXwudELNus7xhXtloBb3hUgjZccR4MCgXadUFbBhJJLtZebg/exec';
-        const LOAD_ERROR = null;
-        const PAGE_MODE = 'editor';
-        const CATALOG_DATA = [];
+        const INITIAL_PROJECT = <?!= initialProject ?>;
+        const SERVER_IS_EDIT = <?!= isEditMode ?>;
+        const SCRIPT_URL = <?!= scriptUrl ?> || 'https://script.google.com/a/macros/jerschools.org.il/s/AKfycbwg3LisOKMy1MPYclGzsvbXwudELNus7xhXtloBb3hUgjZccR4MCgXadUFbBhJJLtZebg/exec';
+        const LOAD_ERROR = <?!= loadError ?>;
+        const PAGE_MODE = <?!= pageMode ?>;
+        const CATALOG_DATA = <?!= catalogData ?>;
         const PANORAMA_CENTER_LON = 180;
+        const APP_VERSION = '2.1-drive-proxy';
 
         const EMBEDDED_STATE = /*_EMBEDDED_STATE_START_*/ null /*_EMBEDDED_STATE_END_*/;
 
@@ -619,25 +621,53 @@
             return url;
         }
 
+        function isDriveUrl(url) {
+            if (!url) return false;
+            return url.indexOf('drive.google') !== -1 || url.indexOf('googleusercontent') !== -1;
+        }
+
         function resolveImageForTexture(rawUrl, onSuccess, onError) {
             if (!rawUrl) { if (onError) onError(); return; }
+
             if (rawUrl.indexOf('data:') === 0) {
                 onSuccess(rawUrl);
                 return;
             }
-            const fileId = extractDriveFileId(rawUrl);
-            if (fileId && IS_APPS_SCRIPT) {
-                updateLoadingProgress(12, 'מוריד תמונה מהענן...');
-                google.script.run
-                    .withSuccessHandler(onSuccess)
-                    .withFailureHandler(function(err) {
-                        console.error('Server image fetch failed:', err);
-                        if (onError) onError(err);
-                    })
-                    .getImageAsDataUrl(fileId);
-            } else {
+
+            if (!isDriveUrl(rawUrl)) {
                 onSuccess(rawUrl);
+                return;
             }
+
+            const fileId = extractDriveFileId(rawUrl);
+            if (!fileId) {
+                updateLoadingProgress(100, 'שגיאה: מזהה Drive לא תקין');
+                if (onError) onError();
+                return;
+            }
+
+            if (!IS_APPS_SCRIPT) {
+                updateLoadingProgress(100, 'שגיאה: נדרשת פריסת Apps Script');
+                if (onError) onError();
+                return;
+            }
+
+            updateLoadingProgress(12, 'מוריד תמונה מהענן (v' + APP_VERSION + ')...');
+            google.script.run
+                .withSuccessHandler(function(dataUrl) {
+                    if (dataUrl && dataUrl.indexOf('data:') === 0) {
+                        onSuccess(dataUrl);
+                    } else {
+                        console.error('Invalid data URL from server');
+                        if (onError) onError();
+                    }
+                })
+                .withFailureHandler(function(err) {
+                    console.error('Server image fetch failed:', err);
+                    updateLoadingProgress(100, 'שגיאה: ' + (err.message || err));
+                    if (onError) onError(err);
+                })
+                .getImageAsDataUrl(fileId);
         }
 
         function resolveDisplayImageUrl(url) {
@@ -726,6 +756,7 @@
         }
 
         window.onload = function() {
+            console.log('360 מחולל גרסה:', APP_VERSION);
             showLoadingOverlay();
             updateLoadingProgress(2, 'מאתחל מנוע תלת-ממדי...');
 
@@ -991,25 +1022,29 @@
         }
 
         function loadTextureFromUrl(url) {
-            updateLoadingProgress(20, 'מעבד תמונת רקע...');
-            textureLoader.load(
-                url,
-                function(texture) { applyTextureToSphere(texture); },
-                function(xhr) {
-                    if (xhr.lengthComputable) {
-                        const pct = 20 + Math.round((xhr.loaded / xhr.total) * 75);
-                        updateLoadingProgress(pct, 'טוען תמונת רקע... ' + pct + '%');
-                    } else {
-                        updateLoadingProgress(50, 'טוען תמונת רקע...');
-                    }
-                },
-                function(err) {
-                    console.error('Texture load error:', err);
-                    isTextureLoading = false;
-                    updateLoadingProgress(100, 'שגיאה בטעינת התמונה');
-                    setTimeout(hideLoadingOverlay, 1200);
-                }
-            );
+            if (!url || url.indexOf('data:') !== 0) {
+                console.error('Blocked texture load from non-data URL:', url);
+                isTextureLoading = false;
+                updateLoadingProgress(100, 'שגיאה: התמונה לא הומרה — פרוס מחדש Code.gs + Index');
+                setTimeout(hideLoadingOverlay, 2500);
+                return;
+            }
+
+            updateLoadingProgress(40, 'מפענח תמונת רקע...');
+            const img = new Image();
+            img.onload = function() {
+                updateLoadingProgress(85, 'מציג פנורמה...');
+                const texture = new THREE.Texture(img);
+                texture.needsUpdate = true;
+                applyTextureToSphere(texture);
+            };
+            img.onerror = function(e) {
+                console.error('Image decode error:', e);
+                isTextureLoading = false;
+                updateLoadingProgress(100, 'שגיאה בפענוח התמונה');
+                setTimeout(hideLoadingOverlay, 1200);
+            };
+            img.src = url;
         }
 
         function applySceneBackground() {
@@ -1651,7 +1686,6 @@
                     img.className = 'w-full h-full object-cover';
                     img.alt = p.title || '';
                     img.referrerPolicy = 'no-referrer';
-                    img.crossOrigin = 'anonymous';
                     img.src = getProxiedImageUrl(p.image1);
                     img.onerror = function() {
                         if (IS_APPS_SCRIPT && p.image1.indexOf('data:') !== 0) {
