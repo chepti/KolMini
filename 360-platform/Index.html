@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>יוצר מרחבי 360° — מחול הנחמש</title>
+    <title>יוצר מרחבי 360° — מחולל</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Three.js -->
@@ -69,6 +69,40 @@
         .section-label {
             color: #94a3b8;
         }
+        #hotspot-tooltip {
+            position: fixed;
+            z-index: 45;
+            pointer-events: none;
+            padding: 6px 12px;
+            background: rgba(15, 23, 42, 0.92);
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #f1f5f9;
+            white-space: nowrap;
+            transform: translate(-50%, -120%);
+            opacity: 0;
+            transition: opacity 0.15s;
+        }
+        #hotspot-tooltip.visible {
+            opacity: 1;
+        }
+        #load-progress-track {
+            width: 220px;
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 999px;
+            overflow: hidden;
+            margin-top: 16px;
+        }
+        #load-progress-bar {
+            height: 100%;
+            width: 0%;
+            background: #64748b;
+            border-radius: 999px;
+            transition: width 0.2s ease;
+        }
     </style>
 </head>
 <body class="w-full h-screen relative">
@@ -76,11 +110,14 @@
     <!-- Three.js Canvas Container -->
     <div id="canvas-container" class="w-full h-full absolute inset-0 cursor-grab active:cursor-grabbing"></div>
 
+    <!-- Hotspot hover tooltip -->
+    <div id="hotspot-tooltip"></div>
+
     <!-- UI Loader Overlay -->
-    <div id="loading-overlay" class="absolute inset-0 bg-slate-950 z-50 flex flex-col items-center justify-content justify-center text-white transition-opacity duration-500">
-        <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-cyan-500 mb-4"></div>
-        <h2 class="text-2xl font-bold">טוען סביבת 360...</h2>
-        <p class="text-slate-400 mt-2 text-sm">מייצר מרחב תלת-ממדי אינטראקטיבי</p>
+    <div id="loading-overlay" class="absolute inset-0 bg-slate-950 z-50 flex flex-col items-center justify-center text-white transition-opacity duration-500">
+        <h2 class="text-xl font-bold">טוען סביבת 360...</h2>
+        <p id="load-status-text" class="text-slate-400 mt-2 text-sm">מאתחל</p>
+        <div id="load-progress-track"><div id="load-progress-bar"></div></div>
     </div>
 
     <!-- Mode Banner Indicator -->
@@ -90,8 +127,8 @@
         <button onclick="toggleAddHotspotMode(false)" class="bg-slate-800 hover:bg-slate-700 text-xs px-2.5 py-1 rounded transition-colors mr-2">ביטול</button>
     </div>
 
-    <!-- Floating Top Bar Buttons (Visible in student mode or always accessible) -->
-    <div class="absolute top-4 right-4 z-40 flex items-center gap-3">
+    <!-- Floating Top Bar Buttons (editor only) -->
+    <div id="editor-top-bar" class="absolute top-4 right-4 z-40 flex items-center gap-3">
         <!-- Main Hamburger Button -->
         <button id="menu-toggle-btn" onclick="toggleAdminPanel()" class="w-12 h-12 rounded-xl glass-panel text-white hover:text-cyan-400 flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-105 active:scale-95" title="תפריט ניהול">
             <i data-lucide="menu" class="w-6 h-6"></i>
@@ -124,7 +161,7 @@
                     <i data-lucide="settings" class="w-5 h-5"></i>
                 </div>
                 <div>
-                    <h1 class="font-extrabold text-lg text-white">יוצר מרחבי 360</h1>
+                    <h1 class="font-extrabold text-lg text-white">מחולל מרחבי 360</h1>
                     <p class="text-[11px] text-slate-400">עצב והטמע נקודות מידע אינטראקטיביות</p>
                 </div>
             </div>
@@ -228,7 +265,7 @@
 
         <!-- Sidebar Footer -->
         <div class="p-4 bg-slate-950/80 border-t border-slate-800/80 text-center text-[10px] text-slate-500 leading-relaxed">
-            <div>מחול הנחמש • מרחבי 360° אינטראקטיביים</div>
+            <div>מחולל • מרחבי 360° אינטראקטיביים</div>
             <div class="mt-1 text-slate-600">בהשארת מעיין שפושניק, מאת חולמים תקשוב</div>
         </div>
     </div>
@@ -532,8 +569,9 @@
         let targetFOV = DEFAULT_FOV;
         let currentFOV = DEFAULT_FOV;
 
-        let activeSceneHotspots = []; // Keeps track of Three.js hotspot meshes
+        let activeSceneHotspots = [];
         let isAddHotspotMode = false;
+        let isTextureLoading = false;
         let activeConfigHotspotId = null;
         let currentEditingType = 'text';
 
@@ -562,6 +600,72 @@
 
         function hexToNumber(hex) {
             return parseInt(hex.replace('#', ''), 16);
+        }
+
+        function extractDriveFileId(url) {
+            if (!url) return null;
+            const patterns = [/[?&]id=([^&]+)/, /\/file\/d\/([^/]+)/, /\/d\/([^/]+)/];
+            for (let i = 0; i < patterns.length; i++) {
+                const m = url.match(patterns[i]);
+                if (m) return m[1];
+            }
+            return null;
+        }
+
+        function toViewableImageUrl(url) {
+            if (!url || url.indexOf('data:') === 0) return url;
+            const id = extractDriveFileId(url);
+            if (id) return 'https://drive.google.com/thumbnail?id=' + id + '&sz=w4000';
+            return url;
+        }
+
+        function toCatalogThumbUrl(url) {
+            if (!url) return '';
+            const id = extractDriveFileId(url);
+            if (id) return 'https://drive.google.com/thumbnail?id=' + id + '&sz=w600';
+            return url;
+        }
+
+        function updateLoadingProgress(percent, text) {
+            const bar = document.getElementById('load-progress-bar');
+            const status = document.getElementById('load-status-text');
+            const overlay = document.getElementById('loading-overlay');
+            if (bar) bar.style.width = Math.min(100, Math.max(0, percent)) + '%';
+            if (status && text) status.textContent = text;
+            if (overlay) overlay.classList.remove('hidden', 'opacity-0');
+        }
+
+        function showLoadingOverlay() {
+            const overlay = document.getElementById('loading-overlay');
+            if (overlay) overlay.classList.remove('hidden', 'opacity-0');
+        }
+
+        function hideLoadingOverlay() {
+            const overlay = document.getElementById('loading-overlay');
+            if (!overlay) return;
+            overlay.classList.add('opacity-0');
+            setTimeout(function() { overlay.classList.add('hidden'); }, 500);
+        }
+
+        function showHotspotTooltip(x, y, hs) {
+            const tip = document.getElementById('hotspot-tooltip');
+            const text = hs.title || (hs.label ? 'נקודה ' + hs.label : '');
+            if (!text) { hideHotspotTooltip(); return; }
+            tip.textContent = text;
+            tip.style.left = x + 'px';
+            tip.style.top = y + 'px';
+            tip.classList.add('visible');
+        }
+
+        function hideHotspotTooltip() {
+            document.getElementById('hotspot-tooltip').classList.remove('visible');
+        }
+
+        function applyStudentModeUI() {
+            document.getElementById('admin-sidebar').classList.add('translate-x-full');
+            const meta = document.getElementById('project-meta-section');
+            if (meta) meta.classList.add('hidden');
+            document.getElementById('editor-top-bar').classList.add('hidden');
         }
 
         function createHotspotSprite(label, colorHex) {
@@ -602,26 +706,34 @@
             return sprite;
         }
 
-        // Safe Initialization after page loads
         window.onload = function() {
+            showLoadingOverlay();
+            updateLoadingProgress(2, 'מאתחל מנוע תלת-ממדי...');
+
             initThree();
+            renderHotspotsIn3D();
+
             if (!state.image1) {
                 setupDefaultProceduralBackgrounds();
             } else {
                 applySceneBackground();
             }
-            centerViewOnPanorama();
-            renderHotspotsIn3D();
-            updateUI();
-            setupPasteHandlers();
-            setupImageDropzone();
-            setupEmbedAutoIframe();
+
+            if (state.isEditMode) {
+                updateUI();
+                setupPasteHandlers();
+                setupImageDropzone();
+                setupEmbedAutoIframe();
+            } else {
+                applyStudentModeUI();
+            }
 
             if (PAGE_MODE === 'catalog') {
+                hideLoadingOverlay();
                 openCatalog(CATALOG_DATA);
             }
 
-            if (state.projectTitle) {
+            if (state.projectTitle && state.isEditMode) {
                 document.getElementById('project-title-input').value = state.projectTitle;
             }
 
@@ -629,22 +741,7 @@
                 showSaveStatus('שגיאת טעינה: ' + LOAD_ERROR, 'error');
             }
 
-            setTimeout(() => {
-                const loader = document.getElementById('loading-overlay');
-                loader.classList.add('opacity-0');
-                setTimeout(() => loader.classList.add('hidden'), 500);
-            }, 1000);
-
             lucide.createIcons();
-
-            if (!state.isEditMode) {
-                document.getElementById('admin-sidebar').classList.add('translate-x-full');
-                document.getElementById('project-meta-section').classList.add('hidden');
-                document.getElementById('view-mode-badge').innerHTML = `
-                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-                    <span>מצב תלמיד</span>
-                `;
-            }
         };
 
         function setupPasteHandlers() {
@@ -724,9 +821,11 @@
             scene.add(sphereMesh);
 
             textureLoader = new THREE.TextureLoader();
+            textureLoader.setCrossOrigin('anonymous');
 
-            // Setup Controls Event Listeners
             container.addEventListener('pointerdown', onPointerDown, false);
+            container.addEventListener('pointermove', onCanvasPointerMove, false);
+            container.addEventListener('pointerleave', hideHotspotTooltip, false);
             container.addEventListener('wheel', onDocumentMouseWheel, { passive: false });
 
             // Touch support for dragging
@@ -862,20 +961,55 @@
             return canvas.toDataURL('image/jpeg');
         }
 
-        // Apply selected background state to sphere mesh
-        function applySceneBackground() {
-            const dataUrl = state.image1;
-            if (!dataUrl) return;
+        function applyTextureToSphere(texture) {
+            sphereMesh.material.map = texture;
+            sphereMesh.material.color.setHex(0xffffff);
+            sphereMesh.material.needsUpdate = true;
+            centerViewOnPanorama();
+            isTextureLoading = false;
+            updateLoadingProgress(100, 'הטעינה הושלמה');
+            hideLoadingOverlay();
+        }
 
-            textureLoader.load(dataUrl, function(texture) {
-                sphereMesh.material.map = texture;
-                sphereMesh.material.needsUpdate = true;
-                sphereMesh.material.color.setHex(0xffffff);
-                sphereMesh.material.needsUpdate = true;
-                centerViewOnPanorama();
-            }, undefined, function(err) {
-                console.error("Error loading sphere texture: ", err);
-            });
+        function loadTextureFromUrl(url, isFallback) {
+            textureLoader.load(
+                url,
+                function(texture) { applyTextureToSphere(texture); },
+                function(xhr) {
+                    if (xhr.lengthComputable) {
+                        const pct = 10 + Math.round((xhr.loaded / xhr.total) * 85);
+                        updateLoadingProgress(pct, 'טוען תמונת רקע... ' + pct + '%');
+                    } else {
+                        updateLoadingProgress(40, 'טוען תמונת רקע...');
+                    }
+                },
+                function(err) {
+                    console.error('Texture load error:', err);
+                    if (!isFallback && url !== state.image1) {
+                        updateLoadingProgress(20, 'מנסה מקור חלופי...');
+                        loadTextureFromUrl(state.image1, true);
+                    } else {
+                        isTextureLoading = false;
+                        updateLoadingProgress(100, 'שגיאה בטעינת התמונה');
+                        setTimeout(hideLoadingOverlay, 1200);
+                    }
+                }
+            );
+        }
+
+        function applySceneBackground() {
+            const raw = state.image1;
+            if (!raw) {
+                hideLoadingOverlay();
+                return;
+            }
+
+            isTextureLoading = true;
+            showLoadingOverlay();
+            updateLoadingProgress(5, 'מכין תמונת רקע...');
+
+            const url = toViewableImageUrl(raw);
+            loadTextureFromUrl(url, false);
         }
 
         // ==========================================
@@ -908,7 +1042,35 @@
             if (isUserInteracting === true) {
                 lon = (onPointerDownMouseX - event.clientX) * 0.1 + onPointerDownLon;
                 lat = (event.clientY - onPointerDownMouseY) * 0.1 + onPointerDownLat;
+                hideHotspotTooltip();
             }
+        }
+
+        function onCanvasPointerMove(event) {
+            if (isUserInteracting || isAddHotspotMode) {
+                hideHotspotTooltip();
+                return;
+            }
+
+            mouseVector.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouseVector.y = -(event.clientY / window.innerHeight) * 2 + 1;
+            raycaster.setFromCamera(mouseVector, camera);
+
+            const interactiveObjects = activeSceneHotspots.map(function(item) { return item.mesh; }).filter(Boolean);
+            const intersects = raycaster.intersectObjects(interactiveObjects, true);
+
+            if (intersects.length > 0) {
+                let obj = intersects[0].object;
+                while (obj && !obj.userData.hsId) obj = obj.parent;
+                if (obj && obj.userData.hsId) {
+                    const hs = state.hotspots.find(function(h) { return h.id === obj.userData.hsId; });
+                    if (hs) {
+                        showHotspotTooltip(event.clientX, event.clientY, hs);
+                        return;
+                    }
+                }
+            }
+            hideHotspotTooltip();
         }
 
         function onPointerUp(event) {
@@ -1077,6 +1239,7 @@
 
             filteredHotspots.forEach(hs => {
                 const hotspotGroup = new THREE.Group();
+                hotspotGroup.userData = { hsId: hs.id };
                 hotspotGroup.position.set(hs.position.x, hs.position.y, hs.position.z);
                 hotspotGroup.lookAt(0, 0, 0);
 
@@ -1460,18 +1623,44 @@
             projects.forEach(function(p) {
                 const card = document.createElement('div');
                 card.className = 'glass-panel rounded-2xl overflow-hidden border border-slate-700/50 flex flex-col';
-                const thumb = p.image1
-                    ? '<img src="' + p.image1 + '" class="w-full h-32 object-cover bg-slate-900" alt="">'
-                    : '<div class="w-full h-32 bg-slate-800 flex items-center justify-center text-slate-600"><i data-lucide="image" class="w-8 h-8"></i></div>';
+
+                const thumbWrap = document.createElement('div');
+                thumbWrap.className = 'w-full h-32 bg-slate-900 relative overflow-hidden';
+                if (p.image1) {
+                    const img = document.createElement('img');
+                    img.className = 'w-full h-full object-cover';
+                    img.alt = p.title || '';
+                    img.referrerPolicy = 'no-referrer';
+                    img.crossOrigin = 'anonymous';
+                    const thumbUrl = toCatalogThumbUrl(p.image1);
+                    img.src = thumbUrl;
+                    img.onerror = function() {
+                        if (img.src !== p.image1) {
+                            img.src = p.image1;
+                        } else {
+                            thumbWrap.innerHTML = '<div class="w-full h-full flex items-center justify-center text-slate-600"><i data-lucide="image-off" class="w-8 h-8"></i></div>';
+                            lucide.createIcons();
+                        }
+                    };
+                    thumbWrap.appendChild(img);
+                } else {
+                    thumbWrap.innerHTML = '<div class="w-full h-full flex items-center justify-center text-slate-600"><i data-lucide="image" class="w-8 h-8"></i></div>';
+                }
+
+                const body = document.createElement('div');
+                body.className = 'p-4 flex-1 flex flex-col gap-2';
                 const dateStr = p.updatedAt ? new Date(p.updatedAt).toLocaleDateString('he-IL') : '';
-                card.innerHTML = thumb +
-                    '<div class="p-4 flex-1 flex flex-col gap-2">' +
-                    '<h3 class="font-bold text-sm truncate">' + (p.title || 'ללא שם') + '</h3>' +
+                body.innerHTML =
+                    '<h3 class="font-bold text-sm truncate"></h3>' +
                     '<p class="text-[10px] text-slate-500">' + dateStr + '</p>' +
                     '<div class="flex flex-col gap-1.5 mt-auto">' +
                     '<a href="' + p.viewUrl + '" target="_blank" class="btn-muted text-center py-1.5 rounded-lg text-xs font-semibold">צפייה</a>' +
                     '<a href="' + p.copyUrl + '" class="btn-muted-primary text-center py-1.5 rounded-lg text-xs font-semibold">העתקה לעריכה</a>' +
-                    '</div></div>';
+                    '</div>';
+                body.querySelector('h3').textContent = p.title || 'ללא שם';
+
+                card.appendChild(thumbWrap);
+                card.appendChild(body);
                 grid.appendChild(card);
             });
             lucide.createIcons();
