@@ -6,6 +6,10 @@
 var CONFIG = {
   SHEET_NAME: 'Projects',
   DRIVE_FOLDER_NAME: '360-Environments',
+  // כתובת קבועה של פריסת ה-Web App — לא משתנה בין פריסות
+  WEB_APP_URL: 'https://script.google.com/a/macros/jerschools.org.il/s/AKfycbwg3LisOKMy1MPYclGzsvbXwudELNus7xhXtloBb3hUgjZccR4MCgXadUFbBhJJLtZebg/exec',
+  // אופציונלי: הדבק כאן מזהה תיקיית Drive קיימת (מהכתובת). ריק = ייווצר אוטומטית
+  DRIVE_FOLDER_ID: '',
   HEADERS: ['id', 'title', 'created_at', 'updated_at', 'image1_url', 'image2_url', 'active_image', 'hotspots_json', 'edit_token']
 };
 
@@ -194,6 +198,9 @@ function findRowById_(sheet, id) {
 }
 
 function getOrCreateDriveFolder_() {
+  if (CONFIG.DRIVE_FOLDER_ID) {
+    return DriveApp.getFolderById(CONFIG.DRIVE_FOLDER_ID);
+  }
   var folders = DriveApp.getFoldersByName(CONFIG.DRIVE_FOLDER_NAME);
   if (folders.hasNext()) {
     return folders.next();
@@ -218,7 +225,14 @@ function generateShortId_() {
 }
 
 function getScriptUrl_() {
-  return ScriptApp.getService().getUrl();
+  if (CONFIG.WEB_APP_URL) {
+    return CONFIG.WEB_APP_URL;
+  }
+  var url = ScriptApp.getService().getUrl();
+  if (!url) {
+    throw new Error('כתובת Web App לא מוגדרת — עדכן את CONFIG.WEB_APP_URL');
+  }
+  return url;
 }
 
 function setupSheet() {
