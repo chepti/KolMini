@@ -47,6 +47,28 @@
             backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
+        .btn-muted {
+            background: #334155;
+            border: 1px solid #475569;
+            color: #e2e8f0;
+            transition: background 0.2s, border-color 0.2s;
+        }
+        .btn-muted:hover {
+            background: #3f4f63;
+            border-color: #64748b;
+        }
+        .btn-muted-primary {
+            background: #3d4f63;
+            border: 1px solid #52657a;
+            color: #f1f5f9;
+        }
+        .btn-muted-primary:hover {
+            background: #4a5d72;
+            border-color: #6b7f94;
+        }
+        .section-label {
+            color: #94a3b8;
+        }
     </style>
 </head>
 <body class="w-full h-screen relative">
@@ -74,8 +96,8 @@
         <button id="menu-toggle-btn" onclick="toggleAdminPanel()" class="w-12 h-12 rounded-xl glass-panel text-white hover:text-cyan-400 flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-105 active:scale-95" title="תפריט ניהול">
             <i data-lucide="menu" class="w-6 h-6"></i>
         </button>
-        <button id="view-mode-badge" class="px-4 py-2.5 rounded-xl glass-panel text-xs font-semibold text-cyan-400 border border-cyan-500/20 flex items-center gap-1.5 shadow-lg">
-            <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+        <button id="view-mode-badge" class="px-4 py-2.5 rounded-xl glass-panel text-xs font-semibold text-slate-300 border border-slate-600/40 flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-slate-400"></span>
             <span id="view-mode-text">מצב עורך</span>
         </button>
     </div>
@@ -116,7 +138,7 @@
 
             <!-- שם הפרויקט -->
             <div class="space-y-2" id="project-meta-section">
-                <div class="flex items-center gap-1.5 text-cyan-400 font-bold text-sm">
+                <div class="flex items-center gap-1.5 section-label font-bold text-sm">
                     <i data-lucide="folder-open" class="w-4 h-4"></i>
                     <span>פרטי הפרויקט</span>
                 </div>
@@ -127,11 +149,17 @@
             
             <!-- Step 1: Backgrounds Settings -->
             <div class="space-y-3">
-                <div class="flex items-center gap-1.5 text-cyan-400 font-bold text-sm">
-                    <i data-lucide="image" class="w-4 h-4"></i>
-                    <span>שלב א': תמונת רקע 360°</span>
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-1.5 section-label font-bold text-sm">
+                        <i data-lucide="image" class="w-4 h-4"></i>
+                        <span>שלב א': תמונת רקע 360°</span>
+                    </div>
+                    <button type="button" onclick="openHelpModal()" class="btn-muted text-[10px] px-2 py-1 rounded-lg flex items-center gap-1" title="עזרה ופרומפט ליצירת תמונה">
+                        <i data-lucide="help-circle" class="w-3.5 h-3.5"></i>
+                        עזרה
+                    </button>
                 </div>
-                <p class="text-xs text-slate-400 leading-relaxed">העלה תמונה פנורמית בפורמט 360 מעלות (Equirectangular), או הדבק תמונה (Ctrl+V) כשהסיידבר פתוח.</p>
+                <p class="text-xs text-slate-400 leading-relaxed">העלה תמונה פנורמית בפורמט 360 מעלות (Equirectangular), או הדבק תמונה (Ctrl+V) כשהסיידבר פתוח. המבט ייפתח על מרכז התמונה.</p>
                 
                 <div class="mt-2">
                     <label class="block cursor-pointer border border-dashed border-slate-700 hover:border-cyan-500/50 rounded-xl p-4 text-center bg-slate-950/40 transition-all hover:bg-slate-950/60">
@@ -149,14 +177,14 @@
 
             <!-- Step 2: Interactive Hotspots -->
             <div class="space-y-3">
-                <div class="flex items-center gap-1.5 text-cyan-400 font-bold text-sm">
+                <div class="flex items-center gap-1.5 section-label font-bold text-sm">
                     <i data-lucide="map-pin" class="w-4 h-4"></i>
                     <span>שלב ב': ניהול נקודות חמות אינטראקטיביות</span>
                 </div>
                 <p class="text-xs text-slate-400 leading-relaxed">נקודות חמות נשארות מעוגנות במיקום תלת-ממדי מדויק במרחב ומציגות מידע עשיר לסטודנטים בלחיצה.</p>
                 
-                <button id="add-hotspot-btn" onclick="toggleAddHotspotMode(true)" class="w-full py-3 px-4 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 transform active:scale-[0.98]">
-                    <i data-lucide="plus-circle" class="w-5 h-5 animate-pulse"></i>
+                <button id="add-hotspot-btn" onclick="toggleAddHotspotMode(true)" class="w-full py-3 px-4 btn-muted-primary font-bold rounded-xl flex items-center justify-center gap-2 transform active:scale-[0.98]">
+                    <i data-lucide="plus-circle" class="w-5 h-5"></i>
                     צור נקודה חמה חדשה בסביבה
                 </button>
 
@@ -173,29 +201,35 @@
 
             <!-- Step 3: Cloud Save & Export -->
             <div class="space-y-3 pt-2">
-                <div class="flex items-center gap-1.5 text-cyan-400 font-bold text-sm">
+                <div class="flex items-center gap-1.5 section-label font-bold text-sm">
                     <i data-lucide="cloud-upload" class="w-4 h-4"></i>
                     <span>שלב ג': שמירה ושיתוף</span>
                 </div>
                 <p class="text-xs text-slate-400 leading-relaxed">שמור בענן — הנתונים נשמרים ב-Google Sheet והתמונות ב-Drive. תקבל קישור ייחודי לתלמידים וקישור עריכה לחזור ולעדכן.</p>
                 
-                <button id="btn-save-cloud" onclick="saveToCloud()" class="w-full py-3 px-4 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-extrabold rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 transform active:scale-[0.98]">
+                <button id="btn-save-cloud" onclick="saveToCloud()" class="w-full py-3 px-4 btn-muted-primary font-extrabold rounded-xl flex items-center justify-center gap-2 transform active:scale-[0.98]">
                     <i data-lucide="cloud-upload" class="w-5 h-5"></i>
                     שמור בענן וקבל קישור
                 </button>
                 <div id="save-status" class="hidden text-xs text-center py-2 rounded-lg"></div>
 
-                <button onclick="exportProjectHTML()" class="w-full py-2 px-4 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl transition-all flex items-center justify-center gap-2 text-sm">
+                <button onclick="exportProjectHTML()" class="w-full py-2 px-4 btn-muted font-semibold rounded-xl flex items-center justify-center gap-2 text-sm">
                     <i data-lucide="file-down" class="w-4 h-4"></i>
                     הורד גיבוי HTML (אופציונלי)
+                </button>
+
+                <button onclick="openCatalog()" class="w-full py-2 px-4 btn-muted font-semibold rounded-xl flex items-center justify-center gap-2 text-sm">
+                    <i data-lucide="layout-grid" class="w-4 h-4"></i>
+                    קטלוג כל המרחבים
                 </button>
             </div>
 
         </div>
 
         <!-- Sidebar Footer -->
-        <div class="p-4 bg-slate-950/80 border-t border-slate-800/80 text-center text-[10px] text-slate-500">
-            מחול הנחמש • מרחבי 360° אינטראקטיביים
+        <div class="p-4 bg-slate-950/80 border-t border-slate-800/80 text-center text-[10px] text-slate-500 leading-relaxed">
+            <div>מחול הנחמש • מרחבי 360° אינטראקטיביים</div>
+            <div class="mt-1 text-slate-600">בהשארת מעיין שפושניק, מאת חולמים תקשוב</div>
         </div>
     </div>
 
@@ -239,7 +273,7 @@
                 <div>
                     <label class="block text-xs font-bold text-slate-400 mb-1.5">סוג התוכן להצגה:</label>
                     <div class="grid grid-cols-5 gap-2">
-                        <button type="button" onclick="selectHotspotType('text')" id="hs-type-text" class="py-2.5 px-2 rounded-xl border border-cyan-500 bg-cyan-500/10 text-white font-semibold text-xs flex flex-col items-center gap-1 transition-all">
+                        <button type="button" onclick="selectHotspotType('text')" id="hs-type-text" class="py-2.5 px-2 rounded-xl border border-slate-500 bg-slate-700/50 text-white font-semibold text-xs flex flex-col items-center gap-1 transition-all">
                             <i data-lucide="align-right" class="w-4 h-4"></i>
                             <span>טקסט מעוצב</span>
                         </button>
@@ -306,12 +340,52 @@
                     <button type="button" onclick="closeHotspotConfig()" class="py-2.5 px-4 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl transition-all text-sm">
                         ביטול
                     </button>
-                    <button type="button" onclick="saveHotspotConfig()" class="py-2.5 px-5 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl transition-all text-sm flex items-center gap-1">
+                    <button type="button" onclick="saveHotspotConfig()" class="py-2.5 px-5 btn-muted-primary font-bold rounded-xl text-sm flex items-center gap-1">
                         <i data-lucide="check" class="w-4 h-4"></i>
                         שמור שינויים
                     </button>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Help / Prompt Modal -->
+    <div id="help-modal" class="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/85 backdrop-blur-md hidden p-4">
+        <div class="glass-panel w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl border border-slate-600/40 flex flex-col text-white">
+            <div class="p-5 border-b border-slate-800 bg-slate-900/60 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="sparkles" class="w-5 h-5 text-slate-400"></i>
+                    <h3 class="font-bold text-lg">פרומפט ליצירת תמונת 360°</h3>
+                </div>
+                <button onclick="closeHelpModal()" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div class="p-5 space-y-3">
+                <p class="text-xs text-slate-400">העתק לכלי AI ליצירת תמונות (ChatGPT, Gemini, Midjourney וכו'):</p>
+                <textarea id="prompt-template-text" readonly rows="8" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-xs text-slate-300 leading-relaxed font-mono">equirectangular 360 panoramic projection, immersive environment, מעבדה עם תחנות חקירה ולמידה בנושאים הקשורים לחשמל, הפקה, תחנת כוח - לכיתה ד, סגנון פיקסאר, נוף ואווירה מהממים., visible ceiling and floor with polar distortion, seamless left-right edges, wide-angle fisheye distortion on top and bottom, 2:1 aspect ratio, no horizon line bias</textarea>
+                <button onclick="copyPromptTemplate()" class="w-full py-2.5 btn-muted-primary rounded-xl text-sm font-bold">העתק פרומפט</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Catalog Overlay -->
+    <div id="catalog-overlay" class="fixed inset-0 z-[55] bg-slate-950/95 backdrop-blur-md hidden overflow-y-auto">
+        <div class="max-w-5xl mx-auto p-6 text-white">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h2 class="text-2xl font-bold">קטלוג מרחבי 360°</h2>
+                    <p class="text-sm text-slate-400 mt-1">כל הסביבות שנשמרו בענן</p>
+                </div>
+                <button onclick="closeCatalog()" class="btn-muted px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2">
+                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    חזרה לעורך
+                </button>
+            </div>
+            <div id="catalog-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+            <div id="catalog-empty" class="hidden text-center py-16 text-slate-500">
+                <i data-lucide="inbox" class="w-12 h-12 mx-auto mb-3 opacity-40"></i>
+                <p>עדיין אין מרחבים שמורים</p>
+            </div>
+            <div class="mt-8 text-center text-[10px] text-slate-600">בהשארת מעיין שפושניק, מאת חולמים תקשוב</div>
         </div>
     </div>
 
@@ -335,20 +409,27 @@
                     <label class="text-xs font-bold text-cyan-400">קישור לתלמידים (צפייה בלבד):</label>
                     <div class="flex gap-2">
                         <input type="text" id="modal-view-url" readonly class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-cyan-300" onclick="this.select()">
-                        <button onclick="copyLink('modal-view-url', 'copy-view-btn')" id="copy-view-btn" class="px-3 py-2 bg-cyan-600 hover:bg-cyan-500 rounded-xl text-xs font-bold whitespace-nowrap">העתק</button>
+                        <button onclick="copyLink('modal-view-url', 'copy-view-btn')" id="copy-view-btn" class="px-3 py-2 btn-muted rounded-xl text-xs font-bold whitespace-nowrap">העתק</button>
                     </div>
                 </div>
                 <div class="space-y-2">
-                    <label class="text-xs font-bold text-amber-400">קישור לעריכה (שמור לעצמך!):</label>
+                    <label class="text-xs font-bold text-slate-400">קישור לעריכה (שמור לעצמך!):</label>
                     <div class="flex gap-2">
-                        <input type="text" id="modal-edit-url" readonly class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-amber-300" onclick="this.select()">
-                        <button onclick="copyLink('modal-edit-url', 'copy-edit-btn')" id="copy-edit-btn" class="px-3 py-2 bg-amber-600 hover:bg-amber-500 rounded-xl text-xs font-bold whitespace-nowrap">העתק</button>
+                        <input type="text" id="modal-edit-url" readonly class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-300" onclick="this.select()">
+                        <button onclick="copyLink('modal-edit-url', 'copy-edit-btn')" id="copy-edit-btn" class="px-3 py-2 btn-muted rounded-xl text-xs font-bold whitespace-nowrap">העתק</button>
                     </div>
                 </div>
-                <p class="text-[10px] text-slate-500 leading-relaxed">כתובת הבסיס קבועה — רק הפרמטרים בסוף הקישור משתנים לפי המרחב.</p>
+                <div class="space-y-2">
+                    <label class="text-xs font-bold text-slate-400">קישור להעתקה (מורה אחר יכול לערוך ולהתאים):</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="modal-copy-url" readonly class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-300" onclick="this.select()">
+                        <button onclick="copyLink('modal-copy-url', 'copy-copy-btn')" id="copy-copy-btn" class="px-3 py-2 btn-muted rounded-xl text-xs font-bold whitespace-nowrap">העתק</button>
+                    </div>
+                </div>
+                <p class="text-[10px] text-slate-500 leading-relaxed">כתובת הבסיס קבועה — הקישורים נשמרים גם בטבלה.</p>
             </div>
             <div class="p-4 bg-slate-950/80 border-t border-slate-800">
-                <button onclick="closeShareModal()" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-semibold rounded-xl transition-all text-sm">סגור והמשך עריכה</button>
+                <button onclick="closeShareModal()" class="w-full py-2.5 btn-muted font-semibold rounded-xl text-sm">סגור והמשך עריכה</button>
             </div>
         </div>
     </div>
@@ -397,7 +478,7 @@
 
             <!-- Modal Close Action Bar -->
             <div class="p-4 bg-slate-950/80 border-t border-slate-800/80 text-left">
-                <button onclick="closeDisplayModal()" class="py-2.5 px-6 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold rounded-xl transition-all text-sm shadow-md">
+                <button onclick="closeDisplayModal()" class="py-2.5 px-6 btn-muted-primary font-bold rounded-xl text-sm">
                     הבנתי, תודה!
                 </button>
             </div>
@@ -415,6 +496,9 @@
         const SERVER_IS_EDIT = <?!= isEditMode ?>;
         const SCRIPT_URL = <?!= scriptUrl ?> || 'https://script.google.com/a/macros/jerschools.org.il/s/AKfycbwg3LisOKMy1MPYclGzsvbXwudELNus7xhXtloBb3hUgjZccR4MCgXadUFbBhJJLtZebg/exec';
         const LOAD_ERROR = <?!= loadError ?>;
+        const PAGE_MODE = <?!= pageMode ?>;
+        const CATALOG_DATA = <?!= catalogData ?>;
+        const PANORAMA_CENTER_LON = 180;
 
         const EMBEDDED_STATE = /*_EMBEDDED_STATE_START_*/ null /*_EMBEDDED_STATE_END_*/;
 
@@ -465,8 +549,8 @@
             state.image2 = project.image2 || null;
             state.activeImage = project.activeImage || 1;
             state.hotspots = project.hotspots || [];
-            state.isEditMode = !!project.canEdit;
-            if (!project.canEdit && SERVER_IS_EDIT === false) {
+            state.isEditMode = !!project.canEdit || !!project.isTemplate;
+            if (!project.canEdit && !project.isTemplate && SERVER_IS_EDIT === false) {
                 state.isEditMode = false;
             }
         }
@@ -526,10 +610,16 @@
             } else {
                 applySceneBackground();
             }
+            centerViewOnPanorama();
             renderHotspotsIn3D();
             updateUI();
             setupPasteHandlers();
             setupImageDropzone();
+            setupEmbedAutoIframe();
+
+            if (PAGE_MODE === 'catalog') {
+                openCatalog(CATALOG_DATA);
+            }
 
             if (state.projectTitle) {
                 document.getElementById('project-title-input').value = state.projectTitle;
@@ -780,10 +870,9 @@
             textureLoader.load(dataUrl, function(texture) {
                 sphereMesh.material.map = texture;
                 sphereMesh.material.needsUpdate = true;
-                
-                // Keep the color clean
                 sphereMesh.material.color.setHex(0xffffff);
                 sphereMesh.material.needsUpdate = true;
+                centerViewOnPanorama();
             }, undefined, function(err) {
                 console.error("Error loading sphere texture: ", err);
             });
@@ -871,10 +960,15 @@
             targetFOV = Math.max(30, Math.min(100, targetFOV)); // Clamp FOV safely
         }
 
-        function resetCamera() {
+        function centerViewOnPanorama() {
             targetFOV = DEFAULT_FOV;
-            lon = 0;
+            lon = PANORAMA_CENTER_LON;
             lat = 0;
+            currentFOV = DEFAULT_FOV;
+        }
+
+        function resetCamera() {
+            centerViewOnPanorama();
         }
 
         function animate() {
@@ -1111,6 +1205,7 @@
                 state.image1 = e.target.result;
                 state.activeImage = 1;
                 applySceneBackground();
+                centerViewOnPanorama();
                 renderHotspotsIn3D();
                 updateUI();
             };
@@ -1165,7 +1260,7 @@
                 const field = document.getElementById(`editor-field-${t}`);
                 
                 if (t === type) {
-                    btn.className = "py-2.5 px-2 rounded-xl border border-cyan-500 bg-cyan-500/10 text-white font-semibold text-xs flex flex-col items-center gap-1 transition-all";
+                    btn.className = "py-2.5 px-2 rounded-xl border border-slate-500 bg-slate-700/50 text-white font-semibold text-xs flex flex-col items-center gap-1 transition-all";
                     field.classList.remove('hidden');
                 } else {
                     btn.className = "py-2.5 px-2 rounded-xl border border-slate-700 hover:border-slate-600 bg-slate-900 text-slate-300 font-semibold text-xs flex flex-col items-center gap-1 transition-all";
@@ -1195,7 +1290,7 @@
             } else if (currentEditingType === 'image') {
                 hs.content = document.getElementById('hs-content-image').value;
             } else {
-                hs.content = document.getElementById('hs-content-embed').value;
+                hs.content = normalizeEmbedContent(document.getElementById('hs-content-embed').value);
             }
 
             closeHotspotConfig();
@@ -1260,11 +1355,7 @@
                 formsCont.classList.remove('hidden');
             } else if (hs.type === 'embed') {
                 const placeholder = document.getElementById('display-embed-placeholder');
-                if (hs.content.trim().startsWith('<iframe')) {
-                    placeholder.innerHTML = hs.content;
-                } else {
-                    placeholder.innerHTML = `<iframe class="w-full h-full" src="${hs.content}" frameborder="0"></iframe>`;
-                }
+                placeholder.innerHTML = normalizeEmbedContent(hs.content);
                 embedCont.classList.remove('hidden');
             } else if (hs.type === 'image') {
                 document.getElementById('display-image-el').src = hs.content;
@@ -1307,9 +1398,113 @@
             return SCRIPT_URL + '?id=' + id + '&edit=' + token;
         }
 
-        function openShareModal(viewUrl, editUrl) {
+        function buildCopyUrl(id) {
+            return SCRIPT_URL + '?template=' + id;
+        }
+
+        function normalizeEmbedContent(raw) {
+            const trimmed = (raw || '').trim();
+            if (!trimmed) return '';
+            if (trimmed.toLowerCase().indexOf('<iframe') !== -1) return trimmed;
+            if (/^https?:\/\//i.test(trimmed)) {
+                return '<iframe class="w-full h-full" src="' + trimmed.replace(/"/g, '&quot;') + '" frameborder="0" allowfullscreen></iframe>';
+            }
+            return trimmed;
+        }
+
+        function setupEmbedAutoIframe() {
+            const embedField = document.getElementById('hs-content-embed');
+            embedField.addEventListener('paste', function(e) {
+                setTimeout(function() {
+                    const normalized = normalizeEmbedContent(embedField.value);
+                    if (normalized !== embedField.value) {
+                        embedField.value = normalized;
+                    }
+                }, 0);
+            });
+            embedField.addEventListener('blur', function() {
+                const normalized = normalizeEmbedContent(embedField.value);
+                if (normalized !== embedField.value) {
+                    embedField.value = normalized;
+                }
+            });
+        }
+
+        function openHelpModal() {
+            document.getElementById('help-modal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closeHelpModal() {
+            document.getElementById('help-modal').classList.add('hidden');
+        }
+
+        function copyPromptTemplate() {
+            const ta = document.getElementById('prompt-template-text');
+            navigator.clipboard.writeText(ta.value).then(function() {
+                showSaveStatus('הפרומפט הועתק!', 'success');
+            });
+        }
+
+        function renderCatalog(projects) {
+            const grid = document.getElementById('catalog-grid');
+            const empty = document.getElementById('catalog-empty');
+            grid.innerHTML = '';
+
+            if (!projects || projects.length === 0) {
+                empty.classList.remove('hidden');
+                return;
+            }
+            empty.classList.add('hidden');
+
+            projects.forEach(function(p) {
+                const card = document.createElement('div');
+                card.className = 'glass-panel rounded-2xl overflow-hidden border border-slate-700/50 flex flex-col';
+                const thumb = p.image1
+                    ? '<img src="' + p.image1 + '" class="w-full h-32 object-cover bg-slate-900" alt="">'
+                    : '<div class="w-full h-32 bg-slate-800 flex items-center justify-center text-slate-600"><i data-lucide="image" class="w-8 h-8"></i></div>';
+                const dateStr = p.updatedAt ? new Date(p.updatedAt).toLocaleDateString('he-IL') : '';
+                card.innerHTML = thumb +
+                    '<div class="p-4 flex-1 flex flex-col gap-2">' +
+                    '<h3 class="font-bold text-sm truncate">' + (p.title || 'ללא שם') + '</h3>' +
+                    '<p class="text-[10px] text-slate-500">' + dateStr + '</p>' +
+                    '<div class="flex flex-col gap-1.5 mt-auto">' +
+                    '<a href="' + p.viewUrl + '" target="_blank" class="btn-muted text-center py-1.5 rounded-lg text-xs font-semibold">צפייה</a>' +
+                    '<a href="' + p.copyUrl + '" class="btn-muted-primary text-center py-1.5 rounded-lg text-xs font-semibold">העתקה לעריכה</a>' +
+                    '</div></div>';
+                grid.appendChild(card);
+            });
+            lucide.createIcons();
+        }
+
+        function openCatalog(prefetched) {
+            document.getElementById('catalog-overlay').classList.remove('hidden');
+            if (Array.isArray(prefetched)) {
+                renderCatalog(prefetched);
+                return;
+            }
+            if (!IS_APPS_SCRIPT) {
+                renderCatalog([]);
+                return;
+            }
+            document.getElementById('catalog-grid').innerHTML = '<p class="text-slate-500 col-span-3 text-center py-8">טוען...</p>';
+            google.script.run
+                .withSuccessHandler(renderCatalog)
+                .withFailureHandler(function() { renderCatalog([]); })
+                .listProjects();
+        }
+
+        function closeCatalog() {
+            document.getElementById('catalog-overlay').classList.add('hidden');
+            if (PAGE_MODE === 'catalog') {
+                window.location.href = SCRIPT_URL;
+            }
+        }
+
+        function openShareModal(viewUrl, editUrl, copyUrl) {
             document.getElementById('modal-view-url').value = viewUrl;
             document.getElementById('modal-edit-url').value = editUrl;
+            document.getElementById('modal-copy-url').value = copyUrl || '';
             document.getElementById('share-modal').classList.remove('hidden');
             lucide.createIcons();
         }
@@ -1360,7 +1555,8 @@
                     state.editToken = result.editToken;
                     const viewUrl = result.viewUrl || buildViewUrl(result.id);
                     const editUrl = result.editUrl || buildEditUrl(result.id, result.editToken);
-                    openShareModal(viewUrl, editUrl);
+                    const copyUrl = result.copyUrl || buildCopyUrl(result.id);
+                    openShareModal(viewUrl, editUrl, copyUrl);
                     showSaveStatus('נשמר בהצלחה!', 'success');
                     btn.disabled = false;
                     btn.classList.remove('opacity-50');
