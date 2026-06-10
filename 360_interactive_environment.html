@@ -492,12 +492,12 @@
         // ==========================================
 
         const IS_APPS_SCRIPT = typeof google !== 'undefined' && google.script && google.script.run;
-        const INITIAL_PROJECT = <?!= initialProject ?>;
-        const SERVER_IS_EDIT = <?!= isEditMode ?>;
-        const SCRIPT_URL = <?!= scriptUrl ?> || 'https://script.google.com/a/macros/jerschools.org.il/s/AKfycbwg3LisOKMy1MPYclGzsvbXwudELNus7xhXtloBb3hUgjZccR4MCgXadUFbBhJJLtZebg/exec';
-        const LOAD_ERROR = <?!= loadError ?>;
-        const PAGE_MODE = <?!= pageMode ?>;
-        const CATALOG_DATA = <?!= catalogData ?>;
+        const INITIAL_PROJECT = null;
+        const SERVER_IS_EDIT = true;
+        const SCRIPT_URL = 'https://script.google.com/a/macros/jerschools.org.il/s/AKfycbwg3LisOKMy1MPYclGzsvbXwudELNus7xhXtloBb3hUgjZccR4MCgXadUFbBhJJLtZebg/exec';
+        const LOAD_ERROR = null;
+        const PAGE_MODE = 'editor';
+        const CATALOG_DATA = [];
         const PANORAMA_CENTER_LON = 180;
 
         const EMBEDDED_STATE = /*_EMBEDDED_STATE_START_*/ null /*_EMBEDDED_STATE_END_*/;
