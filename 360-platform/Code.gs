@@ -14,6 +14,8 @@ function doGet(e) {
   var id = e && e.parameter ? e.parameter.id : null;
   var edit = e && e.parameter ? e.parameter.edit : null;
 
+  template.loadError = 'null';
+
   if (id) {
     try {
       var project = getProjectData_(id, edit);
@@ -27,7 +29,6 @@ function doGet(e) {
   } else {
     template.initialProject = 'null';
     template.isEditMode = 'true';
-    template.loadError = 'null';
   }
 
   template.scriptUrl = JSON.stringify(getScriptUrl_());
