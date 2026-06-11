@@ -8,7 +8,7 @@ var CONFIG = {
   DRIVE_FOLDER_NAME: '360-Environments',
   WEB_APP_URL: 'https://script.google.com/a/macros/jerschools.org.il/s/AKfycbwg3LisOKMy1MPYclGzsvbXwudELNus7xhXtloBb3hUgjZccR4MCgXadUFbBhJJLtZebg/exec',
   DRIVE_FOLDER_ID: '',
-  HEADERS: ['id', 'title', 'created_at', 'updated_at', 'image1_url', 'image2_url', 'active_image', 'hotspots_json', 'edit_token', 'view_url', 'edit_url', 'copy_url']
+  HEADERS: ['id', 'title', 'created_at', 'updated_at', 'image1_url', 'image2_url', 'active_image', 'hotspots_json', 'edit_token', 'view_url', 'edit_url', 'copy_url', 'image1_thumb_url', 'creator_name', 'creator_info', 'hide_from_catalog', 'opening_message_json', 'enforce_order']
 };
 
 function doGet(e) {
@@ -58,8 +58,18 @@ function doGet(e) {
     template.isEditMode = 'true';
   }
 
+  var pageTitle = 'מחולל מרחבי 360°';
+  if (params.page === 'catalog') {
+    pageTitle = 'קטלוג מרחבי 360°';
+  } else if (params.id && !params.edit) {
+    try {
+      var p = getProjectData_(params.id, null);
+      if (p.title) pageTitle = p.title;
+    } catch (e) {}
+  }
+
   return template.evaluate()
-    .setTitle('יוצר מרחבי 360°')
+    .setTitle(pageTitle)
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
     .addMetaTag('viewport', 'width=device-width, initial-scale=1');
 }
@@ -83,10 +93,7 @@ function saveProject(payload) {
   if (id) {
     rowIndex = findRowById_(sheet, id);
     if (rowIndex > 0) {
-      var storedToken = String(sheet.getRange(rowIndex, 9).getValue());
-      if (!editToken || editToken !== storedToken) {
-        throw new Error('אין הרשאת עריכה לפרויקט זה');
-      }
+      verifyEditToken_(sheet, rowIndex, editToken);
     } else {
       id = '';
     }
@@ -101,41 +108,41 @@ function saveProject(payload) {
 
   var image1Url = payload.image1 || '';
   var image2Url = payload.image2 || '';
+  var thumbUrl = payload.image1Thumb || '';
 
   if (image1Url && image1Url.indexOf('data:') === 0) {
     image1Url = uploadBase64ToDrive_(image1Url, id + '_bg1.jpg', folder);
   }
-  if (image2Url && image2Url.indexOf('data:') === 0) {
-    image2Url = uploadBase64ToDrive_(image2Url, id + '_bg2.jpg', folder);
+  if (thumbUrl && thumbUrl.indexOf('data:') === 0) {
+    thumbUrl = uploadBase64ToDrive_(thumbUrl, id + '_thumb.jpg', folder);
+  } else if (!thumbUrl && rowIndex > 0) {
+    thumbUrl = String(sheet.getRange(rowIndex, 13).getValue() || '');
   }
 
-  var hotspots = payload.hotspots || [];
-  for (var i = 0; i < hotspots.length; i++) {
-    var hs = hotspots[i];
-    if (hs.type === 'image' && hs.content && hs.content.indexOf('data:') === 0) {
-      hs.content = uploadBase64ToDrive_(hs.content, id + '_hs_' + hs.id + '.jpg', folder);
-    }
+  var hotspots = uploadHotspotImages_(payload.hotspots || [], id, folder);
+
+  var openingMessage = payload.openingMessage || {};
+  if (openingMessage.image && openingMessage.image.indexOf('data:') === 0) {
+    openingMessage.image = uploadBase64ToDrive_(openingMessage.image, id + '_opening.jpg', folder);
   }
 
-  var baseUrl = getScriptUrl_();
-  var viewUrl = baseUrl + '?id=' + id;
-  var editUrl = baseUrl + '?id=' + id + '&edit=' + editToken;
-  var copyUrl = baseUrl + '?template=' + id;
-
-  var rowData = [
-    id,
-    payload.title || 'מרחב 360 ללא שם',
-    rowIndex > 0 ? sheet.getRange(rowIndex, 3).getValue() : now,
-    now,
-    image1Url,
-    image2Url,
-    payload.activeImage || 1,
-    JSON.stringify(hotspots),
-    editToken,
-    viewUrl,
-    editUrl,
-    copyUrl
-  ];
+  var rowData = buildRowData_({
+    id: id,
+    title: payload.title || 'מרחב 360',
+    createdAt: rowIndex > 0 ? sheet.getRange(rowIndex, 3).getValue() : now,
+    updatedAt: now,
+    image1: image1Url,
+    image2: image2Url,
+    activeImage: payload.activeImage || 1,
+    hotspots: hotspots,
+    editToken: editToken,
+    image1Thumb: thumbUrl,
+    creatorName: payload.creatorName || '',
+    creatorInfo: payload.creatorInfo || '',
+    hideFromCatalog: !!payload.hideFromCatalog,
+    openingMessage: openingMessage,
+    enforceOrder: !!payload.enforceOrder
+  });
 
   if (rowIndex > 0) {
     sheet.getRange(rowIndex, 1, 1, rowData.length).setValues([rowData]);
@@ -143,16 +150,74 @@ function saveProject(payload) {
     sheet.appendRow(rowData);
   }
 
+  var baseUrl = getScriptUrl_();
   return {
     success: true,
     id: id,
     editToken: editToken,
     image1: image1Url,
+    image1Thumb: thumbUrl,
     image2: image2Url,
-    viewUrl: viewUrl,
-    editUrl: editUrl,
-    copyUrl: copyUrl,
+    viewUrl: baseUrl + '?id=' + id,
+    editUrl: baseUrl + '?id=' + id + '&edit=' + editToken,
+    copyUrl: baseUrl + '?template=' + id,
     isNew: isNew
+  };
+}
+
+function uploadBackgroundImages(payload) {
+  payload = payload || {};
+  var sheet = getProjectsSheet_();
+  var folder = getOrCreateDriveFolder_();
+  var now = new Date().toISOString();
+  var id = payload.id || '';
+  var editToken = payload.editToken || '';
+  var rowIndex = -1;
+
+  if (id) {
+    rowIndex = findRowById_(sheet, id);
+    if (rowIndex > 0) {
+      verifyEditToken_(sheet, rowIndex, editToken);
+    } else {
+      id = '';
+    }
+  }
+
+  if (!id) {
+    id = generateShortId_();
+    editToken = Utilities.getUuid();
+    sheet.appendRow(buildRowData_({
+      id: id,
+      title: payload.title || 'מרחב חדש',
+      createdAt: now,
+      updatedAt: now,
+      editToken: editToken,
+      hotspots: []
+    }));
+    rowIndex = sheet.getLastRow();
+  }
+
+  var image1Url = '';
+  var thumbUrl = '';
+  if (payload.image1 && payload.image1.indexOf('data:') === 0) {
+    image1Url = uploadBase64ToDrive_(payload.image1, id + '_bg1.jpg', folder);
+  } else if (payload.image1) {
+    image1Url = payload.image1;
+  }
+  if (payload.thumb && payload.thumb.indexOf('data:') === 0) {
+    thumbUrl = uploadBase64ToDrive_(payload.thumb, id + '_thumb.jpg', folder);
+  }
+
+  sheet.getRange(rowIndex, 4).setValue(now);
+  if (image1Url) sheet.getRange(rowIndex, 5).setValue(image1Url);
+  if (thumbUrl) sheet.getRange(rowIndex, 13).setValue(thumbUrl);
+  if (payload.title) sheet.getRange(rowIndex, 2).setValue(payload.title);
+
+  return {
+    id: id,
+    editToken: editToken,
+    image1: image1Url,
+    image1Thumb: thumbUrl
   };
 }
 
@@ -212,6 +277,11 @@ function getProjectData_(id, editToken) {
 
   hotspots = inlineDriveImagesInHotspots_(hotspots);
 
+  var openingMessage = parseJsonSafe_(row[16], {});
+  if (openingMessage.image) {
+    openingMessage.image = inlineImageIfDrive_(openingMessage.image);
+  }
+
   return {
     id: String(row[0]),
     title: String(row[1]),
@@ -219,13 +289,19 @@ function getProjectData_(id, editToken) {
     updatedAt: row[3],
     image1: inlineImageIfDrive_(String(row[4] || '')),
     image2: inlineImageIfDrive_(String(row[5] || '')),
+    image1Thumb: String(row[12] || ''),
     activeImage: parseInt(row[6], 10) || 1,
     hotspots: hotspots,
     canEdit: canEdit,
     editToken: canEdit ? storedToken : '',
     viewUrl: String(row[9] || baseUrl + '?id=' + row[0]),
     editUrl: canEdit ? String(row[10] || baseUrl + '?id=' + row[0] + '&edit=' + storedToken) : '',
-    copyUrl: String(row[11] || baseUrl + '?template=' + row[0])
+    copyUrl: String(row[11] || baseUrl + '?template=' + row[0]),
+    creatorName: String(row[13] || ''),
+    creatorInfo: String(row[14] || ''),
+    hideFromCatalog: String(row[15]).toLowerCase() === 'true',
+    openingMessage: openingMessage,
+    enforceOrder: String(row[17]).toLowerCase() === 'true'
   };
 }
 
@@ -252,11 +328,19 @@ function listAllProjects_() {
 
   for (var i = 1; i < data.length; i++) {
     if (!data[i][0]) continue;
+    if (String(data[i][15]).toLowerCase() === 'true') continue;
+
+    var hs = [];
+    try { hs = JSON.parse(data[i][7] || '[]'); } catch (e) { hs = []; }
+
     list.push({
       id: String(data[i][0]),
       title: String(data[i][1] || 'ללא שם'),
       updatedAt: data[i][3] ? String(data[i][3]) : '',
       image1: String(data[i][4] || ''),
+      image1Thumb: String(data[i][12] || ''),
+      hotspotCount: hs.length,
+      creatorName: String(data[i][13] || ''),
       viewUrl: String(data[i][9] || baseUrl + '?id=' + data[i][0]),
       copyUrl: String(data[i][11] || baseUrl + '?template=' + data[i][0])
     });
@@ -329,6 +413,54 @@ function inlineImageIfDrive_(imageUrl) {
     Logger.log('inlineImageIfDrive failed: ' + e.message);
     return str;
   }
+}
+
+function verifyEditToken_(sheet, rowIndex, editToken) {
+  var storedToken = String(sheet.getRange(rowIndex, 9).getValue());
+  if (!editToken || editToken !== storedToken) {
+    throw new Error('אין הרשאת עריכה לפרויקט זה');
+  }
+}
+
+function parseJsonSafe_(val, fallback) {
+  if (!val) return fallback;
+  try { return JSON.parse(val); } catch (e) { return fallback; }
+}
+
+function buildRowData_(data) {
+  var baseUrl = getScriptUrl_();
+  var id = data.id;
+  var token = data.editToken;
+  return [
+    id,
+    data.title || 'מרחב 360',
+    data.createdAt || new Date().toISOString(),
+    data.updatedAt || new Date().toISOString(),
+    data.image1 || '',
+    data.image2 || '',
+    data.activeImage || 1,
+    JSON.stringify(data.hotspots || []),
+    token,
+    baseUrl + '?id=' + id,
+    baseUrl + '?id=' + id + '&edit=' + token,
+    baseUrl + '?template=' + id,
+    data.image1Thumb || '',
+    data.creatorName || '',
+    data.creatorInfo || '',
+    data.hideFromCatalog ? 'true' : 'false',
+    JSON.stringify(data.openingMessage || {}),
+    data.enforceOrder ? 'true' : 'false'
+  ];
+}
+
+function uploadHotspotImages_(hotspots, id, folder) {
+  for (var i = 0; i < hotspots.length; i++) {
+    var hs = hotspots[i];
+    if (hs.type === 'image' && hs.content && hs.content.indexOf('data:') === 0) {
+      hs.content = uploadBase64ToDrive_(hs.content, id + '_hs_' + hs.id + '.jpg', folder);
+    }
+  }
+  return hotspots;
 }
 
 function inlineDriveImagesInHotspots_(hotspots) {

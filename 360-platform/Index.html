@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>יוצר מרחבי 360° — מחולל</title>
-    <!-- APP_VERSION: 2.1-drive-proxy -->
+    <title>מחולל מרחבי 360°</title>
+    <!-- APP_VERSION: 3.0-features -->
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Three.js -->
@@ -104,6 +104,13 @@
             border-radius: 999px;
             transition: width 0.2s ease;
         }
+        .opening-rtl {
+            direction: rtl;
+            text-align: right;
+        }
+        .hotspot-locked {
+            filter: grayscale(0.85) brightness(0.65);
+        }
     </style>
 </head>
 <body class="w-full h-screen relative">
@@ -113,6 +120,8 @@
 
     <!-- Hotspot hover tooltip -->
     <div id="hotspot-tooltip"></div>
+    <div id="student-toast" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-xl glass-panel text-sm font-semibold text-white hidden border border-amber-500/40 shadow-lg"></div>
+    <a id="student-feedback-link" href="mailto:chepti@gmail.com?subject=%D7%94%D7%A6%D7%A2%D7%95%D7%AA%20%D7%9C%D7%A9%D7%99%D7%A4%D7%95%D7%A8%20%D7%9E%D7%97%D7%95%D7%9C%D7%9C%20360" class="fixed bottom-3 left-3 z-30 text-[10px] text-slate-500 hover:text-cyan-400 underline hidden">הצעות לשיפור</a>
 
     <!-- UI Loader Overlay -->
     <div id="loading-overlay" class="absolute inset-0 bg-slate-950 z-50 flex flex-col items-center justify-center text-white transition-opacity duration-500">
@@ -124,8 +133,8 @@
     <!-- Mode Banner Indicator -->
     <div id="interaction-mode-banner" class="absolute top-4 left-1/2 -translate-x-1/2 glass-panel text-white px-6 py-2.5 rounded-full shadow-2xl z-20 flex items-center gap-3 hidden border border-cyan-500/50">
         <span class="w-3 h-3 bg-red-500 rounded-full animate-ping"></span>
-        <span class="font-semibold text-sm">מצב עריכה: לחץ בכל מקום על הרקע כדי לנעוץ נקודה חדשה</span>
-        <button onclick="toggleAddHotspotMode(false)" class="bg-slate-800 hover:bg-slate-700 text-xs px-2.5 py-1 rounded transition-colors mr-2">ביטול</button>
+        <span id="interaction-mode-text" class="font-semibold text-sm">מצב עריכה: לחץ על הרקע לנעיצת נקודה</span>
+        <button onclick="cancelInteractionMode()" class="bg-slate-800 hover:bg-slate-700 text-xs px-2.5 py-1 rounded transition-colors mr-2">ביטול</button>
     </div>
 
     <!-- Floating Top Bar Buttons (editor only) -->
@@ -163,7 +172,7 @@
                 </div>
                 <div>
                     <h1 class="font-extrabold text-lg text-white">מחולל מרחבי 360</h1>
-                    <p class="text-[11px] text-slate-400">עצב והטמע נקודות מידע אינטראקטיביות</p>
+                    <p class="text-[11px] text-slate-400">נקודות חמות בסביבה אינטראקטיבית</p>
                 </div>
             </div>
             <button onclick="toggleAdminPanel()" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors">
@@ -181,6 +190,16 @@
                     <span>פרטי הפרויקט</span>
                 </div>
                 <input type="text" id="project-title-input" placeholder="שם המרחב" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-500">
+                <button type="button" onclick="openOpeningMessageEditor()" class="w-full py-2 btn-muted rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5">
+                    <i data-lucide="message-square" class="w-3.5 h-3.5"></i>
+                    הודעת פתיחה
+                </button>
+                <input type="text" id="creator-name-input" placeholder="שם היוצר (אופציונלי)" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-cyan-500">
+                <textarea id="creator-info-input" rows="2" placeholder="מידע נוסף על היוצר (אופציונלי)" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-cyan-500 resize-none"></textarea>
+                <label class="flex items-center gap-2 text-xs text-slate-400 cursor-pointer">
+                    <input type="checkbox" id="hide-catalog-checkbox" class="rounded border-slate-600">
+                    הסתר מהקטלוג בינתיים
+                </label>
             </div>
 
             <hr class="border-slate-800">
@@ -192,12 +211,12 @@
                         <i data-lucide="image" class="w-4 h-4"></i>
                         <span>שלב א': תמונת רקע 360°</span>
                     </div>
-                    <button type="button" onclick="openHelpModal()" class="btn-muted text-[10px] px-2 py-1 rounded-lg flex items-center gap-1" title="עזרה ופרומפט ליצירת תמונה">
-                        <i data-lucide="help-circle" class="w-3.5 h-3.5"></i>
-                        עזרה
+                    <button type="button" onclick="openHelpModal()" class="btn-muted text-[10px] px-2 py-1 rounded-lg flex items-center gap-1" title="פרומפט ליצירת תמונת 360°">
+                        <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                        פרומפט ליצירת תמונת 360°
                     </button>
                 </div>
-                <p class="text-xs text-slate-400 leading-relaxed">העלה תמונה פנורמית בפורמט 360 מעלות (Equirectangular), או הדבק תמונה (Ctrl+V) כשהסיידבר פתוח. המבט ייפתח על מרכז התמונה.</p>
+                <p class="text-xs text-slate-400">העלה או הדבק (Ctrl+V) תמונת 360°.</p>
                 
                 <div class="mt-2">
                     <label class="block cursor-pointer border border-dashed border-slate-700 hover:border-cyan-500/50 rounded-xl p-4 text-center bg-slate-950/40 transition-all hover:bg-slate-950/60">
@@ -217,13 +236,16 @@
             <div class="space-y-3">
                 <div class="flex items-center gap-1.5 section-label font-bold text-sm">
                     <i data-lucide="map-pin" class="w-4 h-4"></i>
-                    <span>שלב ב': ניהול נקודות חמות אינטראקטיביות</span>
+                    <span>שלב ב': נקודות חמות</span>
                 </div>
-                <p class="text-xs text-slate-400 leading-relaxed">נקודות חמות נשארות מעוגנות במיקום תלת-ממדי מדויק במרחב ומציגות מידע עשיר לסטודנטים בלחיצה.</p>
-                
+                <p class="text-xs text-slate-400">נעץ נקודות על הרקע — התלמידים ילחצו לצפייה בתוכן.</p>
+                <label class="flex items-center gap-2 text-xs text-slate-400 cursor-pointer bg-slate-950/40 border border-slate-800 rounded-xl px-3 py-2">
+                    <input type="checkbox" id="enforce-order-checkbox" class="rounded border-slate-600">
+                    נעילת שלבים — חובה לעבור לפי סדר הנקודות
+                </label>
                 <button id="add-hotspot-btn" onclick="toggleAddHotspotMode(true)" class="w-full py-3 px-4 btn-muted-primary font-bold rounded-xl flex items-center justify-center gap-2 transform active:scale-[0.98]">
                     <i data-lucide="plus-circle" class="w-5 h-5"></i>
-                    צור נקודה חמה חדשה בסביבה
+                    הוסף נקודה חמה
                 </button>
 
                 <!-- Hotspots List Manager -->
@@ -243,11 +265,10 @@
                     <i data-lucide="cloud-upload" class="w-4 h-4"></i>
                     <span>שלב ג': שמירה ושיתוף</span>
                 </div>
-                <p class="text-xs text-slate-400 leading-relaxed">שמור בענן — הנתונים נשמרים ב-Google Sheet והתמונות ב-Drive. תקבל קישור ייחודי לתלמידים וקישור עריכה לחזור ולעדכן.</p>
-                
+                <p class="text-xs text-slate-400">שמירה בענן — קישור לתלמידים ולעריכה.</p>
                 <button id="btn-save-cloud" onclick="saveToCloud()" class="w-full py-3 px-4 btn-muted-primary font-extrabold rounded-xl flex items-center justify-center gap-2 transform active:scale-[0.98]">
                     <i data-lucide="cloud-upload" class="w-5 h-5"></i>
-                    שמור בענן וקבל קישור
+                    שמור וקבל קישור
                 </button>
                 <div id="save-status" class="hidden text-xs text-center py-2 rounded-lg"></div>
 
@@ -266,8 +287,9 @@
 
         <!-- Sidebar Footer -->
         <div class="p-4 bg-slate-950/80 border-t border-slate-800/80 text-center text-[10px] text-slate-500 leading-relaxed">
-            <div>מחולל • מרחבי 360° אינטראקטיביים</div>
-            <div class="mt-1 text-slate-600">בהשארת מעיין שפושניק, מאת חולמים תקשוב</div>
+            <div>מחולל • מרחבי 360°</div>
+            <div class="mt-1 text-slate-600">בהשראת מעיין שפושניק, מאת חולמים תקשוב</div>
+            <a href="mailto:chepti@gmail.com?subject=%D7%94%D7%A6%D7%A2%D7%95%D7%AA%20%D7%9C%D7%A9%D7%99%D7%A4%D7%95%D7%A8%20%D7%9E%D7%97%D7%95%D7%9C%D7%9C%20360&body=%D7%94%D7%99%D7%99%2C%20%D7%99%D7%A9%20%D7%9C%D7%99%20%D7%94%D7%A6%D7%A2%D7%94%3A%0A" class="inline-block mt-2 text-slate-500 hover:text-cyan-400 underline">הצעות לשיפור</a>
         </div>
     </div>
 
@@ -387,6 +409,49 @@
         </div>
     </div>
 
+    <!-- Opening Message Editor -->
+    <div id="opening-editor-modal" class="fixed inset-0 z-[58] flex items-center justify-center bg-slate-950/85 backdrop-blur-md hidden p-4">
+        <div class="glass-panel w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl border border-slate-600/40 flex flex-col text-white">
+            <div class="p-5 border-b border-slate-800 bg-slate-900/60 flex items-center justify-between">
+                <h3 class="font-bold text-lg">הודעת פתיחה למרחב</h3>
+                <button onclick="closeOpeningMessageEditor()" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div class="p-5 space-y-3 opening-rtl max-h-[70vh] overflow-y-auto">
+                <label class="flex items-center gap-2 text-sm text-slate-300 cursor-pointer">
+                    <input type="checkbox" id="opening-enabled-checkbox" class="rounded border-slate-600">
+                    הצג בתחילת הפעילות
+                </label>
+                <input type="text" id="opening-title-input" placeholder="כותרת ההודעה" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-500">
+                <textarea id="opening-content-input" rows="6" placeholder="תוכן ההודעה (תומך ב-HTML פשוט)" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-cyan-500"></textarea>
+                <div id="opening-image-dropzone" class="border-2 border-dashed border-slate-700 hover:border-cyan-500/50 rounded-xl p-4 text-center bg-slate-950/40 cursor-pointer">
+                    <img id="opening-image-preview" class="max-h-36 mx-auto rounded-lg hidden mb-2">
+                    <p class="text-xs text-slate-500">תמונה אופציונלית — לחץ או הדבק (Ctrl+V)</p>
+                    <input type="file" id="opening-image-file" accept="image/*" class="hidden">
+                </div>
+            </div>
+            <div class="p-4 bg-slate-950/80 border-t border-slate-800 flex gap-2 justify-end">
+                <button onclick="closeOpeningMessageEditor()" class="py-2 px-4 bg-slate-800 hover:bg-slate-700 rounded-xl text-sm">ביטול</button>
+                <button onclick="saveOpeningMessageEditor()" class="py-2 px-5 btn-muted-primary rounded-xl text-sm font-bold">שמור</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Opening Message Display (student) -->
+    <div id="opening-display-modal" class="fixed inset-0 z-[65] flex items-center justify-center bg-slate-950/90 backdrop-blur-md hidden p-4">
+        <div class="glass-panel w-full max-w-xl rounded-2xl overflow-hidden shadow-2xl border border-cyan-500/30 flex flex-col text-white">
+            <div class="p-6 border-b border-slate-800 bg-gradient-to-l from-cyan-900/40 to-slate-900/60 opening-rtl">
+                <h2 id="opening-display-title" class="font-extrabold text-2xl text-white"></h2>
+            </div>
+            <div class="p-6 opening-rtl overflow-y-auto max-h-[60vh] space-y-4">
+                <div id="opening-display-content" class="text-slate-200 text-base leading-relaxed prose prose-invert max-w-none"></div>
+                <img id="opening-display-image" class="w-full max-h-64 object-contain rounded-xl hidden" alt="">
+            </div>
+            <div class="p-4 bg-slate-950/80 border-t border-slate-800 text-left">
+                <button onclick="closeOpeningDisplay()" class="py-2.5 px-6 btn-muted-primary font-bold rounded-xl text-sm">התחל לחקור</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Help / Prompt Modal -->
     <div id="help-modal" class="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/85 backdrop-blur-md hidden p-4">
         <div class="glass-panel w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl border border-slate-600/40 flex flex-col text-white">
@@ -423,7 +488,7 @@
                 <i data-lucide="inbox" class="w-12 h-12 mx-auto mb-3 opacity-40"></i>
                 <p>עדיין אין מרחבים שמורים</p>
             </div>
-            <div class="mt-8 text-center text-[10px] text-slate-600">בהשארת מעיין שפושניק, מאת חולמים תקשוב</div>
+            <div class="mt-8 text-center text-[10px] text-slate-600">בהשראת מעיין שפושניק, מאת חולמים תקשוב</div>
         </div>
     </div>
 
@@ -537,7 +602,8 @@
         const PAGE_MODE = <?!= pageMode ?>;
         const CATALOG_DATA = <?!= catalogData ?>;
         const PANORAMA_CENTER_LON = 180;
-        const APP_VERSION = '2.1-drive-proxy';
+        const APP_VERSION = '3.0-features';
+        const FEEDBACK_EMAIL = 'chepti@gmail.com';
 
         const EMBEDDED_STATE = /*_EMBEDDED_STATE_START_*/ null /*_EMBEDDED_STATE_END_*/;
 
@@ -546,10 +612,18 @@
             editToken: '',
             projectTitle: '',
             image1: null,
+            image1Thumb: null,
             image2: null,
             activeImage: 1,
             hotspots: [],
-            isEditMode: true
+            isEditMode: true,
+            creatorName: '',
+            creatorInfo: '',
+            hideFromCatalog: false,
+            openingMessage: { enabled: false, title: '', content: '', image: '' },
+            enforceOrder: false,
+            visitedHotspots: [],
+            backgroundUploading: false
         };
 
         if (EMBEDDED_STATE) {
@@ -573,6 +647,8 @@
 
         let activeSceneHotspots = [];
         let isAddHotspotMode = false;
+        let isMoveHotspotMode = false;
+        let moveHotspotId = null;
         let isTextureLoading = false;
         let activeConfigHotspotId = null;
         let currentEditingType = 'text';
@@ -586,13 +662,72 @@
             state.editToken = project.editToken || '';
             state.projectTitle = project.title || '';
             state.image1 = project.image1 || null;
+            state.image1Thumb = project.image1Thumb || null;
             state.image2 = project.image2 || null;
             state.activeImage = project.activeImage || 1;
             state.hotspots = project.hotspots || [];
+            state.creatorName = project.creatorName || '';
+            state.creatorInfo = project.creatorInfo || '';
+            state.hideFromCatalog = !!project.hideFromCatalog;
+            state.openingMessage = project.openingMessage || { enabled: false, title: '', content: '', image: '' };
+            state.enforceOrder = !!project.enforceOrder;
             state.isEditMode = !!project.canEdit || !!project.isTemplate;
             if (!project.canEdit && !project.isTemplate && SERVER_IS_EDIT === false) {
                 state.isEditMode = false;
             }
+            if (!state.isEditMode && state.projectId) {
+                try {
+                    const saved = sessionStorage.getItem('visited_' + state.projectId);
+                    state.visitedHotspots = saved ? JSON.parse(saved) : [];
+                } catch (e) {
+                    state.visitedHotspots = [];
+                }
+            }
+            updateDocumentTitle();
+        }
+
+        function updateDocumentTitle() {
+            if (!state.isEditMode && state.projectTitle) {
+                document.title = state.projectTitle;
+            } else if (PAGE_MODE === 'catalog') {
+                document.title = 'קטלוג מרחבי 360°';
+            } else {
+                document.title = 'מחולל מרחבי 360°';
+            }
+        }
+
+        function getHotspotsInSequence() {
+            return state.hotspots.slice().sort(function(a, b) {
+                return (a.order || 0) - (b.order || 0);
+            });
+        }
+
+        function isHotspotAccessible(hsId) {
+            if (!state.enforceOrder || state.isEditMode) return true;
+            const ordered = getHotspotsInSequence();
+            const idx = ordered.findIndex(function(h) { return h.id === hsId; });
+            if (idx <= 0) return true;
+            for (let i = 0; i < idx; i++) {
+                if (state.visitedHotspots.indexOf(ordered[i].id) === -1) return false;
+            }
+            return true;
+        }
+
+        function markHotspotVisited(hsId) {
+            if (state.visitedHotspots.indexOf(hsId) === -1) {
+                state.visitedHotspots.push(hsId);
+                if (state.projectId) {
+                    sessionStorage.setItem('visited_' + state.projectId, JSON.stringify(state.visitedHotspots));
+                }
+            }
+        }
+
+        function getLockedHotspotLabel(hsId) {
+            const ordered = getHotspotsInSequence();
+            const idx = ordered.findIndex(function(h) { return h.id === hsId; });
+            if (idx <= 0) return '';
+            const prev = ordered[idx - 1];
+            return prev.label || String(idx);
         }
 
         function getNextHotspotLabel() {
@@ -715,14 +850,16 @@
             const meta = document.getElementById('project-meta-section');
             if (meta) meta.classList.add('hidden');
             document.getElementById('editor-top-bar').classList.add('hidden');
+            const fb = document.getElementById('student-feedback-link');
+            if (fb) fb.classList.remove('hidden');
         }
 
-        function createHotspotSprite(label, colorHex) {
+        function createHotspotSprite(label, colorHex, locked) {
             const canvas = document.createElement('canvas');
             canvas.width = 128;
             canvas.height = 128;
             const ctx = canvas.getContext('2d');
-            const color = colorHex || '#06b6d4';
+            const color = locked ? '#64748b' : (colorHex || '#06b6d4');
 
             ctx.beginPath();
             ctx.arc(64, 64, 52, 0, Math.PI * 2);
@@ -741,10 +878,12 @@
             ctx.globalAlpha = 1;
 
             ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 48px Assistant, Arial, sans-serif';
+            ctx.font = 'bold ' + (locked ? '36' : '48') + 'px Assistant, Arial, sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            if (label) {
+            if (locked) {
+                ctx.fillText('🔒', 64, 66);
+            } else if (label) {
                 ctx.fillText(label.substring(0, 2), 64, 66);
             }
 
@@ -776,15 +915,24 @@
                 setupEmbedAutoIframe();
             } else {
                 applyStudentModeUI();
+                maybeShowOpeningMessage();
             }
+
+            updateDocumentTitle();
 
             if (PAGE_MODE === 'catalog') {
                 hideLoadingOverlay();
                 openCatalog(CATALOG_DATA);
             }
 
-            if (state.projectTitle && state.isEditMode) {
-                document.getElementById('project-title-input').value = state.projectTitle;
+            if (state.isEditMode) {
+                if (state.projectTitle) document.getElementById('project-title-input').value = state.projectTitle;
+                document.getElementById('creator-name-input').value = state.creatorName || '';
+                document.getElementById('creator-info-input').value = state.creatorInfo || '';
+                document.getElementById('hide-catalog-checkbox').checked = !!state.hideFromCatalog;
+                document.getElementById('enforce-order-checkbox').checked = !!state.enforceOrder;
+                setupOpeningMessageEditor();
+                setupEnforceOrderCheckbox();
             }
 
             if (LOAD_ERROR && LOAD_ERROR !== 'null') {
@@ -812,6 +960,7 @@
                                 state.activeImage = 1;
                                 applySceneBackground();
                                 updateUI();
+                                uploadBackgroundToCloud(ev.target.result);
                                 showSaveStatus('תמונת רקע הודבקה', 'success');
                             }
                         };
@@ -1225,11 +1374,25 @@
         // ==========================================
 
         function handleSceneInteraction(event) {
-            // Normalize mouse position (-1 to +1) for raycasting
             mouseVector.x = (event.clientX / window.innerWidth) * 2 - 1;
             mouseVector.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
             raycaster.setFromCamera(mouseVector, camera);
+
+            if (isMoveHotspotMode && moveHotspotId) {
+                const moveHits = raycaster.intersectObject(sphereMesh);
+                if (moveHits.length > 0) {
+                    const p = moveHits[0].point;
+                    const hs = state.hotspots.find(function(h) { return h.id === moveHotspotId; });
+                    if (hs) {
+                        hs.position = { x: p.x * 0.85, y: p.y * 0.85, z: p.z * 0.85 };
+                        renderHotspotsIn3D();
+                        updateUI();
+                        toggleMoveHotspotMode(false);
+                    }
+                }
+                return;
+            }
 
             if (isAddHotspotMode) {
                 // ADD HOTSPOT LOGIC
@@ -1251,7 +1414,8 @@
                         color: '#06b6d4',
                         type: 'text',
                         content: '',
-                        scene: 1
+                        scene: 1,
+                        order: state.hotspots.length + 1
                     };
 
                     state.hotspots.push(newHotspot);
@@ -1275,6 +1439,10 @@
                     const parentGroup = clickedMesh.parent;
                     const match = activeSceneHotspots.find(item => item.mesh === clickedMesh || item.mesh === parentGroup);
                     if (match) {
+                        if (!isHotspotAccessible(match.id)) {
+                            showSaveStatus('יש להשלים קודם נקודה ' + getLockedHotspotLabel(match.id), 'error');
+                            return;
+                        }
                         displayHotspotToStudent(match.id);
                     }
                 }
@@ -1293,17 +1461,18 @@
             const filteredHotspots = state.hotspots.filter(hs => (hs.scene || 1) === 1);
 
             filteredHotspots.forEach(hs => {
+                const locked = !state.isEditMode && state.enforceOrder && !isHotspotAccessible(hs.id);
                 const hotspotGroup = new THREE.Group();
                 hotspotGroup.userData = { hsId: hs.id };
                 hotspotGroup.position.set(hs.position.x, hs.position.y, hs.position.z);
                 hotspotGroup.lookAt(0, 0, 0);
 
-                const sprite = createHotspotSprite(hs.label || '', hs.color || '#06b6d4');
+                const sprite = createHotspotSprite(hs.label || '', hs.color || '#06b6d4', locked);
                 hotspotGroup.add(sprite);
 
                 const ringGeom = new THREE.RingGeometry(28, 32, 32);
                 const ringMat = new THREE.MeshBasicMaterial({
-                    color: hexToNumber(hs.color || '#06b6d4'),
+                    color: locked ? 0x64748b : hexToNumber(hs.color || '#06b6d4'),
                     side: THREE.DoubleSide,
                     transparent: true,
                     opacity: 0.35
@@ -1322,7 +1491,15 @@
 
         function updateUI() {
             const status1 = document.getElementById('bg-status-1');
-            status1.textContent = (state.image1 && (state.image1.startsWith('data:image') || state.image1.startsWith('http'))) ? 'רקע מותאם אישית' : 'מוכן (ברירת מחדל)';
+            if (state.backgroundUploading) {
+                status1.textContent = 'מעלה לענן...';
+            } else if (state.image1 && state.image1.indexOf('http') === 0) {
+                status1.textContent = 'שמור בענן';
+            } else if (state.image1 && state.image1.indexOf('data:') === 0) {
+                status1.textContent = 'רקע מקומי';
+            } else {
+                status1.textContent = 'ברירת מחדל';
+            }
 
             const listContainer = document.getElementById('hotspots-list');
             const activeSceneHotspotsData = state.hotspots;
@@ -1359,6 +1536,9 @@
                             <button onclick="openHotspotConfig('${hs.id}')" class="p-1 hover:bg-slate-800 rounded text-slate-400 hover:text-white transition-colors" title="ערוך">
                                 <i data-lucide="edit-2" class="w-3.5 h-3.5"></i>
                             </button>
+                            <button onclick="toggleMoveHotspotMode('${hs.id}')" class="p-1 hover:bg-slate-800 rounded text-slate-400 hover:text-amber-400 transition-colors" title="הזז נעיצה">
+                                <i data-lucide="move" class="w-3.5 h-3.5"></i>
+                            </button>
                         </div>
                     `;
                     listContainer.appendChild(div);
@@ -1378,6 +1558,18 @@
             }
         }
 
+        function setInteractionBanner(text) {
+            const banner = document.getElementById('interaction-mode-banner');
+            const textEl = document.getElementById('interaction-mode-text');
+            if (textEl) textEl.textContent = text;
+            banner.classList.remove('hidden');
+        }
+
+        function cancelInteractionMode() {
+            toggleAddHotspotMode(false);
+            toggleMoveHotspotMode(false);
+        }
+
         function toggleAddHotspotMode(status) {
             isAddHotspotMode = status;
             const banner = document.getElementById('interaction-mode-banner');
@@ -1385,14 +1577,32 @@
             const container = document.getElementById('canvas-container');
 
             if (isAddHotspotMode) {
-                banner.classList.remove('hidden');
+                isMoveHotspotMode = false;
+                moveHotspotId = null;
+                setInteractionBanner('לחץ על הרקע לנעיצת נקודה חדשה');
                 addBtn.classList.add('opacity-50', 'pointer-events-none');
                 container.style.cursor = 'crosshair';
-            } else {
+            } else if (!isMoveHotspotMode) {
                 banner.classList.add('hidden');
                 addBtn.classList.remove('opacity-50', 'pointer-events-none');
                 container.style.cursor = 'grab';
             }
+        }
+
+        function toggleMoveHotspotMode(hsId) {
+            if (hsId === false || (isMoveHotspotMode && moveHotspotId === hsId)) {
+                isMoveHotspotMode = false;
+                moveHotspotId = null;
+                document.getElementById('interaction-mode-banner').classList.add('hidden');
+                document.getElementById('canvas-container').style.cursor = 'grab';
+                return;
+            }
+            isAddHotspotMode = false;
+            toggleAddHotspotMode(false);
+            isMoveHotspotMode = true;
+            moveHotspotId = hsId;
+            setInteractionBanner('לחץ על הרקע במיקום החדש להזזת הנקודה');
+            document.getElementById('canvas-container').style.cursor = 'crosshair';
         }
 
         // Moves camera look at vector smooth to the selected hotspot's position
@@ -1426,8 +1636,60 @@
                 centerViewOnPanorama();
                 renderHotspotsIn3D();
                 updateUI();
+                uploadBackgroundToCloud(e.target.result);
             };
             reader.readAsDataURL(file);
+        }
+
+        function createThumbnailDataUrl(dataUrl, maxWidth) {
+            return new Promise(function(resolve, reject) {
+                const img = new Image();
+                img.onload = function() {
+                    const scale = Math.min(1, maxWidth / img.width);
+                    const w = Math.round(img.width * scale);
+                    const h = Math.round(img.height * scale);
+                    const canvas = document.createElement('canvas');
+                    canvas.width = w;
+                    canvas.height = h;
+                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                    resolve(canvas.toDataURL('image/jpeg', 0.72));
+                };
+                img.onerror = reject;
+                img.src = dataUrl;
+            });
+        }
+
+        function uploadBackgroundToCloud(dataUrl) {
+            if (!IS_APPS_SCRIPT || !dataUrl || dataUrl.indexOf('data:') !== 0) return;
+            state.backgroundUploading = true;
+            updateUI();
+            createThumbnailDataUrl(dataUrl, 480).then(function(thumb) {
+                google.script.run
+                    .withSuccessHandler(function(r) {
+                        state.projectId = r.id;
+                        state.editToken = r.editToken;
+                        if (r.image1) state.image1 = r.image1;
+                        if (r.image1Thumb) state.image1Thumb = r.image1Thumb;
+                        state.backgroundUploading = false;
+                        updateUI();
+                        showSaveStatus('רקע הועלה לענן', 'success');
+                    })
+                    .withFailureHandler(function(err) {
+                        state.backgroundUploading = false;
+                        updateUI();
+                        showSaveStatus('שגיאת העלאת רקע: ' + (err.message || err), 'error');
+                    })
+                    .uploadBackgroundImages({
+                        id: state.projectId || '',
+                        editToken: state.editToken || '',
+                        title: document.getElementById('project-title-input').value.trim() || 'מרחב חדש',
+                        image1: dataUrl,
+                        thumb: thumb
+                    });
+            }).catch(function() {
+                state.backgroundUploading = false;
+                updateUI();
+            });
         }
 
         // ==========================================
@@ -1532,6 +1794,11 @@
         function displayHotspotToStudent(hsId) {
             const hs = state.hotspots.find(h => h.id === hsId);
             if (!hs) return;
+            if (!isHotspotAccessible(hsId)) {
+                showSaveStatus('יש להשלים קודם נקודה ' + getLockedHotspotLabel(hsId), 'error');
+                return;
+            }
+            markHotspotVisited(hsId);
 
             // Set title
             document.getElementById('display-title').textContent = hs.title || '';
@@ -1580,8 +1847,10 @@
                 imageCont.classList.remove('hidden');
             }
 
-            // Show student view modal
             document.getElementById('hotspot-display-modal').classList.remove('hidden');
+            if (state.enforceOrder && !state.isEditMode) {
+                renderHotspotsIn3D();
+            }
         }
 
         function closeDisplayModal() {
@@ -1597,7 +1866,21 @@
         //  CLOUD SAVE (Google Apps Script)
         // ==========================================
 
+        function showStudentToast(msg, isError) {
+            const el = document.getElementById('student-toast');
+            if (!el) return;
+            el.textContent = msg;
+            el.classList.remove('hidden', 'border-red-500/40', 'border-emerald-500/40');
+            el.classList.add(isError ? 'border-red-500/40' : 'border-emerald-500/40');
+            clearTimeout(showStudentToast._t);
+            showStudentToast._t = setTimeout(function() { el.classList.add('hidden'); }, 3500);
+        }
+
         function showSaveStatus(msg, type) {
+            if (!state.isEditMode) {
+                showStudentToast(msg, type === 'error');
+                return;
+            }
             const el = document.getElementById('save-status');
             el.classList.remove('hidden', 'text-emerald-400', 'text-red-400', 'bg-emerald-500/10', 'bg-red-500/10');
             if (type === 'error') {
@@ -1648,6 +1931,108 @@
             });
         }
 
+        function setupEnforceOrderCheckbox() {
+            const cb = document.getElementById('enforce-order-checkbox');
+            if (!cb || cb._bound) return;
+            cb._bound = true;
+            cb.addEventListener('change', function() {
+                state.enforceOrder = cb.checked;
+            });
+        }
+
+        function setupOpeningMessageEditor() {
+            const zone = document.getElementById('opening-image-dropzone');
+            const fileInput = document.getElementById('opening-image-file');
+            if (!zone || zone._bound) return;
+            zone._bound = true;
+            zone.addEventListener('click', function() { fileInput.click(); });
+            fileInput.addEventListener('change', function(e) {
+                const f = e.target.files[0];
+                if (!f) return;
+                const reader = new FileReader();
+                reader.onload = function(ev) { setOpeningImagePreview(ev.target.result); };
+                reader.readAsDataURL(f);
+            });
+            document.addEventListener('paste', function(e) {
+                const modal = document.getElementById('opening-editor-modal');
+                if (modal.classList.contains('hidden')) return;
+                const items = e.clipboardData && e.clipboardData.items;
+                if (!items) return;
+                for (let i = 0; i < items.length; i++) {
+                    if (items[i].type.indexOf('image') !== -1) {
+                        const blob = items[i].getAsFile();
+                        const reader = new FileReader();
+                        reader.onload = function(ev) { setOpeningImagePreview(ev.target.result); };
+                        reader.readAsDataURL(blob);
+                        e.preventDefault();
+                        break;
+                    }
+                }
+            });
+        }
+
+        function setOpeningImagePreview(dataUrl) {
+            state.openingMessage = state.openingMessage || {};
+            state.openingMessage.image = dataUrl;
+            const img = document.getElementById('opening-image-preview');
+            img.src = dataUrl;
+            img.classList.remove('hidden');
+        }
+
+        function openOpeningMessageEditor() {
+            const om = state.openingMessage || {};
+            document.getElementById('opening-enabled-checkbox').checked = !!om.enabled;
+            document.getElementById('opening-title-input').value = om.title || '';
+            document.getElementById('opening-content-input').value = om.content || '';
+            const img = document.getElementById('opening-image-preview');
+            if (om.image) {
+                img.src = om.image.indexOf('data:') === 0 ? om.image : resolveDisplayImageUrl(om.image);
+                img.classList.remove('hidden');
+            } else {
+                img.src = '';
+                img.classList.add('hidden');
+            }
+            document.getElementById('opening-editor-modal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closeOpeningMessageEditor() {
+            document.getElementById('opening-editor-modal').classList.add('hidden');
+        }
+
+        function saveOpeningMessageEditor() {
+            state.openingMessage = {
+                enabled: document.getElementById('opening-enabled-checkbox').checked,
+                title: document.getElementById('opening-title-input').value.trim(),
+                content: document.getElementById('opening-content-input').value,
+                image: (state.openingMessage && state.openingMessage.image) || ''
+            };
+            closeOpeningMessageEditor();
+            showSaveStatus('הודעת פתיחה נשמרה (יש לשמור בענן)', 'success');
+        }
+
+        function maybeShowOpeningMessage() {
+            const om = state.openingMessage;
+            if (!om || !om.enabled) return;
+            if (!om.title && !om.content && !om.image) return;
+            document.getElementById('opening-display-title').textContent = om.title || 'ברוכים הבאים';
+            const contentEl = document.getElementById('opening-display-content');
+            contentEl.innerHTML = (om.content || '').replace(/\n/g, '<br>');
+            const imgEl = document.getElementById('opening-display-image');
+            if (om.image) {
+                imgEl.src = om.image.indexOf('data:') === 0 ? om.image : resolveDisplayImageUrl(om.image);
+                imgEl.classList.remove('hidden');
+            } else {
+                imgEl.src = '';
+                imgEl.classList.add('hidden');
+            }
+            document.getElementById('opening-display-modal').classList.remove('hidden');
+        }
+
+        function closeOpeningDisplay() {
+            document.getElementById('opening-display-modal').classList.add('hidden');
+        }
+
         function openHelpModal() {
             document.getElementById('help-modal').classList.remove('hidden');
             lucide.createIcons();
@@ -1681,15 +2066,21 @@
 
                 const thumbWrap = document.createElement('div');
                 thumbWrap.className = 'w-full h-32 bg-slate-900 relative overflow-hidden';
-                if (p.image1) {
+                const thumbSrc = p.image1Thumb || p.image1;
+                if (thumbSrc) {
                     const img = document.createElement('img');
                     img.className = 'w-full h-full object-cover';
                     img.alt = p.title || '';
+                    img.loading = 'lazy';
                     img.referrerPolicy = 'no-referrer';
-                    img.src = getProxiedImageUrl(p.image1);
+                    img.src = getProxiedImageUrl(thumbSrc);
                     img.onerror = function() {
-                        if (IS_APPS_SCRIPT && p.image1.indexOf('data:') !== 0) {
-                            const fid = extractDriveFileId(p.image1);
+                        if (p.image1Thumb && p.image1 && thumbSrc === p.image1Thumb) {
+                            img.src = getProxiedImageUrl(p.image1);
+                            return;
+                        }
+                        if (IS_APPS_SCRIPT && thumbSrc.indexOf('data:') !== 0) {
+                            const fid = extractDriveFileId(thumbSrc);
                             if (fid) {
                                 google.script.run
                                     .withSuccessHandler(function(dataUrl) { img.src = dataUrl; })
@@ -1714,9 +2105,12 @@
                 const body = document.createElement('div');
                 body.className = 'p-4 flex-1 flex flex-col gap-2';
                 const dateStr = p.updatedAt ? new Date(p.updatedAt).toLocaleDateString('he-IL') : '';
+                const hsCount = p.hotspotCount != null ? p.hotspotCount : 0;
+                const creatorLine = p.creatorName ? '<p class="text-[10px] text-slate-400 truncate">' + p.creatorName + '</p>' : '';
                 body.innerHTML =
                     '<h3 class="font-bold text-sm truncate"></h3>' +
-                    '<p class="text-[10px] text-slate-500">' + dateStr + '</p>' +
+                    creatorLine +
+                    '<p class="text-[10px] text-slate-500">' + dateStr + (hsCount ? ' · ' + hsCount + ' נקודות' : '') + '</p>' +
                     '<div class="flex flex-col gap-1.5 mt-auto">' +
                     '<a href="' + p.viewUrl + '" target="_blank" class="btn-muted text-center py-1.5 rounded-lg text-xs font-semibold">צפייה</a>' +
                     '<a href="' + p.copyUrl + '" class="btn-muted-primary text-center py-1.5 rounded-lg text-xs font-semibold">העתקה לעריכה</a>' +
@@ -1788,18 +2182,32 @@
             const btn = document.getElementById('btn-save-cloud');
             btn.disabled = true;
             btn.classList.add('opacity-50');
-            showSaveStatus('שומר... תמונות עולות ל-Drive', 'success');
+            showSaveStatus(state.backgroundUploading ? 'שומר נקודות...' : 'שומר...', 'success');
 
             state.projectTitle = document.getElementById('project-title-input').value.trim() || 'מרחב 360';
+            state.creatorName = document.getElementById('creator-name-input').value.trim();
+            state.creatorInfo = document.getElementById('creator-info-input').value.trim();
+            state.hideFromCatalog = document.getElementById('hide-catalog-checkbox').checked;
+            state.enforceOrder = document.getElementById('enforce-order-checkbox').checked;
+
+            state.hotspots.forEach(function(hs, i) { hs.order = i + 1; });
+
+            const imagePayload = (state.image1 && state.image1.indexOf('data:') === 0) ? state.image1 : (state.image1 || '');
 
             const payload = {
                 id: state.projectId || '',
                 editToken: state.editToken || '',
                 title: state.projectTitle,
-                image1: state.image1,
+                image1: imagePayload,
+                image1Thumb: state.image1Thumb || '',
                 image2: '',
                 activeImage: 1,
-                hotspots: state.hotspots
+                hotspots: state.hotspots,
+                creatorName: state.creatorName,
+                creatorInfo: state.creatorInfo,
+                hideFromCatalog: state.hideFromCatalog,
+                openingMessage: state.openingMessage,
+                enforceOrder: state.enforceOrder
             };
 
             google.script.run
@@ -1814,6 +2222,8 @@
                     btn.disabled = false;
                     btn.classList.remove('opacity-50');
                     if (result.image1) state.image1 = result.image1;
+                    if (result.image1Thumb) state.image1Thumb = result.image1Thumb;
+                    updateDocumentTitle();
                 })
                 .withFailureHandler(function(err) {
                     showSaveStatus('שגיאה: ' + (err.message || err), 'error');
