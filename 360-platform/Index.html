@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>מחולל מרחבי 360°</title>
-    <!-- APP_VERSION: 3.0-features -->
+    <!-- APP_VERSION: 3.1-hotspot-interactions -->
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Three.js -->
@@ -110,6 +110,20 @@
         }
         .hotspot-locked {
             filter: grayscale(0.85) brightness(0.65);
+        }
+        #hotspot-display-modal,
+        #hotspot-display-modal .hotspot-content-selectable {
+            user-select: text;
+            -webkit-user-select: text;
+        }
+        #display-text-container a.hotspot-content-link {
+            color: #22d3ee;
+            text-decoration: underline;
+            cursor: pointer;
+            pointer-events: auto;
+        }
+        #display-text-container a.hotspot-content-link:hover {
+            color: #67e8f9;
         }
     </style>
 </head>
@@ -548,15 +562,23 @@
                     </div>
                     <h3 id="display-title" class="font-extrabold text-xl text-white">שם נקודת המידע</h3>
                 </div>
-                <button onclick="closeDisplayModal()" class="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-slate-800/80 transition-all flex items-center justify-center">
-                    <i data-lucide="x" class="w-6 h-6"></i>
-                </button>
+                <div class="flex items-center gap-1">
+                    <button type="button" id="display-open-tab-btn" onclick="openHotspotContentInNewTab()" class="text-slate-400 hover:text-cyan-300 p-2 rounded-xl hover:bg-slate-800/80 transition-all flex items-center justify-center" title="פתיחה בכרטיסיה חדשה">
+                        <i data-lucide="external-link" class="w-5 h-5"></i>
+                    </button>
+                    <button type="button" id="display-copy-text-btn" onclick="copyHotspotDisplayText()" class="text-slate-400 hover:text-cyan-300 p-2 rounded-xl hover:bg-slate-800/80 transition-all flex items-center justify-center hidden" title="העתקת הטקסט">
+                        <i data-lucide="copy" class="w-5 h-5"></i>
+                    </button>
+                    <button type="button" onclick="closeDisplayModal()" class="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-slate-800/80 transition-all flex items-center justify-center" title="סגור">
+                        <i data-lucide="x" class="w-6 h-6"></i>
+                    </button>
+                </div>
             </div>
 
             <!-- Content Display Area -->
-            <div class="p-6 overflow-y-auto max-h-[65vh] space-y-4">
+            <div class="p-6 overflow-y-auto max-h-[65vh] space-y-4 hotspot-content-selectable" onclick="event.stopPropagation()">
                 <!-- Text Container -->
-                <div id="display-text-container" class="prose prose-invert max-w-none text-slate-200 text-base leading-relaxed hidden"></div>
+                <div id="display-text-container" class="prose prose-invert max-w-none text-slate-200 text-base leading-relaxed hidden hotspot-content-selectable"></div>
                 
                 <!-- Video Container -->
                 <div id="display-video-container" class="aspect-video w-full rounded-xl overflow-hidden bg-black hidden">
@@ -602,7 +624,7 @@
         const PAGE_MODE = <?!= pageMode ?>;
         const CATALOG_DATA = <?!= catalogData ?>;
         const PANORAMA_CENTER_LON = 180;
-        const APP_VERSION = '3.0-features';
+        const APP_VERSION = '3.1-hotspot-interactions';
         const FEEDBACK_EMAIL = 'chepti@gmail.com';
 
         const EMBEDDED_STATE = /*_EMBEDDED_STATE_START_*/ null /*_EMBEDDED_STATE_END_*/;
@@ -651,6 +673,7 @@
         let moveHotspotId = null;
         let isTextureLoading = false;
         let activeConfigHotspotId = null;
+        let activeDisplayHotspotId = null;
         let currentEditingType = 'text';
 
         // 3D Hotspot click raycasting
@@ -1791,6 +1814,155 @@
         // ==========================================
         //  STUDENT MODE: DISPLAY MODAL LOGIC
         // ==========================================
+
+        function escapeHtmlText(str) {
+            return String(str || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        function ensureLinksOpenInNewTab(html) {
+            const div = document.createElement('div');
+            div.innerHTML = html;
+            div.querySelectorAll('a').forEach(function(a) {
+                a.target = '_blank';
+                a.rel = 'noopener noreferrer';
+                a.classList.add('hotspot-content-link');
+            });
+            return div.innerHTML;
+        }
+
+        function linkifyPlainText(text) {
+            const escaped = escapeHtmlText(text).replace(/\n/g, '<br>');
+            const urlRe = /(https?:\/\/[^\s<]+[^\s<.,;:!?'")\]}>])/gi;
+            return escaped.replace(urlRe, function(url) {
+                return '<a href="' + url + '" target="_blank" rel="noopener noreferrer" class="hotspot-content-link">' + url + '</a>';
+            });
+        }
+
+        function formatRichTextContent(raw) {
+            const text = (raw || '').trim();
+            if (!text) return '';
+            if (/<[a-z][\s\S]*>/i.test(text)) {
+                return ensureLinksOpenInNewTab(text);
+            }
+            return linkifyPlainText(text);
+        }
+
+        function getVideoEmbedUrl(videoUrl) {
+            let url = (videoUrl || '').trim();
+            if (!url) return '';
+            if (url.includes('youtube.com/watch?v=')) {
+                const videoId = url.split('v=')[1]?.split('&')[0];
+                url = 'https://www.youtube.com/embed/' + videoId;
+            } else if (url.includes('youtu.be/')) {
+                const videoId = url.split('youtu.be/')[1]?.split('?')[0];
+                url = 'https://www.youtube.com/embed/' + videoId;
+            } else if (url.includes('vimeo.com/')) {
+                const vimeoId = url.split('vimeo.com/')[1]?.split('?')[0];
+                url = 'https://player.vimeo.com/video/' + vimeoId;
+            }
+            return url;
+        }
+
+        function getHotspotPlainText(hs) {
+            if (!hs) return '';
+            if (hs.type === 'text') {
+                const div = document.createElement('div');
+                div.innerHTML = formatRichTextContent(hs.content);
+                return div.textContent || '';
+            }
+            if (hs.type === 'video' || hs.type === 'forms' || hs.type === 'embed') {
+                return (hs.content || '').trim();
+            }
+            if (hs.type === 'image') {
+                return hs.title || 'תמונה';
+            }
+            return '';
+        }
+
+        function buildHotspotStandaloneHtml(hs) {
+            const title = escapeHtmlText(hs.title || 'נקודה חמה');
+            let body = '';
+
+            if (hs.type === 'text') {
+                body = '<div class="content">' + formatRichTextContent(hs.content) + '</div>';
+            } else if (hs.type === 'video') {
+                const embedUrl = getVideoEmbedUrl(hs.content);
+                if (embedUrl) {
+                    body = '<div class="media"><iframe src="' + escapeHtmlText(embedUrl) + '" allowfullscreen></iframe></div>';
+                } else {
+                    body = '<p class="content">לא נמצא קישור לסרטון.</p>';
+                }
+            } else if (hs.type === 'forms') {
+                body = '<div class="media tall"><iframe src="' + escapeHtmlText(hs.content) + '"></iframe></div>';
+            } else if (hs.type === 'embed') {
+                body = '<div class="media tall">' + normalizeEmbedContent(hs.content) + '</div>';
+            } else if (hs.type === 'image') {
+                const imgUrl = resolveDisplayImageUrl(hs.content);
+                body = '<div class="content"><img src="' + escapeHtmlText(imgUrl) + '" alt="' + title + '"></div>';
+            }
+
+            return '<!DOCTYPE html><html lang="he" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' +
+                title + '</title><style>body{font-family:Assistant,Arial,sans-serif;margin:0;padding:24px;background:#0b0f19;color:#e2e8f0;line-height:1.7}h1{font-size:1.5rem;margin:0 0 16px}a{color:#22d3ee}.content{max-width:720px;margin:0 auto}.media{max-width:960px;margin:0 auto}.media iframe,.media img{width:100%;border:0;border-radius:12px}.media iframe{aspect-ratio:16/9;height:min(70vh,540px)}.media.tall iframe{height:min(80vh,720px)}img{max-height:80vh;object-fit:contain}</style></head><body><h1>' +
+                title + '</h1>' + body + '</body></html>';
+        }
+
+        function openHotspotContentInNewTab() {
+            const hs = state.hotspots.find(function(h) { return h.id === activeDisplayHotspotId; });
+            if (!hs) return;
+
+            if (hs.type === 'video' || hs.type === 'forms') {
+                const directUrl = (hs.content || '').trim();
+                if (/^https?:\/\//i.test(directUrl)) {
+                    window.open(directUrl, '_blank', 'noopener,noreferrer');
+                    return;
+                }
+            }
+
+            const pageHtml = buildHotspotStandaloneHtml(hs);
+            const blob = new Blob([pageHtml], { type: 'text/html;charset=utf-8' });
+            const tab = window.open(URL.createObjectURL(blob), '_blank', 'noopener');
+            if (!tab) {
+                showStudentToast('הדפדפן חסם פתיחת כרטיסיה — אפשר חלונות קופצים', true);
+            }
+        }
+
+        function copyHotspotDisplayText() {
+            const hs = state.hotspots.find(function(h) { return h.id === activeDisplayHotspotId; });
+            if (!hs || hs.type !== 'text') return;
+
+            const text = getHotspotPlainText(hs);
+            const btn = document.getElementById('display-copy-text-btn');
+            navigator.clipboard.writeText(text).then(function() {
+                showStudentToast('הטקסט הועתק!', false);
+                if (btn) {
+                    btn.classList.add('text-emerald-400');
+                    setTimeout(function() { btn.classList.remove('text-emerald-400'); }, 1500);
+                }
+            }).catch(function() {
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                ta.style.position = 'fixed';
+                ta.style.left = '-9999px';
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+                showStudentToast('הטקסט הועתק!', false);
+            });
+        }
+
+        function updateDisplayModalActions(hs) {
+            const copyBtn = document.getElementById('display-copy-text-btn');
+            if (copyBtn) {
+                copyBtn.classList.toggle('hidden', !hs || hs.type !== 'text');
+            }
+            lucide.createIcons();
+        }
+
         function displayHotspotToStudent(hsId) {
             const hs = state.hotspots.find(h => h.id === hsId);
             if (!hs) return;
@@ -1799,6 +1971,7 @@
                 return;
             }
             markHotspotVisited(hsId);
+            activeDisplayHotspotId = hsId;
 
             // Set title
             document.getElementById('display-title').textContent = hs.title || '';
@@ -1817,23 +1990,10 @@
             imageCont.classList.add('hidden');
 
             if (hs.type === 'text') {
-                textCont.innerHTML = hs.content.replace(/\n/g, '<br>');
+                textCont.innerHTML = formatRichTextContent(hs.content);
                 textCont.classList.remove('hidden');
             } else if (hs.type === 'video') {
-                let videoUrl = hs.content;
-                // Parse standard YouTube link to embed format
-                if (videoUrl.includes('youtube.com/watch?v=')) {
-                    const videoId = videoUrl.split('v=')[1]?.split('&')[0];
-                    videoUrl = `https://www.youtube.com/embed/${videoId}`;
-                } else if (videoUrl.includes('youtu.be/')) {
-                    const videoId = videoUrl.split('youtu.be/')[1]?.split('?')[0];
-                    videoUrl = `https://www.youtube.com/embed/${videoId}`;
-                } else if (videoUrl.includes('vimeo.com/')) {
-                    const vimeoId = videoUrl.split('vimeo.com/')[1]?.split('?')[0];
-                    videoUrl = `https://player.vimeo.com/video/${vimeoId}`;
-                }
-                
-                document.getElementById('display-video-iframe').src = videoUrl;
+                document.getElementById('display-video-iframe').src = getVideoEmbedUrl(hs.content);
                 videoCont.classList.remove('hidden');
             } else if (hs.type === 'forms') {
                 document.getElementById('display-forms-iframe').src = hs.content;
@@ -1847,6 +2007,7 @@
                 imageCont.classList.remove('hidden');
             }
 
+            updateDisplayModalActions(hs);
             document.getElementById('hotspot-display-modal').classList.remove('hidden');
             if (state.enforceOrder && !state.isEditMode) {
                 renderHotspotsIn3D();
@@ -1855,6 +2016,7 @@
 
         function closeDisplayModal() {
             document.getElementById('hotspot-display-modal').classList.add('hidden');
+            activeDisplayHotspotId = null;
             // Reset iframes to stop playback
             document.getElementById('display-video-iframe').src = '';
             document.getElementById('display-forms-iframe').src = '';
