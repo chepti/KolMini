@@ -14,6 +14,7 @@
 var SHEET_NAME = '';   // ריק = הגיליון הראשון. אפשר לציין שם טאב מפורש.
 var COMMENT_HEADER = 'הערות';
 var UPDATED_HEADER = 'עודכן';
+var PLATFORM_HEADER = 'פלטפורמה';
 
 function doGet() {
   return HtmlService.createHtmlOutputFromFile('Index')
@@ -41,7 +42,7 @@ function getHeaders_(sheet) {
 function ensureExtraColumns_(sheet) {
   var headers = getHeaders_(sheet);
   var added = false;
-  [COMMENT_HEADER, UPDATED_HEADER].forEach(function (name) {
+  [PLATFORM_HEADER, COMMENT_HEADER, UPDATED_HEADER].forEach(function (name) {
     if (headers.indexOf(name) === -1) {
       sheet.getRange(1, sheet.getLastColumn() + 1).setValue(name);
       added = true;
@@ -67,6 +68,8 @@ function getCourses() {
       // דלג על שורות ריקות לגמרי
       var nonEmpty = row.some(function (c) { return String(c).trim() !== ''; });
       if (!nonEmpty) continue;
+      // דלג על שורת כותרת כפולה אם נכנסה בטעות לנתונים
+      if (String(row[0]).trim() === headers[0]) continue;
       var obj = { _row: i + 2 };
       for (var c = 0; c < headers.length; c++) {
         obj[headers[c]] = row[c] === null ? '' : String(row[c]);

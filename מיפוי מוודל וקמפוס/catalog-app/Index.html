@@ -6,134 +6,152 @@
 <title>קורסי מוודל וקמפוס – משרד החינוך</title>
 <style>
   :root{
-    --ink:#2b2545; --ink-soft:#6b6385; --line:#ece8f5;
-    --card:#ffffff; --shadow:0 10px 30px -12px rgba(80,60,140,.28);
+    --ink:#2b2545; --ink-soft:#736b8c; --line:#e8e6f0;
+    --card:#ffffff; --shadow:0 6px 20px -10px rgba(70,55,120,.22);
     --pink:#ffd9e8; --lav:#e4dcff; --mint:#d4f5e9; --peach:#ffe6cf;
     --sky:#d6ecff; --lemon:#fff3c4;
-    --accent:#7c5cff; --accent-soft:#efeaff;
-    --radius:22px;
+    --accent:#6d4dff; --accent-soft:#efeaff;
+    --moodle:#f47b20; --campus:#2f6fd6;
+    --radius:18px;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
   body{
     font-family:'Assistant','Segoe UI',Arial,sans-serif;
-    color:var(--ink);
-    background:linear-gradient(160deg,#faf8ff 0%,#f3f9ff 45%,#fff6f9 100%);
+    color:var(--ink); background:#f5f6fb;
     min-height:100vh; position:relative; overflow-x:hidden;
   }
-  /* ---- בלובים פסטל מרחפים ---- */
-  .blob{position:fixed;border-radius:50%;filter:blur(48px);opacity:.55;z-index:0;
-    animation:float 18s ease-in-out infinite;}
-  .blob.b1{width:380px;height:380px;background:var(--pink);top:-90px;right:-60px;}
-  .blob.b2{width:320px;height:320px;background:var(--lav);top:40%;left:-110px;animation-delay:-4s;}
-  .blob.b3{width:300px;height:300px;background:var(--mint);bottom:-100px;right:18%;animation-delay:-8s;}
-  .blob.b4{width:260px;height:260px;background:var(--sky);top:8%;left:30%;animation-delay:-12s;}
-  @keyframes float{0%,100%{transform:translateY(0) translateX(0) scale(1);}
-    50%{transform:translateY(-30px) translateX(20px) scale(1.06);}}
+  /* ---- רקע: דפוס נקודות שטוח + בלובים גיאומטריים שטוחים (ללא מעברי צבע/טשטוש) ---- */
+  .dots{position:fixed;inset:0;z-index:0;
+    background-image:radial-gradient(#dcdaeb 1.3px,transparent 1.3px);background-size:24px 24px;opacity:.6;}
+  .shapes{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;}
+  .sh{position:absolute;opacity:.55;}
+  .sh.s1{width:340px;height:320px;background:var(--lav);top:-70px;right:-60px;
+    border-radius:42% 58% 63% 37% / 45% 48% 52% 55%;}
+  .sh.s2{width:240px;height:240px;background:var(--mint);bottom:-60px;left:-50px;
+    border-radius:58% 42% 38% 62% / 52% 55% 45% 48%;}
+  .sh.s3{width:140px;height:140px;background:var(--peach);top:38%;left:6%;border-radius:30px;transform:rotate(18deg);}
+  .sh.s4{width:90px;height:90px;background:var(--sky);top:62%;right:10%;border-radius:50%;}
 
-  .wrap{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:28px 20px 80px;}
+  .wrap{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:24px 20px 70px;}
 
-  header.page{text-align:center;margin-bottom:8px;}
-  header.page h1{font-size:34px;margin:0;font-weight:800;letter-spacing:-.5px;
-    background:linear-gradient(90deg,#7c5cff,#ff7eb6);-webkit-background-clip:text;background-clip:text;color:transparent;}
-  .subtitle{display:inline-block;margin-top:10px;background:#fff0d6;color:#a86a16;
-    padding:6px 16px;border-radius:999px;font-weight:700;font-size:14px;border:1px solid #ffe0a8;}
+  header.page{text-align:center;margin-bottom:6px;}
+  header.page h1{font-size:31px;margin:0;font-weight:900;letter-spacing:-.5px;color:#3a2d70;}
+  .subtitle{display:inline-block;margin-top:9px;background:#fff3d6;color:#a86a16;
+    padding:5px 15px;border-radius:999px;font-weight:700;font-size:13px;border:1px solid #ffe2a8;}
 
-  /* ---- פאנל סינון ---- */
-  .filters{background:rgba(255,255,255,.78);backdrop-filter:blur(8px);
-    border:1px solid var(--line);border-radius:var(--radius);
-    box-shadow:var(--shadow);padding:18px 20px;margin:24px 0 18px;}
+  /* ---- פאנל סינון קומפקטי ---- */
+  .filters{background:#fff;border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:14px 16px;margin:18px 0 16px;}
   .search-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;}
-  .search-box{flex:1;min-width:220px;position:relative;}
-  .search-box input{width:100%;padding:13px 44px 13px 16px;border:1.5px solid var(--line);
-    border-radius:999px;font-size:15px;font-family:inherit;outline:none;transition:.2s;background:#fff;}
-  .search-box input:focus{border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft);}
-  .search-box .ico{position:absolute;right:16px;top:50%;transform:translateY(-50%);opacity:.4;font-size:17px;}
-  .btn-clear{padding:12px 20px;border:none;border-radius:999px;cursor:pointer;font-family:inherit;
-    font-weight:700;font-size:14px;background:#fff;color:var(--accent);border:1.5px solid var(--accent-soft);transition:.2s;}
+  .count{display:flex;align-items:center;gap:9px;flex-shrink:0;
+    background:var(--accent-soft);padding:7px 16px;border-radius:14px;}
+  .count-num{font-size:30px;font-weight:900;color:var(--accent);line-height:.95;min-width:1ch;}
+  .count-lbl{font-size:13px;font-weight:800;color:#5a4fb0;line-height:1.1;}
+  .count-lbl small{display:block;font-size:10.5px;font-weight:700;color:#9a8fd0;}
+  .search-box{flex:1;min-width:200px;position:relative;}
+  .search-box input{width:100%;padding:11px 40px 11px 14px;border:1.5px solid var(--line);
+    border-radius:999px;font-size:14px;font-family:inherit;outline:none;transition:.2s;background:#fbfbfe;}
+  .search-box input:focus{border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft);background:#fff;}
+  .search-box .ico{position:absolute;right:14px;top:50%;transform:translateY(-50%);opacity:.4;font-size:16px;}
+  .btn-clear{padding:10px 16px;border:1.5px solid var(--accent-soft);border-radius:999px;cursor:pointer;
+    font-family:inherit;font-weight:700;font-size:13px;background:#fff;color:var(--accent);transition:.2s;white-space:nowrap;}
   .btn-clear:hover{background:var(--accent-soft);}
-  .count-pill{font-size:14px;color:var(--ink-soft);font-weight:700;padding:6px 4px;white-space:nowrap;}
 
-  .filter-group{margin-top:14px;}
-  .filter-group .lbl{font-size:12px;font-weight:800;color:var(--ink-soft);margin-bottom:7px;letter-spacing:.3px;}
-  .chips{display:flex;flex-wrap:wrap;gap:8px;}
-  .chip{padding:7px 15px;border-radius:999px;border:1.5px solid var(--line);background:#fff;
-    cursor:pointer;font-size:13.5px;font-weight:600;color:var(--ink);transition:.18s;user-select:none;
-    display:inline-flex;align-items:center;gap:6px;}
-  .chip:hover{transform:translateY(-2px);box-shadow:0 6px 14px -8px rgba(124,92,255,.5);}
+  .filter-group{margin-top:11px;}
+  .filter-group .lbl{font-size:11px;font-weight:800;color:var(--ink-soft);margin-bottom:6px;letter-spacing:.2px;}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;}
+  .chip{padding:5px 12px;border-radius:999px;border:1.5px solid var(--line);background:#fff;
+    cursor:pointer;font-size:12.5px;font-weight:600;color:var(--ink);transition:.15s;user-select:none;
+    display:inline-flex;align-items:center;gap:5px;line-height:1.4;}
+  .chip:hover{border-color:#cdc4f5;background:#faf9ff;}
   .chip.active{background:var(--accent);color:#fff;border-color:var(--accent);}
-  .chip .c-ico{font-size:15px;}
-  .chip .c-cnt{font-size:11px;opacity:.6;font-weight:700;}
+  .chip .c-ico{font-size:14px;}
+  .chip .c-cnt{font-size:10.5px;opacity:.55;font-weight:800;}
   .chip.active .c-cnt{opacity:.85;}
+  .chip.plat-moodle.active{background:var(--moodle);border-color:var(--moodle);}
+  .chip.plat-campus.active{background:var(--campus);border-color:var(--campus);}
+  .dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+  .dot.moodle{background:var(--moodle);} .dot.campus{background:var(--campus);}
 
-  /* ---- רשת כרטיסים ---- */
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:18px;margin-top:6px;}
+  /* שורת סינונים משולבת – הכל בשורה אחת ככל האפשר */
+  .filters-inline{display:flex;flex-wrap:wrap;gap:9px 20px;align-items:center;margin-top:11px;
+    padding-top:11px;border-top:1px dashed var(--line);}
+  .mini{display:flex;align-items:center;gap:8px;}
+  .mini .lbl{margin:0;white-space:nowrap;}
+
+  /* ---- רשת כרטיסים (Masonry בעמודות – ללא רווחים מיותרים) ---- */
+  .grid{column-width:280px;column-gap:16px;margin-top:4px;}
   .card{background:var(--card);border-radius:var(--radius);border:1px solid var(--line);
-    box-shadow:var(--shadow);padding:18px;cursor:pointer;position:relative;overflow:hidden;
-    transition:transform .22s cubic-bezier(.2,.8,.2,1),box-shadow .22s;
-    animation:rise .45s cubic-bezier(.2,.8,.2,1) both;}
-  @keyframes rise{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
-  .card:hover{transform:translateY(-6px);box-shadow:0 22px 40px -18px rgba(80,60,140,.4);}
-  .card .topbar{height:6px;border-radius:999px;margin:-18px -18px 14px;}
-  .card-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:10px;}
-  .ico-badge{width:48px;height:48px;border-radius:16px;display:flex;align-items:center;justify-content:center;
-    font-size:24px;flex-shrink:0;}
-  .card h3{font-size:16.5px;margin:0;line-height:1.35;font-weight:800;}
-  .card .desc{font-size:13.5px;color:var(--ink-soft);line-height:1.6;margin:6px 0 12px;
-    display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;min-height:20px;}
-  .card .desc.empty{font-style:italic;opacity:.6;}
-  .card-tags{display:flex;flex-wrap:wrap;gap:6px;}
-  .tag{font-size:11.5px;padding:4px 11px;border-radius:999px;font-weight:700;background:#f5f2ff;color:#6a52d6;}
+    box-shadow:var(--shadow);padding:15px 16px 14px;cursor:pointer;position:relative;
+    break-inside:avoid;margin-bottom:16px;display:block;width:100%;
+    transition:transform .18s cubic-bezier(.2,.8,.2,1),box-shadow .18s,border-color .18s;
+    animation:rise .4s cubic-bezier(.2,.8,.2,1) both;}
+  @keyframes rise{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+  .card:hover{transform:translateY(-4px);box-shadow:0 16px 30px -16px rgba(70,55,120,.4);border-color:#d9d2f7;}
+  .plat-badge{position:absolute;top:12px;left:12px;font-size:10px;font-weight:800;padding:3px 9px;
+    border-radius:999px;display:inline-flex;align-items:center;gap:5px;letter-spacing:.2px;}
+  .plat-badge.moodle{background:#fff0e2;color:#d96f12;border:1px solid #ffd6ac;}
+  .plat-badge.campus{background:#e7f0ff;color:#235fc4;border:1px solid #c2daff;}
+  .card-head{display:flex;align-items:flex-start;gap:11px;padding-left:78px;min-height:42px;}
+  .ico-badge{width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;
+    font-size:21px;flex-shrink:0;}
+  .card h3{font-size:15.5px;margin:0;line-height:1.32;font-weight:800;}
+  .card .desc{font-size:13px;color:var(--ink-soft);line-height:1.55;margin:9px 0 0;
+    display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+  .card-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:11px;}
+  .tag{font-size:11px;padding:3px 10px;border-radius:999px;font-weight:700;background:#f3f0fc;color:#6a52d6;}
   .tag.lvl{background:#eafaf2;color:#1f9d6b;}
   .tag.lang{background:#fff1e8;color:#d4783c;}
   .tag.missing{background:#ffeaea;color:#d4564b;}
 
   /* ---- חלונית מורחבת ---- */
-  .overlay{position:fixed;inset:0;background:rgba(45,35,80,.42);backdrop-filter:blur(3px);
-    z-index:50;display:none;align-items:stretch;justify-content:flex-start;}
+  .overlay{position:fixed;inset:0;background:rgba(45,35,80,.42);z-index:50;display:none;
+    align-items:stretch;justify-content:flex-start;}
   .overlay.open{display:flex;animation:fade .2s ease;}
   @keyframes fade{from{opacity:0;}to{opacity:1;}}
   .panel{background:#fff;width:min(560px,100%);height:100%;overflow-y:auto;
-    box-shadow:-20px 0 60px -20px rgba(0,0,0,.3);animation:slidein .32s cubic-bezier(.2,.85,.25,1);}
+    box-shadow:-20px 0 60px -20px rgba(0,0,0,.3);animation:slidein .3s cubic-bezier(.2,.85,.25,1);
+    display:flex;flex-direction:column;}
   @keyframes slidein{from{transform:translateX(-100%);}to{transform:translateX(0);}}
-  .panel-head{position:sticky;top:0;background:#fff;z-index:2;padding:20px 24px 16px;border-bottom:1px solid var(--line);}
-  .panel-head .ph-top{display:flex;align-items:center;gap:14px;}
-  .panel-head h2{font-size:20px;margin:0;font-weight:800;flex:1;line-height:1.3;}
-  .x-btn{border:none;background:#f3f0fb;width:38px;height:38px;border-radius:12px;cursor:pointer;
-    font-size:18px;color:var(--ink-soft);flex-shrink:0;transition:.2s;}
+  .panel-head{position:sticky;top:0;background:#fff;z-index:2;padding:18px 22px 14px;border-bottom:1px solid var(--line);}
+  .panel-head .ph-top{display:flex;align-items:center;gap:12px;}
+  .panel-head h2{font-size:19px;margin:0;font-weight:800;flex:1;line-height:1.3;}
+  .panel-head .ph-sub{margin-top:8px;display:flex;gap:7px;align-items:center;flex-wrap:wrap;}
+  .x-btn{border:none;background:#f3f0fb;width:36px;height:36px;border-radius:11px;cursor:pointer;
+    font-size:17px;color:var(--ink-soft);flex-shrink:0;transition:.2s;}
   .x-btn:hover{background:#e9e3fb;}
-  .panel-body{padding:18px 22px 26px;display:grid;grid-template-columns:1fr 1fr;gap:12px 14px;align-content:start;}
+  .panel-body{padding:16px 22px 24px;display:grid;grid-template-columns:1fr 1fr;gap:11px 14px;align-content:start;flex:1;}
   .field{margin-bottom:0;min-width:0;}
   .field.full{grid-column:1 / -1;}
   .field label{display:block;font-size:11.5px;font-weight:800;color:var(--ink-soft);margin-bottom:4px;}
   .field input,.field textarea,.field select{width:100%;padding:8px 11px;border:1.5px solid var(--line);
-    border-radius:12px;font-size:13.5px;font-family:inherit;outline:none;transition:.2s;background:#fdfcff;color:var(--ink);}
-  .field textarea{resize:vertical;min-height:64px;line-height:1.5;}
+    border-radius:11px;font-size:13.5px;font-family:inherit;outline:none;transition:.2s;background:#fdfcff;color:var(--ink);}
+  .field textarea{resize:vertical;min-height:62px;line-height:1.5;}
   .field input:focus,.field textarea:focus,.field select:focus{border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft);}
   .field .hint{font-size:11px;color:#b8b0cc;margin-top:4px;}
   .field.readonly input{background:#f6f5fa;color:#9a93ad;}
   .link-row{display:flex;gap:8px;align-items:center;}
   .link-row a{font-size:13px;color:var(--accent);text-decoration:none;font-weight:700;white-space:nowrap;}
   .save-bar{position:sticky;bottom:0;background:#fff;border-top:1px solid var(--line);
-    padding:16px 24px;display:flex;gap:12px;align-items:center;}
-  .btn-save{flex:1;padding:14px;border:none;border-radius:14px;cursor:pointer;font-family:inherit;
-    font-weight:800;font-size:15px;color:#fff;background:linear-gradient(90deg,#7c5cff,#9b7bff);transition:.2s;}
-  .btn-save:hover{filter:brightness(1.05);box-shadow:0 10px 22px -10px rgba(124,92,255,.7);}
+    padding:14px 22px;display:flex;gap:12px;align-items:center;}
+  .btn-save{flex:1;padding:13px;border:none;border-radius:12px;cursor:pointer;font-family:inherit;
+    font-weight:800;font-size:14.5px;color:#fff;background:var(--accent);transition:.2s;}
+  .btn-save:hover{filter:brightness(1.07);box-shadow:0 10px 22px -10px rgba(109,77,255,.7);}
   .btn-save:disabled{opacity:.55;cursor:default;}
   .save-msg{font-size:13px;font-weight:700;}
   .save-msg.ok{color:#1f9d6b;} .save-msg.err{color:#d4564b;}
 
-  /* ---- טעינה / ריק ---- */
-  .loading,.empty{text-align:center;padding:60px 20px;color:var(--ink-soft);}
-  .spinner{width:42px;height:42px;border:4px solid var(--accent-soft);border-top-color:var(--accent);
-    border-radius:50%;margin:0 auto 16px;animation:spin 1s linear infinite;}
+  .loading,.empty{text-align:center;padding:50px 20px;color:var(--ink-soft);}
+  .spinner{width:40px;height:40px;border:4px solid var(--accent-soft);border-top-color:var(--accent);
+    border-radius:50%;margin:0 auto 14px;animation:spin 1s linear infinite;}
   @keyframes spin{to{transform:rotate(360deg);}}
-  @media(max-width:600px){header.page h1{font-size:26px;}.panel{width:100%;}}
+  @media(max-width:600px){header.page h1{font-size:24px;}.panel{width:100%;}.panel-body{grid-template-columns:1fr;}}
 </style>
 </head>
 <body>
-  <div class="blob b1"></div><div class="blob b2"></div>
-  <div class="blob b3"></div><div class="blob b4"></div>
+  <div class="dots"></div>
+  <div class="shapes"><span class="sh s1"></span><span class="sh s2"></span><span class="sh s3"></span><span class="sh s4"></span></div>
 
   <div class="wrap">
     <header class="page">
@@ -143,17 +161,25 @@
 
     <div class="filters" id="filters" style="display:none;">
       <div class="search-row">
+        <div class="count">
+          <span class="count-num" id="countNum">0</span>
+          <span class="count-lbl">קורסים<small id="countTotal"></small></span>
+        </div>
         <div class="search-box">
           <span class="ico">🔍</span>
-          <input type="text" id="search" placeholder="חיפוש לפי שם קורס, תיאור, ראשי פרקים…">
+          <input type="text" id="search" placeholder="חיפוש לפי שם, תיאור, ראשי פרקים…">
         </div>
-        <button class="btn-clear" id="clearBtn">ניקוי סינון ✕</button>
-        <span class="count-pill" id="countPill"></span>
+        <button class="btn-clear" id="clearBtn">ניקוי ✕</button>
       </div>
+
       <div class="filter-group"><div class="lbl">תחום דעת</div><div class="chips" id="chips-subject"></div></div>
-      <div class="filter-group"><div class="lbl">שכבת חינוך</div><div class="chips" id="chips-level"></div></div>
-      <div class="filter-group"><div class="lbl">שפה</div><div class="chips" id="chips-lang"></div></div>
-      <div class="filter-group"><div class="lbl">השלמת מידע</div><div class="chips" id="chips-flags"></div></div>
+
+      <div class="filters-inline">
+        <div class="mini"><span class="lbl">פלטפורמה</span><div class="chips" id="chips-platform"></div></div>
+        <div class="mini"><span class="lbl">שכבת חינוך</span><div class="chips" id="chips-level"></div></div>
+        <div class="mini"><span class="lbl">שפה</span><div class="chips" id="chips-lang"></div></div>
+        <div class="mini"><span class="lbl">השלמת מידע</span><div class="chips" id="chips-flags"></div></div>
+      </div>
     </div>
 
     <div id="loading" class="loading"><div class="spinner"></div>טוען קורסים…</div>
@@ -170,6 +196,7 @@
           <h2 id="p-title"></h2>
           <button class="x-btn" onclick="closePanel()">✕</button>
         </div>
+        <div class="ph-sub" id="p-sub"></div>
       </div>
       <div class="panel-body" id="panel-body"></div>
       <div class="save-bar">
@@ -197,53 +224,68 @@
   ];
   function styleFor(subject){
     var s = subject || '';
-    for(var i=0;i<SUBJECT_STYLE.length;i++){
-      for(var j=0;j<SUBJECT_STYLE[i].kw.length;j++){
+    for(var i=0;i<SUBJECT_STYLE.length;i++)
+      for(var j=0;j<SUBJECT_STYLE[i].kw.length;j++)
         if(s.indexOf(SUBJECT_STYLE[i].kw[j])!==-1) return SUBJECT_STYLE[i];
-      }
-    }
     return {ico:'🎓', c:'var(--accent-soft)'};
   }
 
-  var DATA = [];          // כל הקורסים
-  var HEADERS = [];
-  var FILTER = {subject:new Set(),level:new Set(),lang:new Set(),flags:new Set(),q:''};
-  var CURRENT = null;     // הקורס הפתוח בחלונית
-  var EDIT_FIELDS = ['שם_קורס','תחום_דעת','שכבת_חינוך','שכבת_גיל','שפה','משך','תיאור','ראשי_פרקים','ספק','הערות'];
+  // ---- פלטפורמה (מוודל / קמפוס) ----
+  function platformOf(c){
+    var p=val(c,'פלטפורמה');
+    if(!p){
+      var link=val(c,'קישור');
+      if(/campus/i.test(link)) p='קמפוס';
+      else if(/lms|moodle/i.test(link)) p='מוודל';
+    }
+    return p;
+  }
+  function platMeta(p){
+    if(/קמפוס|campus/i.test(p||'')) return {label:'קמפוס', cls:'campus'};
+    if(/מוודל|moodle|lms/i.test(p||'')) return {label:'Moodle', cls:'moodle'};
+    return null;
+  }
+
+  var DATA = [], HEADERS = [];
+  var FILTER = {subject:new Set(),level:new Set(),lang:new Set(),platform:new Set(),flags:new Set(),q:''};
+  var CURRENT = null;
+  var EDIT_FIELDS = ['שם_קורס','תחום_דעת','פלטפורמה','שכבת_חינוך','שכבת_גיל','שפה','משך','תיאור','ראשי_פרקים','ספק','הערות'];
   var TEXTAREA_FIELDS = {'תיאור':1,'ראשי_פרקים':1,'הערות':1};
   var FULL_FIELDS = {'שם_קורס':1,'תיאור':1,'ראשי_פרקים':1,'הערות':1};
+  var SELECT_OPTS = {'שכבת_חינוך':['','יסודי','על יסודי'],'פלטפורמה':['','מוודל','קמפוס']};
 
   function val(c,k){ return (c && c[k]!=null) ? String(c[k]).trim() : ''; }
 
   // ---- טעינת נתונים ----
   var DEMO_MODE=false;
   window.onload = function(){
-    if(typeof google==='undefined' || !google.script){
-      DEMO_MODE=true; onData(demoData()); return;   // תצוגה מקדימה בלבד
-    }
+    if(typeof google==='undefined' || !google.script){ DEMO_MODE=true; onData(demoData()); return; }
     google.script.run.withSuccessHandler(onData).withFailureHandler(onErr).getCourses();
   };
   function demoData(){
-    var H=['שם_קורס','תחום_דעת','שכבת_חינוך','שכבת_גיל','שפה','משך','תיאור','ראשי_פרקים','ספק','קישור','הערות','עודכן'];
+    var H=['שם_קורס','תחום_דעת','שכבת_חינוך','פלטפורמה','שכבת_גיל','שפה','משך','תיאור','ראשי_פרקים','ספק','קישור','הערות','עודכן'];
     function mk(a){var o={_row:0};H.forEach(function(h,i){o[h]=a[i]||'';});return o;}
     return {headers:H, courses:[
-      mk(['English Grammar','אנגלית','על יסודי','','אנגלית','','','Parts of Speech | Tenses','','#']),
-      mk(['English for 10th Grade','אנגלית','על יסודי','י׳','אנגלית','כ-12 שעות','קורס מקיף לכיתה י׳ בארבע מיומנויות.','Reading | Writing | Grammar','','#']),
-      mk(['חקר החלל','מדע וטכנולוגיה','יסודי','ה','עברית','6 שעות','מסע אל מערכת השמש והכוכבים, כולל ניסויים אינטראקטיביים.','כוכבי לכת | הירח | גרביטציה','מט"ח','#']),
-      mk(['גיאומטריה במישור','מתמטיקה','על יסודי','ח׳','עברית','','','משולשים | מרובעים | שטחים','','#']),
-      mk(['שברים פשוטים','מתמטיקה','יסודי','ד\'-ו\'','עברית','4 שעות','הבנת שברים בעזרת ייצוגים חזותיים.','חלוקה לחלקים | השוואת שברים','','#']),
-      mk(['اللغة العربية للصف السابع','ערבית','על יסודי','ז׳','ערבית','','קורס בשפה הערבית לכיתה ז׳.','القراءة | الكتابة','','#']),
-      mk(['עברית כשפה שנייה','עברית - חינוך ערבי','יסודי','ה\'-ו\'','עברית','8 שעות','','אוצר מילים | הבנת הנקרא','LNET','#']),
-      mk(['משימה אוריינית: כתבה דיגיטלית','משימות אורייניות מתוקשבות','על יסודי','ט׳','עברית','','יצירת כתבה דיגיטלית בכלים מתוקשבים.','איסוף מידע | עריכה | פרסום','','#']),
-      mk(['קיימות בסביבה העירונית','קיימות ואיכות הסביבה','יסודי','ו','עברית','','','אנרגיה מתחדשת | מיחזור','','#']),
-      mk(['יסודות הכלכלה','כלכלה','על יסודי','י״א','עברית','','מבוא למושגי יסוד בכלכלה לחטיבה העליונה.','היצע וביקוש | תקציב','','#'])
+      mk(['English Grammar','אנגלית','על יסודי','מוודל','','אנגלית','','','Parts of Speech | Tenses','','#']),
+      mk(['English for 10th Grade','אנגלית','על יסודי','מוודל','י׳','אנגלית','כ-12 שעות','קורס מקיף לכיתה י׳ בארבע מיומנויות: קריאה, כתיבה, דקדוק ואוצר מילים.','Reading | Writing | Grammar','','#']),
+      mk(['חקר החלל','מדע וטכנולוגיה','יסודי','קמפוס','ה','עברית','6 שעות','מסע אל מערכת השמש והכוכבים, כולל ניסויים אינטראקטיביים והדמיות.','כוכבי לכת | הירח | גרביטציה','מט"ח','#']),
+      mk(['גיאומטריה במישור','מתמטיקה','על יסודי','מוודל','ח׳','עברית','','','משולשים | מרובעים | שטחים','','#']),
+      mk(['שברים פשוטים','מתמטיקה','יסודי','קמפוס','ד\'-ו\'','עברית','4 שעות','הבנת שברים בעזרת ייצוגים חזותיים.','חלוקה לחלקים | השוואת שברים','','#']),
+      mk(['اللغة العربية للصف السابع','ערבית','על יסודי','מוודל','ז׳','ערבית','','קורס בשפה הערבית לכיתה ז׳.','القراءة | الكتابة','','#']),
+      mk(['עברית כשפה שנייה','עברית - חינוך ערבי','יסודי','מוודל','ה\'-ו\'','עברית','8 שעות','','אוצר מילים | הבנת הנקרא','LNET','#']),
+      mk(['משימה אוריינית: כתבה דיגיטלית','משימות אורייניות מתוקשבות','על יסודי','קמפוס','ט׳','עברית','','יצירת כתבה דיגיטלית בכלים מתוקשבים.','איסוף מידע | עריכה | פרסום','','#']),
+      mk(['קיימות בסביבה העירונית','קיימות ואיכות הסביבה','יסודי','מוודל','ו','עברית','','','אנרגיה מתחדשת | מיחזור','','#']),
+      mk(['יסודות הכלכלה','כלכלה','על יסודי','קמפוס','י״א','עברית','','מבוא למושגי יסוד בכלכלה לחטיבה העליונה.','היצע וביקוש | תקציב','','#'])
     ]};
   }
   function onErr(e){ document.getElementById('loading').innerHTML='⚠️ שגיאה בטעינה: '+(e&&e.message?e.message:e); }
   function onData(res){
-    HEADERS = res.headers; DATA = res.courses;
+    HEADERS = res.headers;
+    // סינון שורת כותרת כפולה אם נכנסה בטעות
+    DATA = (res.courses||[]).filter(function(c){return val(c,'שם_קורס')!=='שם_קורס';});
     document.getElementById('loading').style.display='none';
     document.getElementById('filters').style.display='block';
+    document.getElementById('countTotal').textContent='מתוך '+DATA.length;
     buildFilters(); render();
   }
 
@@ -253,14 +295,20 @@
     DATA.forEach(function(c){var v=val(c,key); if(v) m[v]=(m[v]||0)+1;});
     return Object.keys(m).sort(function(a,b){return m[b]-m[a];}).map(function(k){return {v:k,n:m[k]};});
   }
+  function platformCounts(){
+    var m={};
+    DATA.forEach(function(c){var p=platformOf(c); if(p) m[p]=(m[p]||0)+1;});
+    return Object.keys(m).sort(function(a,b){return m[b]-m[a];}).map(function(k){return {v:k,n:m[k]};});
+  }
   function buildFilters(){
     chipSet('chips-subject', uniqCounts('תחום_דעת'), 'subject', true);
     chipSet('chips-level',   uniqCounts('שכבת_חינוך'),'level', false);
     chipSet('chips-lang',    uniqCounts('שפה'),       'lang', false);
-    // דגלי השלמת מידע
+    platformChips();
     var flagsHost=document.getElementById('chips-flags'); flagsHost.innerHTML='';
     [['no-desc','חסר תיאור'],['no-grade','חסר שכבת גיל'],['no-dur','חסר משך']].forEach(function(f){
       var el=document.createElement('div'); el.className='chip'; el.textContent=f[1];
+      if(FILTER.flags.has(f[0])) el.classList.add('active');
       el.onclick=function(){toggle('flags',f[0],el);};
       flagsHost.appendChild(el);
     });
@@ -269,11 +317,23 @@
     var host=document.getElementById(hostId); host.innerHTML='';
     items.forEach(function(it){
       var el=document.createElement('div'); el.className='chip';
+      if(FILTER[dim].has(it.v)) el.classList.add('active');
       var html='';
       if(withIco) html+='<span class="c-ico">'+styleFor(it.v).ico+'</span>';
       html+='<span>'+esc(it.v)+'</span><span class="c-cnt">'+it.n+'</span>';
       el.innerHTML=html;
       el.onclick=function(){toggle(dim,it.v,el);};
+      host.appendChild(el);
+    });
+  }
+  function platformChips(){
+    var host=document.getElementById('chips-platform'); host.innerHTML='';
+    platformCounts().forEach(function(it){
+      var meta=platMeta(it.v)||{label:it.v,cls:''};
+      var el=document.createElement('div'); el.className='chip plat-'+meta.cls;
+      if(FILTER.platform.has(it.v)) el.classList.add('active');
+      el.innerHTML='<span class="dot '+meta.cls+'"></span><span>'+esc(meta.label)+'</span><span class="c-cnt">'+it.n+'</span>';
+      el.onclick=function(){toggle('platform',it.v,el);};
       host.appendChild(el);
     });
   }
@@ -287,7 +347,7 @@
   // ---- חיפוש + ניקוי ----
   document.getElementById('search').addEventListener('input',function(e){FILTER.q=e.target.value.trim();render();});
   document.getElementById('clearBtn').addEventListener('click',function(){
-    FILTER={subject:new Set(),level:new Set(),lang:new Set(),flags:new Set(),q:''};
+    FILTER={subject:new Set(),level:new Set(),lang:new Set(),platform:new Set(),flags:new Set(),q:''};
     document.getElementById('search').value='';
     document.querySelectorAll('.chip.active').forEach(function(c){c.classList.remove('active');});
     render();
@@ -295,9 +355,10 @@
 
   // ---- סינון + רינדור ----
   function passes(c){
-    if(FILTER.subject.size && !FILTER.subject.has(val(c,'תחום_דעת'))) return false;
-    if(FILTER.level.size   && !FILTER.level.has(val(c,'שכבת_חינוך'))) return false;
-    if(FILTER.lang.size    && !FILTER.lang.has(val(c,'שפה'))) return false;
+    if(FILTER.subject.size  && !FILTER.subject.has(val(c,'תחום_דעת'))) return false;
+    if(FILTER.level.size    && !FILTER.level.has(val(c,'שכבת_חינוך'))) return false;
+    if(FILTER.lang.size     && !FILTER.lang.has(val(c,'שפה'))) return false;
+    if(FILTER.platform.size && !FILTER.platform.has(platformOf(c))) return false;
     if(FILTER.flags.has('no-desc')  && val(c,'תיאור'))    return false;
     if(FILTER.flags.has('no-grade') && val(c,'שכבת_גיל')) return false;
     if(FILTER.flags.has('no-dur')   && val(c,'משך'))      return false;
@@ -310,13 +371,14 @@
   function render(){
     var grid=document.getElementById('grid'); grid.innerHTML='';
     var list=DATA.filter(passes);
-    document.getElementById('countPill').textContent=list.length+' קורסים';
+    document.getElementById('countNum').textContent=list.length;
     document.getElementById('empty').style.display=list.length?'none':'block';
     list.forEach(function(c,i){
       var st=styleFor(val(c,'תחום_דעת'));
       var card=document.createElement('div'); card.className='card';
-      card.style.animationDelay=Math.min(i*22,400)+'ms';
+      card.style.animationDelay=Math.min(i*18,360)+'ms';
       var desc=val(c,'תיאור');
+      var pm=platMeta(platformOf(c));
       var tags='';
       if(val(c,'שכבת_חינוך')) tags+='<span class="tag lvl">'+esc(val(c,'שכבת_חינוך'))+'</span>';
       if(val(c,'שכבת_גיל'))   tags+='<span class="tag">כיתה '+esc(val(c,'שכבת_גיל'))+'</span>';
@@ -324,10 +386,10 @@
       if(val(c,'שפה'))        tags+='<span class="tag lang">'+esc(val(c,'שפה'))+'</span>';
       if(val(c,'משך'))        tags+='<span class="tag">⏱ '+esc(val(c,'משך'))+'</span>';
       card.innerHTML=
-        '<div class="topbar" style="background:'+st.c+'"></div>'+
+        (pm?'<span class="plat-badge '+pm.cls+'"><span class="dot '+pm.cls+'"></span>'+esc(pm.label)+'</span>':'')+
         '<div class="card-head"><div class="ico-badge" style="background:'+st.c+'">'+st.ico+'</div>'+
         '<h3>'+esc(val(c,'שם_קורס')||'(ללא שם)')+'</h3></div>'+
-        '<div class="desc'+(desc?'':' empty')+'">'+esc(desc||'אין תיאור — לחצו לעריכה')+'</div>'+
+        (desc?'<div class="desc">'+esc(desc)+'</div>':'')+
         '<div class="card-tags">'+tags+'</div>';
       card.onclick=function(){openPanel(c);};
       grid.appendChild(card);
@@ -342,8 +404,12 @@
     document.getElementById('p-ico').textContent=st.ico;
     document.getElementById('p-ico').style.background=st.c;
     document.getElementById('p-title').textContent=val(c,'שם_קורס')||'(ללא שם)';
-    var body=document.getElementById('panel-body'); body.innerHTML='';
+    var sub=document.getElementById('p-sub'); sub.innerHTML='';
+    var pm=platMeta(platformOf(c));
+    if(pm) sub.innerHTML+='<span class="plat-badge '+pm.cls+'" style="position:static"><span class="dot '+pm.cls+'"></span>'+esc(pm.label)+'</span>';
+    if(val(c,'תחום_דעת')) sub.innerHTML+='<span class="tag">'+esc(val(c,'תחום_דעת'))+'</span>';
 
+    var body=document.getElementById('panel-body'); body.innerHTML='';
     EDIT_FIELDS.forEach(function(k){
       if(HEADERS.indexOf(k)===-1) return;
       var f=document.createElement('div'); f.className='field'+(FULL_FIELDS[k]?' full':'');
@@ -352,8 +418,8 @@
       var control;
       if(TEXTAREA_FIELDS[k]){
         control='<textarea id="'+id+'">'+esc(val(c,k))+'</textarea>';
-      } else if(k==='שכבת_חינוך'){
-        control='<select id="'+id+'">'+optList(['','יסודי','על יסודי'],val(c,k))+'</select>';
+      } else if(SELECT_OPTS[k]){
+        control='<select id="'+id+'">'+optList(SELECT_OPTS[k],val(c,k))+'</select>';
       } else {
         control='<input type="text" id="'+id+'" value="'+esc(val(c,k))+'">';
       }
@@ -362,7 +428,6 @@
       body.appendChild(f);
     });
 
-    // קישור (קריאה בלבד + פתיחה)
     if(val(c,'קישור')){
       var lf=document.createElement('div'); lf.className='field full';
       lf.innerHTML='<label>קישור לקורס</label><div class="link-row">'+
@@ -388,12 +453,11 @@
   // ---- שמירה ----
   function saveCourse(){
     if(!CURRENT) return;
-    var updates={}; var changed=false;
+    var updates={}, changed=false;
     EDIT_FIELDS.forEach(function(k){
       if(HEADERS.indexOf(k)===-1) return;
       var el=document.getElementById('fld_'+k); if(!el) return;
-      var nv=el.value;
-      if(nv!==val(CURRENT,k)){updates[k]=nv;changed=true;}
+      if(el.value!==val(CURRENT,k)){updates[k]=el.value;changed=true;}
     });
     if(!changed){setMsg('אין שינויים לשמירה','err');return;}
     if(DEMO_MODE){
@@ -403,10 +467,8 @@
     var btn=document.getElementById('saveBtn'); btn.disabled=true; setMsg('שומר…','');
     google.script.run
       .withSuccessHandler(function(){
-        // עדכון מקומי
         Object.keys(updates).forEach(function(k){CURRENT[k]=updates[k];});
-        setMsg('✓ נשמר בגיליון','ok');
-        buildFilters(); render();
+        setMsg('✓ נשמר בגיליון','ok'); buildFilters(); render();
         setTimeout(function(){btn.disabled=false;},300);
       })
       .withFailureHandler(function(e){setMsg('✕ '+(e&&e.message?e.message:'שגיאה'),'err');btn.disabled=false;})
@@ -414,7 +476,6 @@
   }
   function setMsg(t,cls){var m=document.getElementById('saveMsg');m.textContent=t;m.className='save-msg '+(cls||'');}
 
-  // ---- עזר ----
   function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(m){
     return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];});}
 </script>
