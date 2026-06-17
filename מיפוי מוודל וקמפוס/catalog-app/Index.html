@@ -102,12 +102,13 @@
   .x-btn{border:none;background:#f3f0fb;width:38px;height:38px;border-radius:12px;cursor:pointer;
     font-size:18px;color:var(--ink-soft);flex-shrink:0;transition:.2s;}
   .x-btn:hover{background:#e9e3fb;}
-  .panel-body{padding:20px 24px 30px;}
-  .field{margin-bottom:16px;}
-  .field label{display:block;font-size:12.5px;font-weight:800;color:var(--ink-soft);margin-bottom:6px;}
-  .field input,.field textarea,.field select{width:100%;padding:11px 13px;border:1.5px solid var(--line);
-    border-radius:14px;font-size:14px;font-family:inherit;outline:none;transition:.2s;background:#fdfcff;color:var(--ink);}
-  .field textarea{resize:vertical;min-height:80px;line-height:1.55;}
+  .panel-body{padding:18px 22px 26px;display:grid;grid-template-columns:1fr 1fr;gap:12px 14px;align-content:start;}
+  .field{margin-bottom:0;min-width:0;}
+  .field.full{grid-column:1 / -1;}
+  .field label{display:block;font-size:11.5px;font-weight:800;color:var(--ink-soft);margin-bottom:4px;}
+  .field input,.field textarea,.field select{width:100%;padding:8px 11px;border:1.5px solid var(--line);
+    border-radius:12px;font-size:13.5px;font-family:inherit;outline:none;transition:.2s;background:#fdfcff;color:var(--ink);}
+  .field textarea{resize:vertical;min-height:64px;line-height:1.5;}
   .field input:focus,.field textarea:focus,.field select:focus{border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft);}
   .field .hint{font-size:11px;color:#b8b0cc;margin-top:4px;}
   .field.readonly input{background:#f6f5fa;color:#9a93ad;}
@@ -210,6 +211,7 @@
   var CURRENT = null;     // הקורס הפתוח בחלונית
   var EDIT_FIELDS = ['שם_קורס','תחום_דעת','שכבת_חינוך','שכבת_גיל','שפה','משך','תיאור','ראשי_פרקים','ספק','הערות'];
   var TEXTAREA_FIELDS = {'תיאור':1,'ראשי_פרקים':1,'הערות':1};
+  var FULL_FIELDS = {'שם_קורס':1,'תיאור':1,'ראשי_פרקים':1,'הערות':1};
 
   function val(c,k){ return (c && c[k]!=null) ? String(c[k]).trim() : ''; }
 
@@ -344,7 +346,7 @@
 
     EDIT_FIELDS.forEach(function(k){
       if(HEADERS.indexOf(k)===-1) return;
-      var f=document.createElement('div'); f.className='field';
+      var f=document.createElement('div'); f.className='field'+(FULL_FIELDS[k]?' full':'');
       var id='fld_'+k;
       var label='<label for="'+id+'">'+esc(fieldLabel(k))+'</label>';
       var control;
@@ -362,7 +364,7 @@
 
     // קישור (קריאה בלבד + פתיחה)
     if(val(c,'קישור')){
-      var lf=document.createElement('div'); lf.className='field';
+      var lf=document.createElement('div'); lf.className='field full';
       lf.innerHTML='<label>קישור לקורס</label><div class="link-row">'+
         '<input type="text" value="'+esc(val(c,'קישור'))+'" readonly>'+
         '<a href="'+esc(val(c,'קישור'))+'" target="_blank">פתיחה ↗</a></div>';
