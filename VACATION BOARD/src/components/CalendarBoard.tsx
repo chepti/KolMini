@@ -119,7 +119,16 @@ export function CalendarBoard({ onEdit, onNewAtDate }: CalendarBoardProps) {
                 <div
                   className="vb-board__bars"
                   style={{
-                    height: laneCount === 0 ? 6 : laneCount * 32 + 10,
+                    height:
+                      laneCount === 0
+                        ? 6
+                        : multiDay.some(
+                              (a) =>
+                                a.participantMode === 'people' &&
+                                a.personIds.length <= 2,
+                            )
+                          ? laneCount * 20 + 10
+                          : laneCount * 32 + 10,
                   }}
                 >
                   {weekDays.map((day, di) => {

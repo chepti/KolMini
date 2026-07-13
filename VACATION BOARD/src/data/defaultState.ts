@@ -5,7 +5,7 @@ export const defaultState: VacationState = {
   rangeEnd: '2026-08-31',
   hiddenBranches: [],
   hiddenPeople: [],
-  branches: [{ id: 'ben-artzi', name: 'משפחת בן ארצי' }],
+  branches: [{ id: 'ben-artzi', name: 'משפחת בן ארצי', color: '#45B7D1' }],
   people: [],
   activities: [],
 };

@@ -63,7 +63,7 @@ function ss_() {
 function ensureSheets_() {
   var ss = ss_();
   ensureSheet_(ss, SHEET_SETTINGS, ['מפתח', 'ערך']);
-  ensureSheet_(ss, SHEET_BRANCHES, ['id', 'name']);
+  ensureSheet_(ss, SHEET_BRANCHES, ['id', 'name', 'color']);
   ensureSheet_(ss, SHEET_PEOPLE, ['id', 'name', 'color', 'branchId', 'isChild']);
   ensureSheet_(ss, SHEET_ACTIVITIES, [
     'id',
@@ -134,7 +134,10 @@ function upsertSetting_(key, value) {
 function readState_() {
   var map = settingsMap_();
   var branches = readTable_(SHEET_BRANCHES, function (r) {
-    return { id: String(r[0]), name: String(r[1] || '') };
+    var b = { id: String(r[0]), name: String(r[1] || ''), color: '' };
+    if (r[2]) b.color = String(r[2]);
+    else delete b.color;
+    return b;
   });
   var people = readTable_(SHEET_PEOPLE, function (r) {
     return {
@@ -181,8 +184,8 @@ function writeState_(state) {
   upsertSetting_('hiddenBranches', JSON.stringify(state.hiddenBranches || []));
   upsertSetting_('hiddenPeople', JSON.stringify(state.hiddenPeople || []));
 
-  writeTable_(SHEET_BRANCHES, ['id', 'name'], (state.branches || []).map(function (b) {
-    return [b.id, b.name];
+  writeTable_(SHEET_BRANCHES, ['id', 'name', 'color'], (state.branches || []).map(function (b) {
+    return [b.id, b.name, b.color || ''];
   }));
 
   writeTable_(SHEET_PEOPLE, ['id', 'name', 'color', 'branchId', 'isChild'], (state.people || []).map(function (p) {

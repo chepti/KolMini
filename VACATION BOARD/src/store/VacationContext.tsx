@@ -18,8 +18,8 @@ import {
 } from '../api/sheets';
 import { defaultState } from '../data/defaultState';
 import type { Activity, Person, VacationState } from '../types';
-import { SUMMER_COLORS } from '../types';
 import { normalizeDateKey } from '../utils/calendar';
+import { familyShades, nextBranchColor, nextPersonColorInBranch } from '../utils/colors';
 
 const STORAGE_KEY = 'vacation-board-v2';
 
@@ -80,6 +80,7 @@ interface VacationStore extends VacationState {
   toggleBranchVisibility: (branchId: string) => void;
   togglePersonVisibility: (personId: string) => void;
   setPersonColor: (personId: string, color: string) => void;
+  setBranchColor: (branchId: string, color: string) => void;
   addPerson: (person: Omit<Person, 'id' | 'color'> & { color?: string }) => void;
   addBranch: (name: string) => void;
   addActivity: (activity: Omit<Activity, 'id'>) => void;
@@ -277,21 +278,45 @@ export function VacationProvider({ children }: { children: ReactNode }) {
     }));
   }, [patch]);
 
+  const setBranchColor = useCallback((branchId: string, color: string) => {
+    patch((prev) => {
+      const members = prev.people.filter((p) => p.branchId === branchId);
+      const shades = familyShades(color, Math.max(members.length, 1));
+      let i = 0;
+      return {
+        ...prev,
+        branches: prev.branches.map((b) =>
+          b.id === branchId ? { ...b, color } : b,
+        ),
+        people: prev.people.map((p) => {
+          if (p.branchId !== branchId) return p;
+          const next = shades[i % shades.length];
+          i += 1;
+          return { ...p, color: next };
+        }),
+      };
+    });
+  }, [patch]);
+
   const addPerson = useCallback(
     (person: Omit<Person, 'id' | 'color'> & { color?: string }) => {
-      patch((prev) => ({
-        ...prev,
-        people: [
-          ...prev.people,
-          {
-            ...person,
-            id: uuid(),
-            color:
-              person.color ??
-              SUMMER_COLORS[prev.people.length % SUMMER_COLORS.length],
-          },
-        ],
-      }));
+      patch((prev) => {
+        const siblings = prev.people.filter((p) => p.branchId === person.branchId);
+        const branch = prev.branches.find((b) => b.id === person.branchId);
+        return {
+          ...prev,
+          people: [
+            ...prev.people,
+            {
+              ...person,
+              id: uuid(),
+              color:
+                person.color ??
+                nextPersonColorInBranch(branch?.color, siblings.length),
+            },
+          ],
+        };
+      });
     },
     [patch],
   );
@@ -299,7 +324,14 @@ export function VacationProvider({ children }: { children: ReactNode }) {
   const addBranch = useCallback((name: string) => {
     patch((prev) => ({
       ...prev,
-      branches: [...prev.branches, { id: uuid(), name }],
+      branches: [
+        ...prev.branches,
+        {
+          id: uuid(),
+          name,
+          color: nextBranchColor(prev.branches.length),
+        },
+      ],
     }));
   }, [patch]);
 
@@ -343,6 +375,7 @@ export function VacationProvider({ children }: { children: ReactNode }) {
       toggleBranchVisibility,
       togglePersonVisibility,
       setPersonColor,
+      setBranchColor,
       addPerson,
       addBranch,
       addActivity,
@@ -361,6 +394,7 @@ export function VacationProvider({ children }: { children: ReactNode }) {
       toggleBranchVisibility,
       togglePersonVisibility,
       setPersonColor,
+      setBranchColor,
       addPerson,
       addBranch,
       addActivity,

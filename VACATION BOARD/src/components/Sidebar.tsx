@@ -2,6 +2,36 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useState, type FormEvent } from 'react';
 import { useVacation } from '../store/VacationContext';
 import { SUMMER_COLORS } from '../types';
+import { familyShades } from '../utils/colors';
+
+function ColorPalette({
+  current,
+  options,
+  onPick,
+}: {
+  current?: string;
+  options: readonly string[];
+  onPick: (c: string) => void;
+}) {
+  return (
+    <motion.div
+      className="vb-palette"
+      initial={{ opacity: 0, scale: 0.9, y: -4 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.9 }}
+    >
+      {options.map((c) => (
+        <button
+          key={c}
+          type="button"
+          className={`vb-palette__dot ${current?.toUpperCase() === c.toUpperCase() ? 'is-active' : ''}`}
+          style={{ background: c }}
+          onClick={() => onPick(c)}
+        />
+      ))}
+    </motion.div>
+  );
+}
 
 export function Sidebar() {
   const {
@@ -12,6 +42,7 @@ export function Sidebar() {
     toggleBranchVisibility,
     togglePersonVisibility,
     setPersonColor,
+    setBranchColor,
     addPerson,
     addBranch,
   } = useVacation();
@@ -42,7 +73,7 @@ export function Sidebar() {
     <aside className="vb-sidebar">
       <div className="vb-sidebar__head">
         <h2>המשפחה</h2>
-        <p>הצגה / הסתרה · בחירת צבע</p>
+        <p>צבע ענף → גוונים למשפחה · הצגה / הסתרה</p>
       </div>
 
       <div className="vb-sidebar__list">
@@ -51,11 +82,16 @@ export function Sidebar() {
           const adults = branchPeople.filter((p) => !p.isChild);
           const kids = branchPeople.filter((p) => p.isChild);
           const branchHidden = hiddenBranches.includes(branch.id);
+          const branchColor = branch.color ?? '#45B7D1';
+          const personPalette = branch.color
+            ? familyShades(branch.color, 8)
+            : [...SUMMER_COLORS];
 
           return (
             <motion.section
               key={branch.id}
               className={`vb-branch ${branchHidden ? 'is-hidden' : ''}`}
+              style={{ borderColor: `${branchColor}66` }}
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: bi * 0.06 }}
@@ -70,6 +106,31 @@ export function Sidebar() {
                 >
                   {branchHidden ? '🙈' : '👀'}
                 </button>
+
+                <div className="vb-person__color-wrap">
+                  <button
+                    type="button"
+                    className="vb-swatch vb-swatch--branch"
+                    style={{ background: branchColor }}
+                    onClick={() =>
+                      setColorOpen(colorOpen === `b-${branch.id}` ? null : `b-${branch.id}`)
+                    }
+                    title="צבע הענף (גוונים לבני המשפחה)"
+                  />
+                  <AnimatePresence>
+                    {colorOpen === `b-${branch.id}` && (
+                      <ColorPalette
+                        current={branchColor}
+                        options={SUMMER_COLORS}
+                        onPick={(c) => {
+                          setBranchColor(branch.id, c);
+                          setColorOpen(null);
+                        }}
+                      />
+                    )}
+                  </AnimatePresence>
+                </div>
+
                 <h3>{branch.name}</h3>
                 <button
                   type="button"
@@ -118,25 +179,14 @@ export function Sidebar() {
                             />
                             <AnimatePresence>
                               {colorOpen === person.id && (
-                                <motion.div
-                                  className="vb-palette"
-                                  initial={{ opacity: 0, scale: 0.9, y: -4 }}
-                                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                                  exit={{ opacity: 0, scale: 0.9 }}
-                                >
-                                  {SUMMER_COLORS.map((c) => (
-                                    <button
-                                      key={c}
-                                      type="button"
-                                      className={`vb-palette__dot ${person.color === c ? 'is-active' : ''}`}
-                                      style={{ background: c }}
-                                      onClick={() => {
-                                        setPersonColor(person.id, c);
-                                        setColorOpen(null);
-                                      }}
-                                    />
-                                  ))}
-                                </motion.div>
+                                <ColorPalette
+                                  current={person.color}
+                                  options={personPalette}
+                                  onPick={(c) => {
+                                    setPersonColor(person.id, c);
+                                    setColorOpen(null);
+                                  }}
+                                />
                               )}
                             </AnimatePresence>
                           </div>

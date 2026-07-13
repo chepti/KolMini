@@ -2,7 +2,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useState, type FormEvent } from 'react';
 import { useVacation } from '../store/VacationContext';
 import type { Activity, ParticipantMode, TimeOfDay } from '../types';
-import { TIME_LABELS } from '../types';
+import { SUMMER_COLORS, TIME_LABELS } from '../types';
 
 interface EventModalProps {
   open: boolean;
@@ -160,6 +160,29 @@ export function EventModal({ open, onClose, editActivity, defaultDate }: EventMo
                     {TIME_LABELS[t]}
                   </button>
                 ))}
+              </fieldset>
+
+              <fieldset className="vb-time-pills">
+                <legend>צבע האירוע</legend>
+                <div className="vb-event-colors">
+                  <button
+                    type="button"
+                    className={`vb-palette__dot vb-palette__dot--auto ${!form.color ? 'is-active' : ''}`}
+                    onClick={() => setForm({ ...form, color: '' })}
+                    title="אוטומטי לפי משתתפים"
+                  >
+                    א
+                  </button>
+                  {SUMMER_COLORS.map((c) => (
+                    <button
+                      key={c}
+                      type="button"
+                      className={`vb-palette__dot ${form.color === c ? 'is-active' : ''}`}
+                      style={{ background: c }}
+                      onClick={() => setForm({ ...form, color: c })}
+                    />
+                  ))}
+                </div>
               </fieldset>
 
               <label>

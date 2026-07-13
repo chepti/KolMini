@@ -5,6 +5,7 @@ export type ParticipantMode = 'all' | 'branch' | 'people';
 export interface Branch {
   id: string;
   name: string;
+  color?: string;
 }
 
 export interface Person {
