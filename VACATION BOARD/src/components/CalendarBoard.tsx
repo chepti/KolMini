@@ -19,21 +19,18 @@ interface CalendarBoardProps {
   onNewAtDate: (dateKey: string) => void;
 }
 
-const SLOT_ORDER: TimeOfDay[] = ['all-day', 'morning', 'noon', 'evening'];
-
-const SLOT_LABEL: Record<TimeOfDay, string> = {
-  'all-day': 'כל היום',
-  morning: 'בוקר',
-  noon: 'צהריים',
-  evening: 'ערב',
-};
+/** בוקר למעלה → כל היום באמצע → צהריים → ערב למטה */
+const SLOT_STACK: TimeOfDay[] = ['morning', 'all-day', 'noon', 'evening'];
 
 function slotOf(a: Activity): TimeOfDay {
   return a.timeOfDay === 'all-day' ? 'all-day' : a.timeOfDay;
 }
 
-/** מפריד פסים חופפים לתאריכים לשורות נפרדות בלי חפיפה */
-function assignLanes(bars: Activity[], weekStart: string, weekEnd: string): Map<string, number> {
+function assignLanes(
+  bars: Activity[],
+  weekStart: string,
+  weekEnd: string,
+): Map<string, number> {
   const sorted = [...bars].sort((a, b) => {
     const byStart = a.startDate.localeCompare(b.startDate);
     if (byStart !== 0) return byStart;
@@ -45,7 +42,6 @@ function assignLanes(bars: Activity[], weekStart: string, weekEnd: string): Map<
   for (const act of sorted) {
     const start = act.startDate < weekStart ? weekStart : act.startDate;
     const end = act.endDate > weekEnd ? weekEnd : act.endDate;
-    // end כולל — אם פס מסתיים באותו יום שפס אחר מתחיל, הם חופפים
     let lane = lanes.findIndex((l) => l.end < start);
     if (lane === -1) {
       lane = lanes.length;
@@ -100,26 +96,6 @@ export function CalendarBoard({ onEdit, onNewAtDate }: CalendarBoardProps) {
           const weekEnd = toDateKey(weekDays[weekDays.length - 1]);
           const labelIndex = viewMode === 'week' ? weekIndex : wi;
 
-          const multiBySlot = Object.fromEntries(
-            SLOT_ORDER.map((slot) => [
-              slot,
-              visible.filter(
-                (a) =>
-                  isMultiDay(a) &&
-                  slotOf(a) === slot &&
-                  a.endDate >= weekStart &&
-                  a.startDate <= weekEnd,
-              ),
-            ]),
-          ) as Record<TimeOfDay, Activity[]>;
-
-          const lanesBySlot = Object.fromEntries(
-            SLOT_ORDER.map((slot) => [
-              slot,
-              assignLanes(multiBySlot[slot], weekStart, weekEnd),
-            ]),
-          ) as Record<TimeOfDay, Map<string, number>>;
-
           return (
             <section key={weekStart} className="vb-week">
               <header className="vb-week__label">
@@ -159,40 +135,42 @@ export function CalendarBoard({ onEdit, onNewAtDate }: CalendarBoardProps) {
                   })}
                 </div>
 
-                {SLOT_ORDER.map((slot) => {
-                  const multi = multiBySlot[slot];
-                  const laneMap = lanesBySlot[slot];
-                  const laneCount =
-                    laneMap.size === 0 ? 0 : Math.max(...laneMap.values()) + 1;
-                  const barRowHeight =
-                    laneCount === 0 ? 0 : laneCount * 30 + 8;
-
-                  const hasSingleDay = weekDays.some((day) => {
-                    if (!day) return false;
-                    const key = toDateKey(day);
-                    return visible.some(
+                <div className="vb-week__body">
+                  {SLOT_STACK.map((slot) => {
+                    const multi = visible.filter(
                       (a) =>
-                        !isMultiDay(a) &&
+                        isMultiDay(a) &&
                         slotOf(a) === slot &&
-                        activitySpansDay(a, key),
+                        a.endDate >= weekStart &&
+                        a.startDate <= weekEnd,
                     );
-                  });
+                    const laneMap = assignLanes(multi, weekStart, weekEnd);
+                    const laneCount =
+                      laneMap.size === 0
+                        ? 0
+                        : Math.max(...laneMap.values()) + 1;
+                    const barRowHeight =
+                      laneCount === 0 ? 0 : laneCount * 30 + 4;
 
-                  if (laneCount === 0 && !hasSingleDay) return null;
+                    const dayPills = weekDays.map((day) => {
+                      if (!day) return [] as Activity[];
+                      const key = toDateKey(day);
+                      return visible.filter(
+                        (a) =>
+                          !isMultiDay(a) &&
+                          slotOf(a) === slot &&
+                          activitySpansDay(a, key),
+                      );
+                    });
+                    const hasSingleDay = dayPills.some((p) => p.length > 0);
 
-                  return (
-                    <div
-                      key={slot}
-                      className={`vb-band vb-band--${slot} ${spacious ? 'vb-band--spacious' : ''}`}
-                    >
-                      <div className="vb-band__label" title={SLOT_LABEL[slot]}>
-                        {SLOT_LABEL[slot]}
-                      </div>
+                    if (laneCount === 0 && !hasSingleDay) return null;
 
-                      <div className="vb-band__content">
+                    return (
+                      <div key={slot} className="vb-slot-pack">
                         {laneCount > 0 && (
                           <div
-                            className="vb-band__bars"
+                            className="vb-board__bars"
                             style={{ height: barRowHeight }}
                           >
                             {weekDays.map((day, di) => {
@@ -219,18 +197,13 @@ export function CalendarBoard({ onEdit, onNewAtDate }: CalendarBoardProps) {
                         )}
 
                         {hasSingleDay && (
-                          <div className="vb-band__days">
-                            {weekDays.map((day) => {
+                          <div className="vb-board__days">
+                            {weekDays.map((day, di) => {
                               if (!day) return null;
                               const key = toDateKey(day);
                               const isWeekend =
                                 day.getDay() === 5 || day.getDay() === 6;
-                              const pills = visible.filter(
-                                (a) =>
-                                  !isMultiDay(a) &&
-                                  slotOf(a) === slot &&
-                                  activitySpansDay(a, key),
-                              );
+                              const pills = dayPills[di];
 
                               return (
                                 <div
@@ -254,9 +227,9 @@ export function CalendarBoard({ onEdit, onNewAtDate }: CalendarBoardProps) {
                           </div>
                         )}
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
             </section>
           );
