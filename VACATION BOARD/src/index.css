@@ -646,10 +646,10 @@ button {
   height: 20px;
   border: none;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.95);
   color: #ff6b6b;
   font-weight: 700;
-  opacity: 0;
+  opacity: 0.35;
   transition: opacity 0.15s ease, transform 0.15s ease;
 }
 
@@ -665,8 +665,8 @@ button {
   position: relative;
   margin-bottom: 0.2rem;
   border-radius: 10px;
-  background: rgba(78, 205, 196, 0.08);
-  min-height: 8px;
+  background: transparent;
+  min-height: 4px;
 }
 
 .vb-multiday-bar {
@@ -733,68 +733,70 @@ button {
 }
 
 .vb-day-col {
-  min-height: 88px;
-  padding: 0.25rem;
+  min-height: 72px;
+  padding: 0.3rem 0.25rem;
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
-  border-inline-start: 1px dashed rgba(255, 142, 83, 0.25);
-  background: rgba(255, 255, 255, 0.35);
+  gap: 0.2rem;
+  border-inline-start: 1px dashed rgba(255, 142, 83, 0.2);
+  background: rgba(255, 255, 255, 0.4);
   border-radius: 0 0 10px 10px;
   min-width: 0;
+  cursor: default;
 }
 
 .vb-day-col.is-weekend {
-  background: rgba(255, 107, 107, 0.06);
+  background: rgba(255, 107, 107, 0.05);
 }
 
 .vb-day-col--spacious {
-  min-height: 280px;
+  min-height: 260px;
   padding: 0.45rem;
-  gap: 0.4rem;
 }
 
 .vb-day-slot--all {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
-  margin-bottom: 0.15rem;
+  gap: 0.2rem;
+  flex-shrink: 0;
 }
 
-.vb-day-timeline {
+.vb-day-body {
+  position: relative;
   flex: 1;
-  display: grid;
-  grid-template-rows: 1fr 1fr 1fr;
-  min-height: 72px;
-  gap: 2px;
+  min-height: 48px;
 }
 
-.vb-day-col--spacious .vb-day-timeline {
-  min-height: 220px;
-  gap: 6px;
+.vb-day-col--spacious .vb-day-body {
+  min-height: 200px;
 }
 
 .vb-day-slot {
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
-  min-height: 0;
-  border-radius: 8px;
+  width: 100%;
+  padding: 0 1px;
+  box-sizing: border-box;
 }
 
 .vb-day-slot--morning {
-  justify-content: flex-start;
-  background: linear-gradient(180deg, rgba(255, 217, 61, 0.12), transparent);
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
 }
 
 .vb-day-slot--noon {
-  justify-content: center;
-  background: linear-gradient(180deg, transparent, rgba(78, 205, 196, 0.1), transparent);
+  position: absolute;
+  inset-inline: 0;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .vb-day-slot--evening {
-  justify-content: flex-end;
-  background: linear-gradient(0deg, rgba(255, 107, 107, 0.12), transparent);
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
 }
 
 .vb-board--week .vb-week {
@@ -804,22 +806,6 @@ button {
 .vb-activity-pill--striped,
 .vb-multiday-bar--striped {
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
-}
-
-.vb-day-empty {
-  border: 1.5px dashed rgba(255, 142, 83, 0.3);
-  background: transparent;
-  border-radius: 10px;
-  color: #c07840;
-  padding: 0.45rem 0.25rem;
-  font-size: 0.7rem;
-  opacity: 0.5;
-  transition: opacity 0.15s ease, background 0.15s ease;
-}
-
-.vb-day-empty:hover {
-  opacity: 1;
-  background: rgba(255, 217, 61, 0.2);
 }
 
 .vb-activity-pill {

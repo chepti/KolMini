@@ -186,17 +186,9 @@ export function CalendarBoard({ onEdit, onNewAtDate }: CalendarBoardProps) {
                       <div
                         key={key}
                         className={`vb-day-col ${isWeekend ? 'is-weekend' : ''} ${spacious ? 'vb-day-col--spacious' : ''}`}
+                        onDoubleClick={() => onNewAtDate(key)}
+                        title="לחיצה כפולה להוספת אירוע"
                       >
-                        {dayPills.length === 0 && (
-                          <button
-                            type="button"
-                            className="vb-day-empty"
-                            onClick={() => onNewAtDate(key)}
-                          >
-                            הוסף תוכנית
-                          </button>
-                        )}
-
                         {bySlot['all-day'].length > 0 && (
                           <div className="vb-day-slot vb-day-slot--all">
                             {bySlot['all-day'].map((a) => (
@@ -211,40 +203,31 @@ export function CalendarBoard({ onEdit, onNewAtDate }: CalendarBoardProps) {
                           </div>
                         )}
 
-                        <div className="vb-day-timeline">
-                          <div className="vb-day-slot vb-day-slot--morning">
-                            {bySlot.morning.map((a) => (
-                              <ActivityPill
-                                key={a.id}
-                                activity={a}
-                                people={people}
-                                branches={branches}
-                                onClick={() => onEdit(a)}
-                              />
-                            ))}
-                          </div>
-                          <div className="vb-day-slot vb-day-slot--noon">
-                            {bySlot.noon.map((a) => (
-                              <ActivityPill
-                                key={a.id}
-                                activity={a}
-                                people={people}
-                                branches={branches}
-                                onClick={() => onEdit(a)}
-                              />
-                            ))}
-                          </div>
-                          <div className="vb-day-slot vb-day-slot--evening">
-                            {bySlot.evening.map((a) => (
-                              <ActivityPill
-                                key={a.id}
-                                activity={a}
-                                people={people}
-                                branches={branches}
-                                onClick={() => onEdit(a)}
-                              />
-                            ))}
-                          </div>
+                        <div className="vb-day-body">
+                          {(
+                            [
+                              ['morning', bySlot.morning],
+                              ['noon', bySlot.noon],
+                              ['evening', bySlot.evening],
+                            ] as const
+                          ).map(([slot, items]) =>
+                            items.length > 0 ? (
+                              <div
+                                key={slot}
+                                className={`vb-day-slot vb-day-slot--${slot}`}
+                              >
+                                {items.map((a) => (
+                                  <ActivityPill
+                                    key={a.id}
+                                    activity={a}
+                                    people={people}
+                                    branches={branches}
+                                    onClick={() => onEdit(a)}
+                                  />
+                                ))}
+                              </div>
+                            ) : null,
+                          )}
                         </div>
                       </div>
                     );
