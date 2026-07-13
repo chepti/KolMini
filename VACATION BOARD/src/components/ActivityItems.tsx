@@ -123,7 +123,16 @@ interface MultiDayBarProps {
   colWidthPct: number;
   onClick: () => void;
   lane: number;
+  slot: TimeOfDay;
 }
+
+/** מיקום אנכי לפי שעת היום בתוך אזור הימים */
+const SLOT_TOP: Record<TimeOfDay, string> = {
+  'all-day': '4%',
+  morning: '10%',
+  noon: '42%',
+  evening: '72%',
+};
 
 export function MultiDayBar({
   activity,
@@ -135,6 +144,7 @@ export function MultiDayBar({
   colWidthPct,
   onClick,
   lane,
+  slot,
 }: MultiDayBarProps) {
   const colors = activityStripeColors(activity, people, branches);
   const bg = stripeBackground(colors);
@@ -144,17 +154,26 @@ export function MultiDayBar({
   const shared = isSharedEvent(activity) && colors.length > 1;
   const widthPct = Math.max(span * colWidthPct - 1.2, colWidthPct - 1.2);
   const startPct = dayIndex * colWidthPct + 0.6;
-  const tip = [activity.title, activity.location, who].filter(Boolean).join(' · ');
+  const tip = [
+    activity.title,
+    TIME_LABELS[activity.timeOfDay],
+    activity.location,
+    who,
+  ]
+    .filter(Boolean)
+    .join(' · ');
+  const laneGap = slim ? 12 : 28;
+  const barHeight = slim ? 10 : 26;
 
   return (
     <motion.button
       type="button"
-      className={`vb-multiday-bar ${slim ? 'vb-multiday-bar--slim' : ''} ${shared ? 'vb-multiday-bar--striped' : ''}`}
+      className={`vb-multiday-bar vb-multiday-bar--${slot} ${slim ? 'vb-multiday-bar--slim' : ''} ${shared ? 'vb-multiday-bar--striped' : ''}`}
       style={{
         width: `${widthPct}%`,
         insetInlineStart: `${startPct}%`,
-        top: slim ? lane * 18 + 6 : lane * 32 + 8,
-        height: slim ? 10 : 26,
+        top: `calc(${SLOT_TOP[slot]} + ${lane * laneGap}px)`,
+        height: barHeight,
         background: bg,
         boxShadow: `0 4px 12px ${colors[0]}44`,
       }}
@@ -167,8 +186,9 @@ export function MultiDayBar({
         <>
           <span className="vb-multiday-bar__title">{activity.title}</span>
           <span className="vb-multiday-bar__meta">
-            {activity.location ? `${activity.location} · ` : ''}
-            {who}
+            {TIME_LABELS[activity.timeOfDay]}
+            {activity.location ? ` · ${activity.location}` : ''}
+            {who ? ` · ${who}` : ''}
           </span>
         </>
       )}

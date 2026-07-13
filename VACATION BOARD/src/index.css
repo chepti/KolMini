@@ -661,6 +661,34 @@ button {
   transform: scale(1.1);
 }
 
+.vb-board__days-wrap {
+  position: relative;
+}
+
+.vb-board__bars--overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  margin: 0;
+  min-height: 0;
+  background: transparent;
+}
+
+.vb-board__bars--overlay .vb-multiday-bar {
+  pointer-events: auto;
+}
+
+.vb-board__days-wrap.has-evening-bars .vb-day-col,
+.vb-board__days-wrap.has-noon-bars .vb-day-col {
+  min-height: 110px;
+}
+
+.vb-board__days-wrap.has-evening-bars .vb-day-col--spacious,
+.vb-board__days-wrap.has-noon-bars .vb-day-col--spacious {
+  min-height: 280px;
+}
+
 .vb-board__bars {
   position: relative;
   margin-bottom: 0.2rem;
