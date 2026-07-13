@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import type { Activity, Person, TimeOfDay } from '../types';
+import type { Activity, Person } from '../types';
 import { TIME_LABELS } from '../types';
 import {
   activityParticipantsLabel,
@@ -123,16 +123,7 @@ interface MultiDayBarProps {
   colWidthPct: number;
   onClick: () => void;
   lane: number;
-  slot: TimeOfDay;
 }
-
-/** מיקום אנכי לפי שעת היום בתוך אזור הימים */
-const SLOT_TOP: Record<TimeOfDay, string> = {
-  'all-day': '4%',
-  morning: '10%',
-  noon: '42%',
-  evening: '72%',
-};
 
 export function MultiDayBar({
   activity,
@@ -144,7 +135,6 @@ export function MultiDayBar({
   colWidthPct,
   onClick,
   lane,
-  slot,
 }: MultiDayBarProps) {
   const colors = activityStripeColors(activity, people, branches);
   const bg = stripeBackground(colors);
@@ -162,17 +152,17 @@ export function MultiDayBar({
   ]
     .filter(Boolean)
     .join(' · ');
-  const laneGap = slim ? 12 : 28;
-  const barHeight = slim ? 10 : 26;
+  const barHeight = slim ? 12 : 26;
+  const laneGap = slim ? 16 : 30;
 
   return (
     <motion.button
       type="button"
-      className={`vb-multiday-bar vb-multiday-bar--${slot} ${slim ? 'vb-multiday-bar--slim' : ''} ${shared ? 'vb-multiday-bar--striped' : ''}`}
+      className={`vb-multiday-bar ${slim ? 'vb-multiday-bar--slim' : ''} ${shared ? 'vb-multiday-bar--striped' : ''}`}
       style={{
         width: `${widthPct}%`,
         insetInlineStart: `${startPct}%`,
-        top: `calc(${SLOT_TOP[slot]} + ${lane * laneGap}px)`,
+        top: 4 + lane * laneGap,
         height: barHeight,
         background: bg,
         boxShadow: `0 4px 12px ${colors[0]}44`,
@@ -180,7 +170,7 @@ export function MultiDayBar({
       onClick={onClick}
       title={tip}
       initial={false}
-      whileHover={{ y: -2, filter: 'brightness(1.05)' }}
+      whileHover={{ y: -1, filter: 'brightness(1.05)' }}
     >
       {!slim && (
         <>
@@ -210,5 +200,3 @@ export function isBarStart(
     activity.endDate >= rangeStart
   );
 }
-
-export const TIME_SLOTS: TimeOfDay[] = ['all-day', 'morning', 'noon', 'evening'];

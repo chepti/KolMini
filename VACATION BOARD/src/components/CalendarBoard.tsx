@@ -19,14 +19,33 @@ interface CalendarBoardProps {
   onNewAtDate: (dateKey: string) => void;
 }
 
+const SLOT_ORDER: TimeOfDay[] = ['all-day', 'morning', 'noon', 'evening'];
+
+const SLOT_LABEL: Record<TimeOfDay, string> = {
+  'all-day': 'כל היום',
+  morning: 'בוקר',
+  noon: 'צהריים',
+  evening: 'ערב',
+};
+
+function slotOf(a: Activity): TimeOfDay {
+  return a.timeOfDay === 'all-day' ? 'all-day' : a.timeOfDay;
+}
+
+/** מפריד פסים חופפים לתאריכים לשורות נפרדות בלי חפיפה */
 function assignLanes(bars: Activity[], weekStart: string, weekEnd: string): Map<string, number> {
-  const sorted = [...bars].sort((a, b) => a.startDate.localeCompare(b.startDate));
+  const sorted = [...bars].sort((a, b) => {
+    const byStart = a.startDate.localeCompare(b.startDate);
+    if (byStart !== 0) return byStart;
+    return b.endDate.localeCompare(a.endDate);
+  });
   const lanes: { end: string }[] = [];
   const map = new Map<string, number>();
 
   for (const act of sorted) {
     const start = act.startDate < weekStart ? weekStart : act.startDate;
     const end = act.endDate > weekEnd ? weekEnd : act.endDate;
+    // end כולל — אם פס מסתיים באותו יום שפס אחר מתחיל, הם חופפים
     let lane = lanes.findIndex((l) => l.end < start);
     if (lane === -1) {
       lane = lanes.length;
@@ -37,28 +56,6 @@ function assignLanes(bars: Activity[], weekStart: string, weekEnd: string): Map<
     map.set(act.id, lane);
   }
   return map;
-}
-
-function slotOf(a: Activity): TimeOfDay {
-  return a.timeOfDay === 'all-day' ? 'all-day' : a.timeOfDay;
-}
-
-const SLOT_ORDER: TimeOfDay[] = ['all-day', 'morning', 'noon', 'evening'];
-
-function assignLanesBySlot(
-  bars: Activity[],
-  weekStart: string,
-  weekEnd: string,
-): Map<string, { lane: number; slot: TimeOfDay }> {
-  const out = new Map<string, { lane: number; slot: TimeOfDay }>();
-  for (const slot of SLOT_ORDER) {
-    const subset = bars.filter((a) => slotOf(a) === slot);
-    const lanes = assignLanes(subset, weekStart, weekEnd);
-    for (const [id, lane] of lanes) {
-      out.set(id, { lane, slot });
-    }
-  }
-  return out;
 }
 
 export function CalendarBoard({ onEdit, onNewAtDate }: CalendarBoardProps) {
@@ -101,14 +98,27 @@ export function CalendarBoard({ onEdit, onNewAtDate }: CalendarBoardProps) {
         {weeks.map((weekDays, wi) => {
           const weekStart = toDateKey(weekDays[0]);
           const weekEnd = toDateKey(weekDays[weekDays.length - 1]);
-          const multiDay = visible.filter(
-            (a) =>
-              isMultiDay(a) && a.endDate >= weekStart && a.startDate <= weekEnd,
-          );
-          const laneBySlot = assignLanesBySlot(multiDay, weekStart, weekEnd);
-          const hasEveningBars = multiDay.some((a) => slotOf(a) === 'evening');
-          const hasNoonBars = multiDay.some((a) => slotOf(a) === 'noon');
           const labelIndex = viewMode === 'week' ? weekIndex : wi;
+
+          const multiBySlot = Object.fromEntries(
+            SLOT_ORDER.map((slot) => [
+              slot,
+              visible.filter(
+                (a) =>
+                  isMultiDay(a) &&
+                  slotOf(a) === slot &&
+                  a.endDate >= weekStart &&
+                  a.startDate <= weekEnd,
+              ),
+            ]),
+          ) as Record<TimeOfDay, Activity[]>;
+
+          const lanesBySlot = Object.fromEntries(
+            SLOT_ORDER.map((slot) => [
+              slot,
+              assignLanes(multiBySlot[slot], weekStart, weekEnd),
+            ]),
+          ) as Record<TimeOfDay, Map<string, number>>;
 
           return (
             <section key={weekStart} className="vb-week">
@@ -149,85 +159,87 @@ export function CalendarBoard({ onEdit, onNewAtDate }: CalendarBoardProps) {
                   })}
                 </div>
 
-                <div
-                  className={`vb-board__days-wrap ${hasEveningBars ? 'has-evening-bars' : ''} ${hasNoonBars ? 'has-noon-bars' : ''}`}
-                >
-                  <div className="vb-board__bars vb-board__bars--overlay" aria-hidden={false}>
-                    {weekDays.map((day, di) => {
-                      const key = toDateKey(day);
-                      return multiDay
-                        .filter((a) => isBarStart(a, key, weekStart))
-                        .map((a) => {
-                          const meta = laneBySlot.get(a.id);
-                          return (
-                            <MultiDayBar
-                              key={`${a.id}-${weekStart}`}
-                              activity={a}
-                              people={people}
-                              branches={branches}
-                              dayIndex={di}
-                              rangeStart={weekStart}
-                              rangeEnd={weekEnd}
-                              colWidthPct={100 / weekDays.length}
-                              lane={meta?.lane ?? 0}
-                              slot={meta?.slot ?? slotOf(a)}
-                              onClick={() => onEdit(a)}
-                            />
-                          );
-                        });
-                    })}
-                  </div>
+                {SLOT_ORDER.map((slot) => {
+                  const multi = multiBySlot[slot];
+                  const laneMap = lanesBySlot[slot];
+                  const laneCount =
+                    laneMap.size === 0 ? 0 : Math.max(...laneMap.values()) + 1;
+                  const barRowHeight =
+                    laneCount === 0 ? 0 : laneCount * 30 + 8;
 
-                  <div className="vb-board__days">
-                    {weekDays.map((day) => {
-                      if (!day) return null;
-                      const key = toDateKey(day);
-                      const dayPills = visible.filter(
-                        (a) => !isMultiDay(a) && activitySpansDay(a, key),
-                      );
-                      const isWeekend = day.getDay() === 5 || day.getDay() === 6;
-                      const bySlot = {
-                        'all-day': dayPills.filter((a) => slotOf(a) === 'all-day'),
-                        morning: dayPills.filter((a) => slotOf(a) === 'morning'),
-                        noon: dayPills.filter((a) => slotOf(a) === 'noon'),
-                        evening: dayPills.filter((a) => slotOf(a) === 'evening'),
-                      };
+                  const hasSingleDay = weekDays.some((day) => {
+                    if (!day) return false;
+                    const key = toDateKey(day);
+                    return visible.some(
+                      (a) =>
+                        !isMultiDay(a) &&
+                        slotOf(a) === slot &&
+                        activitySpansDay(a, key),
+                    );
+                  });
 
-                      return (
-                        <div
-                          key={key}
-                          className={`vb-day-col ${isWeekend ? 'is-weekend' : ''} ${spacious ? 'vb-day-col--spacious' : ''}`}
-                          onDoubleClick={() => onNewAtDate(key)}
-                          title="לחיצה כפולה להוספת אירוע"
-                        >
-                          {bySlot['all-day'].length > 0 && (
-                            <div className="vb-day-slot vb-day-slot--all">
-                              {bySlot['all-day'].map((a) => (
-                                <ActivityPill
-                                  key={a.id}
-                                  activity={a}
-                                  people={people}
-                                  branches={branches}
-                                  onClick={() => onEdit(a)}
-                                />
-                              ))}
-                            </div>
-                          )}
+                  if (laneCount === 0 && !hasSingleDay) return null;
 
-                          <div className="vb-day-body">
-                            {(
-                              [
-                                ['morning', bySlot.morning],
-                                ['noon', bySlot.noon],
-                                ['evening', bySlot.evening],
-                              ] as const
-                            ).map(([slot, items]) =>
-                              items.length > 0 ? (
+                  return (
+                    <div
+                      key={slot}
+                      className={`vb-band vb-band--${slot} ${spacious ? 'vb-band--spacious' : ''}`}
+                    >
+                      <div className="vb-band__label" title={SLOT_LABEL[slot]}>
+                        {SLOT_LABEL[slot]}
+                      </div>
+
+                      <div className="vb-band__content">
+                        {laneCount > 0 && (
+                          <div
+                            className="vb-band__bars"
+                            style={{ height: barRowHeight }}
+                          >
+                            {weekDays.map((day, di) => {
+                              if (!day) return null;
+                              const key = toDateKey(day);
+                              return multi
+                                .filter((a) => isBarStart(a, key, weekStart))
+                                .map((a) => (
+                                  <MultiDayBar
+                                    key={`${a.id}-${weekStart}`}
+                                    activity={a}
+                                    people={people}
+                                    branches={branches}
+                                    dayIndex={di}
+                                    rangeStart={weekStart}
+                                    rangeEnd={weekEnd}
+                                    colWidthPct={100 / weekDays.length}
+                                    lane={laneMap.get(a.id) ?? 0}
+                                    onClick={() => onEdit(a)}
+                                  />
+                                ));
+                            })}
+                          </div>
+                        )}
+
+                        {hasSingleDay && (
+                          <div className="vb-band__days">
+                            {weekDays.map((day) => {
+                              if (!day) return null;
+                              const key = toDateKey(day);
+                              const isWeekend =
+                                day.getDay() === 5 || day.getDay() === 6;
+                              const pills = visible.filter(
+                                (a) =>
+                                  !isMultiDay(a) &&
+                                  slotOf(a) === slot &&
+                                  activitySpansDay(a, key),
+                              );
+
+                              return (
                                 <div
-                                  key={slot}
-                                  className={`vb-day-slot vb-day-slot--${slot}`}
+                                  key={key}
+                                  className={`vb-day-col ${isWeekend ? 'is-weekend' : ''}`}
+                                  onDoubleClick={() => onNewAtDate(key)}
+                                  title="לחיצה כפולה להוספת אירוע"
                                 >
-                                  {items.map((a) => (
+                                  {pills.map((a) => (
                                     <ActivityPill
                                       key={a.id}
                                       activity={a}
@@ -237,14 +249,14 @@ export function CalendarBoard({ onEdit, onNewAtDate }: CalendarBoardProps) {
                                     />
                                   ))}
                                 </div>
-                              ) : null,
-                            )}
+                              );
+                            })}
                           </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </section>
           );
