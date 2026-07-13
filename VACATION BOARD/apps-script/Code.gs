@@ -162,7 +162,7 @@ function readState_() {
 
   return {
     rangeStart: map.rangeStart || '2026-07-12',
-    rangeEnd: map.rangeEnd || '2026-08-15',
+    rangeEnd: map.rangeEnd || '2026-08-31',
     hiddenBranches: parseList_(map.hiddenBranches),
     hiddenPeople: parseList_(map.hiddenPeople),
     branches: branches,

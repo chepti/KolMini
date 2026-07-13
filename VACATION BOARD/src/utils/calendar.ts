@@ -92,13 +92,13 @@ export function getDaysInRange(start: string, end: string): Date[] {
 /** שבועות מיום ראשון עד שבת */
 export function chunkIntoWeeks(start: string, end: string): Date[][] {
   const safeStart = normalizeDateKey(start, '2026-07-12');
-  const safeEnd = normalizeDateKey(end, '2026-08-15');
+  const safeEnd = normalizeDateKey(end, '2026-08-31');
   let rangeStart = parseISO(safeStart);
   let rangeEnd = parseISO(safeEnd);
 
   if (Number.isNaN(rangeStart.getTime()) || Number.isNaN(rangeEnd.getTime())) {
     rangeStart = parseISO('2026-07-12');
-    rangeEnd = parseISO('2026-08-15');
+    rangeEnd = parseISO('2026-08-31');
   }
   if (rangeEnd < rangeStart) {
     const tmp = rangeStart;

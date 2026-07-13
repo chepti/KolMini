@@ -38,7 +38,11 @@ function mergeState(remote: Partial<VacationState>): VacationState {
     remote.rangeStart,
     defaultState.rangeStart,
   );
-  const rangeEnd = normalizeDateKey(remote.rangeEnd, defaultState.rangeEnd);
+  let rangeEnd = normalizeDateKey(remote.rangeEnd, defaultState.rangeEnd);
+  // לוח הקיץ — עד סוף אוגוסט
+  if (rangeEnd < defaultState.rangeEnd) {
+    rangeEnd = defaultState.rangeEnd;
+  }
 
   return {
     ...defaultState,
