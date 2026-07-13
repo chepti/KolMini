@@ -21,7 +21,6 @@ export function ActivityPill({
   people,
   branches,
   onClick,
-  index = 0,
 }: ActivityPillProps) {
   const color = activityColor(activity, people);
   const who = activityParticipantsLabel(activity, people, branches);
@@ -35,9 +34,7 @@ export function ActivityPill({
         boxShadow: `0 4px 14px ${color}55`,
       }}
       onClick={onClick}
-      initial={{ opacity: 0, y: 10, scale: 0.9 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ delay: index * 0.04, type: 'spring', stiffness: 320, damping: 20 }}
+      initial={false}
       whileHover={{ scale: 1.04, y: -2 }}
       whileTap={{ scale: 0.97 }}
     >
@@ -93,9 +90,7 @@ export function MultiDayBar({
         boxShadow: `0 6px 18px ${color}44`,
       }}
       onClick={onClick}
-      initial={{ opacity: 0, scaleX: 0.4 }}
-      animate={{ opacity: 1, scaleX: 1 }}
-      transition={{ type: 'spring', stiffness: 200, damping: 22 }}
+      initial={false}
       whileHover={{ y: -2, filter: 'brightness(1.05)' }}
     >
       <span className="vb-multiday-bar__title">{activity.title}</span>

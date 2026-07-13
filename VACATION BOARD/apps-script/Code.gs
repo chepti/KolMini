@@ -104,9 +104,17 @@ function settingsMap_() {
   var values = sh.getDataRange().getValues();
   var map = {};
   for (var i = 1; i < values.length; i++) {
-    if (values[i][0]) map[String(values[i][0])] = String(values[i][1] == null ? '' : values[i][1]);
+    if (values[i][0]) map[String(values[i][0])] = cellToText_(values[i][1]);
   }
   return map;
+}
+
+function cellToText_(value) {
+  if (value == null || value === '') return '';
+  if (Object.prototype.toString.call(value) === '[object Date]' && !isNaN(value.getTime())) {
+    return Utilities.formatDate(value, Session.getScriptTimeZone(), 'yyyy-MM-dd');
+  }
+  return String(value);
 }
 
 function upsertSetting_(key, value) {
@@ -114,11 +122,13 @@ function upsertSetting_(key, value) {
   var values = sh.getDataRange().getValues();
   for (var i = 1; i < values.length; i++) {
     if (String(values[i][0]) === key) {
-      sh.getRange(i + 1, 2).setValue(value);
+      // כטקסט — כדי שגוגל לא יהפוך תאריכים ל-Date
+      sh.getRange(i + 1, 2).setNumberFormat('@').setValue(String(value));
       return;
     }
   }
-  sh.appendRow([key, value]);
+  sh.appendRow([key, String(value)]);
+  sh.getRange(sh.getLastRow(), 2).setNumberFormat('@');
 }
 
 function readState_() {
@@ -139,8 +149,8 @@ function readState_() {
     return {
       id: String(r[0]),
       title: String(r[1] || ''),
-      startDate: String(r[2] || ''),
-      endDate: String(r[3] || ''),
+      startDate: cellToText_(r[2]),
+      endDate: cellToText_(r[3]),
       timeOfDay: String(r[4] || 'all-day'),
       location: r[5] ? String(r[5]) : '',
       participantMode: String(r[6] || 'people'),
@@ -227,7 +237,9 @@ function writeTable_(name, headers, rows) {
   // getRange(row, column, numRows, numColumns)
   sh.getRange(1, 1, 1, headers.length).setValues([headers]);
   if (rows.length) {
-    sh.getRange(2, 1, rows.length, headers.length).setValues(rows);
+    var range = sh.getRange(2, 1, rows.length, headers.length);
+    range.setNumberFormat('@');
+    range.setValues(rows);
   }
   sh.setFrozenRows(1);
 }

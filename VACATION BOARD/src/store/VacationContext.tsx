@@ -19,8 +19,55 @@ import {
 import { defaultState } from '../data/defaultState';
 import type { Activity, Person, VacationState } from '../types';
 import { SUMMER_COLORS } from '../types';
+import { normalizeDateKey } from '../utils/calendar';
 
 const STORAGE_KEY = 'vacation-board-v2';
+
+function loadLocal(): VacationState {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return defaultState;
+    return mergeState(JSON.parse(raw) as VacationState);
+  } catch {
+    return defaultState;
+  }
+}
+
+function mergeState(remote: Partial<VacationState>): VacationState {
+  const rangeStart = normalizeDateKey(
+    remote.rangeStart,
+    defaultState.rangeStart,
+  );
+  const rangeEnd = normalizeDateKey(remote.rangeEnd, defaultState.rangeEnd);
+
+  return {
+    ...defaultState,
+    ...remote,
+    rangeStart,
+    rangeEnd,
+    branches: remote.branches ?? [],
+    people: remote.people ?? [],
+    activities: (remote.activities ?? []).map((a) => ({
+      ...a,
+      startDate: normalizeDateKey(a.startDate, rangeStart),
+      endDate: normalizeDateKey(a.endDate, a.startDate || rangeStart),
+    })),
+    hiddenBranches: remote.hiddenBranches ?? [],
+    hiddenPeople: remote.hiddenPeople ?? [],
+  };
+}
+
+function stateFingerprint(s: VacationState): string {
+  return JSON.stringify({
+    rangeStart: s.rangeStart,
+    rangeEnd: s.rangeEnd,
+    branches: s.branches,
+    people: s.people,
+    activities: s.activities,
+    hiddenBranches: s.hiddenBranches,
+    hiddenPeople: s.hiddenPeople,
+  });
+}
 
 interface VacationStore extends VacationState {
   syncStatus: SyncStatus;
@@ -42,28 +89,6 @@ interface VacationStore extends VacationState {
 
 const VacationContext = createContext<VacationStore | null>(null);
 
-function loadLocal(): VacationState {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return defaultState;
-    return { ...defaultState, ...JSON.parse(raw) } as VacationState;
-  } catch {
-    return defaultState;
-  }
-}
-
-function mergeState(remote: VacationState): VacationState {
-  return {
-    ...defaultState,
-    ...remote,
-    branches: remote.branches ?? [],
-    people: remote.people ?? [],
-    activities: remote.activities ?? [],
-    hiddenBranches: remote.hiddenBranches ?? [],
-    hiddenPeople: remote.hiddenPeople ?? [],
-  };
-}
-
 export function VacationProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<VacationState>(loadLocal);
   const [sheetsUrl, setSheetsUrlState] = useState(getSheetsUrl);
@@ -75,6 +100,7 @@ export function VacationProvider({ children }: { children: ReactNode }) {
   const skipNextSave = useRef(false);
   const readyRef = useRef(!getSheetsUrl());
   const updatedAtRef = useRef('');
+  const fingerprintRef = useRef(stateFingerprint(loadLocal()));
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // גיבוי מקומי תמיד
@@ -85,13 +111,14 @@ export function VacationProvider({ children }: { children: ReactNode }) {
   const pushToSheets = useCallback(
     async (next: VacationState, url = sheetsUrl) => {
       if (!url) return;
-      setSyncStatus('saving');
-      setSyncError('');
+      // בלי להבהב "שומר" בכל שינוי קטן — רק בשגיאה/הצלחה שקטה
       try {
         const { updatedAt } = await saveBoardState(url, next);
         updatedAtRef.current = updatedAt;
+        fingerprintRef.current = stateFingerprint(next);
         dirtyRef.current = false;
         setSyncStatus('synced');
+        setSyncError('');
       } catch (err) {
         setSyncStatus('error');
         setSyncError(err instanceof Error ? err.message : 'שמירה נכשלה');
@@ -104,22 +131,30 @@ export function VacationProvider({ children }: { children: ReactNode }) {
     (next: VacationState) => {
       if (!sheetsUrl || !readyRef.current) return;
       dirtyRef.current = true;
+      fingerprintRef.current = stateFingerprint(next);
       if (saveTimer.current) clearTimeout(saveTimer.current);
       saveTimer.current = setTimeout(() => {
         void pushToSheets(next);
-      }, 900);
+      }, 1200);
     },
     [sheetsUrl, pushToSheets],
   );
 
   const applyRemote = useCallback((remote: VacationState, updatedAt: string) => {
-    skipNextSave.current = true;
+    const merged = mergeState(remote);
+    const fp = stateFingerprint(merged);
     updatedAtRef.current = updatedAt;
     dirtyRef.current = false;
     readyRef.current = true;
-    setState(mergeState(remote));
     setSyncStatus('synced');
     setSyncError('');
+
+    // לא מעדכנים state אם אין שינוי אמיתי — מונע הבהוב
+    if (fp === fingerprintRef.current) return;
+
+    fingerprintRef.current = fp;
+    skipNextSave.current = true;
+    setState(merged);
   }, []);
 
   const refreshFromSheets = useCallback(async () => {
@@ -129,7 +164,6 @@ export function VacationProvider({ children }: { children: ReactNode }) {
       setSyncStatus('local');
       return;
     }
-    setSyncStatus('loading');
     try {
       const { state: remote, updatedAt } = await fetchBoardState(url);
       applyRemote(remote, updatedAt);
@@ -160,6 +194,7 @@ export function VacationProvider({ children }: { children: ReactNode }) {
           await pushToSheets(local, url);
           skipNextSave.current = true;
           readyRef.current = true;
+          fingerprintRef.current = stateFingerprint(local);
           setState(local);
           setSyncStatus('synced');
           setSyncError('');
@@ -174,7 +209,7 @@ export function VacationProvider({ children }: { children: ReactNode }) {
     [applyRemote, pushToSheets],
   );
 
-  // טעינה ראשונית + polling לשיתוף משפחתי
+  // טעינה ראשונית + polling עדין
   useEffect(() => {
     if (!sheetsUrl) return;
     void refreshFromSheets();
@@ -184,14 +219,18 @@ export function VacationProvider({ children }: { children: ReactNode }) {
       void (async () => {
         try {
           const { state: remote, updatedAt } = await fetchBoardState(sheetsUrl);
-          if (updatedAt && updatedAt !== updatedAtRef.current && !dirtyRef.current) {
+          if (
+            updatedAt &&
+            updatedAt !== updatedAtRef.current &&
+            !dirtyRef.current
+          ) {
             applyRemote(remote, updatedAt);
           }
         } catch {
-          /* התעלמות בשקט בזמן polling */
+          /* שקט */
         }
       })();
-    }, 20000);
+    }, 45000);
 
     return () => window.clearInterval(id);
   }, [sheetsUrl, refreshFromSheets, applyRemote]);

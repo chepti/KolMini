@@ -87,6 +87,7 @@ export function CalendarBoard({ onEdit, onNewAtDate }: CalendarBoardProps) {
               <div className="vb-week__grid">
                 <div className="vb-board__header-row">
                   {weekDays.map((day) => {
+                    if (!day) return null;
                     const key = toDateKey(day);
                     const heb = hebrewDayLabel(day);
                     const isWeekend = day.getDay() === 5 || day.getDay() === 6;
@@ -144,6 +145,7 @@ export function CalendarBoard({ onEdit, onNewAtDate }: CalendarBoardProps) {
 
                 <div className="vb-board__days">
                   {weekDays.map((day) => {
+                    if (!day) return null;
                     const key = toDateKey(day);
                     const dayPills = visible.filter(
                       (a) => !isMultiDay(a) && activitySpansDay(a, key),

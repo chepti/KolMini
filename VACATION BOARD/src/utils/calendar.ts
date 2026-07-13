@@ -65,6 +65,23 @@ export function toDateKey(date: Date): string {
   return format(date, 'yyyy-MM-dd');
 }
 
+/** מנרמל מחרוזת תאריך ל-yyyy-MM-dd, או מחזיר fallback */
+export function normalizeDateKey(
+  value: unknown,
+  fallback: string,
+): string {
+  if (value == null || value === '') return fallback;
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    return toDateKey(value);
+  }
+  const raw = String(value).trim();
+  if (/^\d{4}-\d{2}-\d{2}/.test(raw)) return raw.slice(0, 10);
+
+  const parsed = new Date(raw);
+  if (!Number.isNaN(parsed.getTime())) return toDateKey(parsed);
+  return fallback;
+}
+
 export function getDaysInRange(start: string, end: string): Date[] {
   return eachDayOfInterval({
     start: parseISO(start),
@@ -74,15 +91,37 @@ export function getDaysInRange(start: string, end: string): Date[] {
 
 /** שבועות מיום ראשון עד שבת */
 export function chunkIntoWeeks(start: string, end: string): Date[][] {
-  const rangeStart = parseISO(start);
-  const rangeEnd = parseISO(end);
+  const safeStart = normalizeDateKey(start, '2026-07-12');
+  const safeEnd = normalizeDateKey(end, '2026-08-15');
+  let rangeStart = parseISO(safeStart);
+  let rangeEnd = parseISO(safeEnd);
+
+  if (Number.isNaN(rangeStart.getTime()) || Number.isNaN(rangeEnd.getTime())) {
+    rangeStart = parseISO('2026-07-12');
+    rangeEnd = parseISO('2026-08-15');
+  }
+  if (rangeEnd < rangeStart) {
+    const tmp = rangeStart;
+    rangeStart = rangeEnd;
+    rangeEnd = tmp;
+  }
+
   const gridStart = startOfWeek(rangeStart, { weekStartsOn: 0 });
   const allDays = eachDayOfInterval({
     start: gridStart,
     end: rangeEnd,
   });
 
+  if (allDays.length === 0) {
+    return [eachDayOfInterval({
+      start: gridStart,
+      end: addDays(gridStart, 6),
+    })];
+  }
+
   const last = allDays[allDays.length - 1];
+  if (!last) return [];
+
   const daysToSat = (6 - last.getDay() + 7) % 7;
   if (daysToSat > 0) {
     for (let i = 1; i <= daysToSat; i++) {
@@ -92,7 +131,8 @@ export function chunkIntoWeeks(start: string, end: string): Date[][] {
 
   const weeks: Date[][] = [];
   for (let i = 0; i < allDays.length; i += 7) {
-    weeks.push(allDays.slice(i, i + 7));
+    const week = allDays.slice(i, i + 7).filter(Boolean);
+    if (week.length === 7) weeks.push(week);
   }
   return weeks;
 }
