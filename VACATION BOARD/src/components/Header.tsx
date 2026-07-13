@@ -49,7 +49,7 @@ export function Header({ onNewEvent }: HeaderProps) {
         >
           + אירוע חדש
         </motion.button>
-        <button type="button" className="vb-reset" onClick={resetDemo} title="איפוס לדמו">
+        <button type="button" className="vb-reset" onClick={resetDemo} title="איפוס הלוח">
           איפוס
         </button>
       </div>

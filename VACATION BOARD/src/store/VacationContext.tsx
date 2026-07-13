@@ -12,7 +12,7 @@ import { defaultState } from '../data/defaultState';
 import type { Activity, Person, VacationState } from '../types';
 import { SUMMER_COLORS } from '../types';
 
-const STORAGE_KEY = 'vacation-board-v1';
+const STORAGE_KEY = 'vacation-board-v2';
 
 interface VacationStore extends VacationState {
   toggleBranchVisibility: (branchId: string) => void;

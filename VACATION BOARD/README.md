@@ -9,6 +9,11 @@ npm install
 npm run dev
 ```
 
+## GitHub Pages
+
+האתר מתפרסם אוטומטית ל־https://chepti.github.io/KolMini/  
+(Settings → Pages → Source: GitHub Actions)
+
 ## יכולות
 
 - תאריכים עבריים + לועזיים על הלוח

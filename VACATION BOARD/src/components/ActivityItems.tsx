@@ -58,7 +58,8 @@ interface MultiDayBarProps {
   dayIndex: number;
   rangeStart: string;
   rangeEnd: string;
-  colWidth: number;
+  /** רוחב עמודה באחוזים מתוך השבוע (למשל 100/7) */
+  colWidthPct: number;
   onClick: () => void;
   lane: number;
 }
@@ -70,22 +71,23 @@ export function MultiDayBar({
   dayIndex,
   rangeStart,
   rangeEnd,
-  colWidth,
+  colWidthPct,
   onClick,
   lane,
 }: MultiDayBarProps) {
   const color = activityColor(activity, people);
   const span = getVisibleSpan(activity, rangeStart, rangeEnd);
   const who = activityParticipantsLabel(activity, people, branches);
-  const width = Math.max(span * colWidth - 10, colWidth - 10);
+  const widthPct = Math.max(span * colWidthPct - 1.2, colWidthPct - 1.2);
+  const startPct = dayIndex * colWidthPct + 0.6;
 
   return (
     <motion.button
       type="button"
       className="vb-multiday-bar"
       style={{
-        width,
-        insetInlineStart: dayIndex * colWidth + 5,
+        width: `${widthPct}%`,
+        insetInlineStart: `${startPct}%`,
         top: lane * 36 + 8,
         background: `linear-gradient(90deg, ${color}, ${color}dd)`,
         boxShadow: `0 6px 18px ${color}44`,

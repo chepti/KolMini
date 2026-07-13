@@ -7,6 +7,7 @@ import {
   max as maxDate,
   min as minDate,
   parseISO,
+  startOfWeek,
 } from 'date-fns';
 import { he } from 'date-fns/locale';
 import type { Activity, Person, TimeOfDay } from '../types';
@@ -69,6 +70,39 @@ export function getDaysInRange(start: string, end: string): Date[] {
     start: parseISO(start),
     end: parseISO(end),
   });
+}
+
+/** שבועות מיום ראשון עד שבת */
+export function chunkIntoWeeks(start: string, end: string): Date[][] {
+  const rangeStart = parseISO(start);
+  const rangeEnd = parseISO(end);
+  const gridStart = startOfWeek(rangeStart, { weekStartsOn: 0 });
+  const allDays = eachDayOfInterval({
+    start: gridStart,
+    end: rangeEnd,
+  });
+
+  const last = allDays[allDays.length - 1];
+  const daysToSat = (6 - last.getDay() + 7) % 7;
+  if (daysToSat > 0) {
+    for (let i = 1; i <= daysToSat; i++) {
+      allDays.push(addDays(last, i));
+    }
+  }
+
+  const weeks: Date[][] = [];
+  for (let i = 0; i < allDays.length; i += 7) {
+    weeks.push(allDays.slice(i, i + 7));
+  }
+  return weeks;
+}
+
+export function weekLabel(weekDays: Date[]): string {
+  const first = weekDays[0];
+  const last = weekDays[weekDays.length - 1];
+  const a = hebrewDayLabel(first);
+  const b = hebrewDayLabel(last);
+  return `${a.full} – ${b.full}`;
 }
 
 export function hebrewDayLabel(date: Date): { day: string; month: string; full: string } {
