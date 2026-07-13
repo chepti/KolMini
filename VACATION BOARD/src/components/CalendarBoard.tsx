@@ -9,7 +9,6 @@ import {
   isActivityVisible,
   isMultiDay,
   toDateKey,
-  weekLabel,
   weekdayLabel,
 } from '../utils/calendar';
 import { ActivityPill, isBarStart, MultiDayBar } from './ActivityItems';
@@ -98,10 +97,9 @@ export function CalendarBoard({ onEdit, onNewAtDate }: CalendarBoardProps) {
 
           return (
             <section key={weekStart} className="vb-week">
-              <header className="vb-week__label">
+              <aside className="vb-week__side" aria-label={`שבוע ${labelIndex + 1}`}>
                 <span className="vb-week__badge">שבוע {labelIndex + 1}</span>
-                <span className="vb-week__range">{weekLabel(weekDays)}</span>
-              </header>
+              </aside>
 
               <div className="vb-week__grid">
                 <div className="vb-board__header-row">

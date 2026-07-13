@@ -91,8 +91,18 @@ export function Header({ onNewEvent }: HeaderProps) {
         >
           + אירוע חדש
         </motion.button>
-        <button type="button" className="vb-reset" onClick={resetDemo} title="איפוס הלוח">
-          איפוס
+        <button
+          type="button"
+          className="vb-reset"
+          onClick={() => {
+            const ok = window.confirm(
+              'לנקות את הלוח?\n\nפעולה זו מוחקת את כל האירועים והאנשים מהמכשיר הזה (ואם מחוברים לגיליון — גם יישמרו לשם).\n\nלא ניתן לבטל.',
+            );
+            if (ok) resetDemo();
+          }}
+          title="מוחק את כל האירועים — דורש אישור"
+        >
+          נקה לוח…
         </button>
       </div>
     </header>

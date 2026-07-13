@@ -212,10 +212,17 @@ button {
 .vb-reset {
   border: none;
   background: transparent;
-  color: var(--ink-soft);
-  font-size: 0.85rem;
-  text-decoration: underline;
-  padding: 0.35rem;
+  color: #a08978;
+  font-size: 0.78rem;
+  opacity: 0.75;
+  padding: 0.35rem 0.45rem;
+  border-radius: 8px;
+}
+
+.vb-reset:hover {
+  opacity: 1;
+  color: #8a5a44;
+  background: rgba(255, 142, 83, 0.12);
 }
 
 .vb-sync-btn {
@@ -554,6 +561,9 @@ button {
 }
 
 .vb-week {
+  display: flex;
+  align-items: stretch;
+  gap: 0.35rem;
   background: transparent;
   backdrop-filter: none;
   border-radius: 0;
@@ -561,39 +571,39 @@ button {
   border-bottom: 1px dashed rgba(255, 142, 83, 0.35);
   box-shadow: none;
   overflow: hidden;
-  padding: 0.45rem 0.55rem 0.35rem;
+  padding: 0.35rem 0.4rem 0.3rem;
 }
 
 .vb-week:last-child {
   border-bottom: none;
 }
 
-.vb-week__label {
+.vb-week__side {
+  flex: 0 0 1.55rem;
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  gap: 0.4rem;
-  margin-bottom: 0.3rem;
+  justify-content: center;
+  min-height: 0;
 }
 
 .vb-week__badge {
   font-family: var(--font-display);
   font-weight: 600;
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   background: linear-gradient(135deg, #ffd93d, #ff8e53);
   color: #3d2c00;
   border-radius: 999px;
-  padding: 0.12rem 0.55rem;
-}
-
-.vb-week__range {
-  color: var(--ink-soft);
-  font-size: 0.78rem;
-  font-weight: 600;
+  padding: 0.45rem 0.2rem;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  letter-spacing: 0.04em;
+  line-height: 1.1;
+  white-space: nowrap;
 }
 
 .vb-week__grid {
-  width: 100%;
+  flex: 1;
+  min-width: 0;
 }
 
 .vb-board__header-row,
