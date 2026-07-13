@@ -117,7 +117,9 @@ export function CalendarBoard({ onEdit, onNewAtDate }: CalendarBoardProps) {
 
                 <div
                   className="vb-board__bars"
-                  style={{ height: Math.max(laneCount, 1) * 36 + 16 }}
+                  style={{
+                    height: laneCount === 0 ? 6 : laneCount * 32 + 10,
+                  }}
                 >
                   {weekDays.map((day, di) => {
                     const key = toDateKey(day);

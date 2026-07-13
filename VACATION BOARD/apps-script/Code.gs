@@ -224,9 +224,10 @@ function readTable_(name, mapRow) {
 function writeTable_(name, headers, rows) {
   var sh = ss_().getSheetByName(name);
   sh.clearContents();
+  // getRange(row, column, numRows, numColumns)
   sh.getRange(1, 1, 1, headers.length).setValues([headers]);
   if (rows.length) {
-    sh.getRange(2, 1, rows.length + 1, headers.length).setValues(rows);
+    sh.getRange(2, 1, rows.length, headers.length).setValues(rows);
   }
   sh.setFrozenRows(1);
 }
