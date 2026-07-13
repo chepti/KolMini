@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useVacation } from '../store/VacationContext';
-import type { Activity } from '../types';
+import type { Activity, TimeOfDay } from '../types';
 import {
   activitySpansDay,
   chunkIntoWeeks,
@@ -39,6 +39,10 @@ function assignLanes(bars: Activity[], weekStart: string, weekEnd: string): Map<
   return map;
 }
 
+function slotOf(a: Activity): TimeOfDay {
+  return a.timeOfDay === 'all-day' ? 'all-day' : a.timeOfDay;
+}
+
 export function CalendarBoard({ onEdit, onNewAtDate }: CalendarBoardProps) {
   const {
     rangeStart,
@@ -48,12 +52,20 @@ export function CalendarBoard({ onEdit, onNewAtDate }: CalendarBoardProps) {
     branches,
     hiddenBranches,
     hiddenPeople,
+    viewMode,
+    weekIndex,
   } = useVacation();
 
-  const weeks = useMemo(
+  const allWeeks = useMemo(
     () => chunkIntoWeeks(rangeStart, rangeEnd),
     [rangeStart, rangeEnd],
   );
+
+  const weeks = useMemo(() => {
+    if (viewMode !== 'week' || allWeeks.length === 0) return allWeeks;
+    const i = Math.min(Math.max(weekIndex, 0), allWeeks.length - 1);
+    return [allWeeks[i]];
+  }, [allWeeks, viewMode, weekIndex]);
 
   const visible = useMemo(
     () =>
@@ -63,8 +75,10 @@ export function CalendarBoard({ onEdit, onNewAtDate }: CalendarBoardProps) {
     [activities, people, hiddenBranches, hiddenPeople],
   );
 
+  const spacious = viewMode === 'week';
+
   return (
-    <div className="vb-board">
+    <div className={`vb-board ${spacious ? 'vb-board--week' : ''}`}>
       <div className="vb-weeks">
         {weeks.map((weekDays, wi) => {
           const weekStart = toDateKey(weekDays[0]);
@@ -76,11 +90,12 @@ export function CalendarBoard({ onEdit, onNewAtDate }: CalendarBoardProps) {
           const laneMap = assignLanes(multiDay, weekStart, weekEnd);
           const laneCount =
             laneMap.size === 0 ? 0 : Math.max(...laneMap.values()) + 1;
+          const labelIndex = viewMode === 'week' ? weekIndex : wi;
 
           return (
             <section key={weekStart} className="vb-week">
               <header className="vb-week__label">
-                <span className="vb-week__badge">שבוע {wi + 1}</span>
+                <span className="vb-week__badge">שבוע {labelIndex + 1}</span>
                 <span className="vb-week__range">{weekLabel(weekDays)}</span>
               </header>
 
@@ -160,11 +175,17 @@ export function CalendarBoard({ onEdit, onNewAtDate }: CalendarBoardProps) {
                       (a) => !isMultiDay(a) && activitySpansDay(a, key),
                     );
                     const isWeekend = day.getDay() === 5 || day.getDay() === 6;
+                    const bySlot = {
+                      'all-day': dayPills.filter((a) => slotOf(a) === 'all-day'),
+                      morning: dayPills.filter((a) => slotOf(a) === 'morning'),
+                      noon: dayPills.filter((a) => slotOf(a) === 'noon'),
+                      evening: dayPills.filter((a) => slotOf(a) === 'evening'),
+                    };
 
                     return (
                       <div
                         key={key}
-                        className={`vb-day-col ${isWeekend ? 'is-weekend' : ''}`}
+                        className={`vb-day-col ${isWeekend ? 'is-weekend' : ''} ${spacious ? 'vb-day-col--spacious' : ''}`}
                       >
                         {dayPills.length === 0 && (
                           <button
@@ -175,16 +196,56 @@ export function CalendarBoard({ onEdit, onNewAtDate }: CalendarBoardProps) {
                             הוסף תוכנית
                           </button>
                         )}
-                        {dayPills.map((a, i) => (
-                          <ActivityPill
-                            key={a.id}
-                            activity={a}
-                            people={people}
-                            branches={branches}
-                            onClick={() => onEdit(a)}
-                            index={i}
-                          />
-                        ))}
+
+                        {bySlot['all-day'].length > 0 && (
+                          <div className="vb-day-slot vb-day-slot--all">
+                            {bySlot['all-day'].map((a) => (
+                              <ActivityPill
+                                key={a.id}
+                                activity={a}
+                                people={people}
+                                branches={branches}
+                                onClick={() => onEdit(a)}
+                              />
+                            ))}
+                          </div>
+                        )}
+
+                        <div className="vb-day-timeline">
+                          <div className="vb-day-slot vb-day-slot--morning">
+                            {bySlot.morning.map((a) => (
+                              <ActivityPill
+                                key={a.id}
+                                activity={a}
+                                people={people}
+                                branches={branches}
+                                onClick={() => onEdit(a)}
+                              />
+                            ))}
+                          </div>
+                          <div className="vb-day-slot vb-day-slot--noon">
+                            {bySlot.noon.map((a) => (
+                              <ActivityPill
+                                key={a.id}
+                                activity={a}
+                                people={people}
+                                branches={branches}
+                                onClick={() => onEdit(a)}
+                              />
+                            ))}
+                          </div>
+                          <div className="vb-day-slot vb-day-slot--evening">
+                            {bySlot.evening.map((a) => (
+                              <ActivityPill
+                                key={a.id}
+                                activity={a}
+                                people={people}
+                                branches={branches}
+                                onClick={() => onEdit(a)}
+                              />
+                            ))}
+                          </div>
+                        </div>
                       </div>
                     );
                   })}

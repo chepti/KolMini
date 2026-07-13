@@ -192,6 +192,56 @@ export function activityColor(activity: Activity, people: Person[]): string {
   return '#4ECDC4';
 }
 
+/** צבעי משתתפים לפסים באירוע משותף */
+export function activityStripeColors(
+  activity: Activity,
+  people: Person[],
+  branches: { id: string; name: string; color?: string }[],
+): string[] {
+  if (activity.color) return [activity.color];
+
+  if (activity.participantMode === 'people') {
+    const colors = activity.personIds
+      .map((id) => people.find((p) => p.id === id)?.color)
+      .filter((c): c is string => Boolean(c));
+    return colors.length ? colors : ['#4ECDC4'];
+  }
+
+  if (activity.participantMode === 'branch') {
+    const colors: string[] = [];
+    for (const bid of activity.branchIds) {
+      const branchPeople = people.filter((p) => p.branchId === bid);
+      if (branchPeople.length) {
+        colors.push(...branchPeople.map((p) => p.color));
+      } else {
+        const b = branches.find((x) => x.id === bid);
+        if (b?.color) colors.push(b.color);
+      }
+    }
+    return colors.length ? colors : ['#4ECDC4'];
+  }
+
+  // כולם — צבעי כל האנשים (עד 6)
+  const all = people.map((p) => p.color).filter(Boolean);
+  return all.length ? all.slice(0, 6) : ['#FF6B6B', '#4ECDC4', '#FFD93D'];
+}
+
+export function stripeBackground(colors: string[]): string {
+  if (colors.length <= 1) {
+    const c = colors[0] ?? '#4ECDC4';
+    return `linear-gradient(135deg, ${c}, ${c}cc)`;
+  }
+  const band = 10;
+  const stops = colors
+    .map((c, i) => {
+      const a = i * band;
+      const b = (i + 1) * band;
+      return `${c} ${a}px, ${c} ${b}px`;
+    })
+    .join(', ');
+  return `repeating-linear-gradient(135deg, ${stops})`;
+}
+
 export function activityParticipantsLabel(
   activity: Activity,
   people: Person[],

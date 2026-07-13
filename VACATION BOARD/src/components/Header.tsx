@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
+import { useMemo } from 'react';
 import { useVacation } from '../store/VacationContext';
-import { shiftRange } from '../utils/calendar';
+import { chunkIntoWeeks, shiftRange } from '../utils/calendar';
 import { SyncPanel } from './SyncPanel';
 
 interface HeaderProps {
@@ -8,9 +9,29 @@ interface HeaderProps {
 }
 
 export function Header({ onNewEvent }: HeaderProps) {
-  const { rangeStart, rangeEnd, setRange, resetDemo } = useVacation();
+  const {
+    rangeStart,
+    rangeEnd,
+    setRange,
+    resetDemo,
+    viewMode,
+    setViewMode,
+    setWeekIndex,
+  } = useVacation();
+
+  const weekCount = useMemo(
+    () => chunkIntoWeeks(rangeStart, rangeEnd).length,
+    [rangeStart, rangeEnd],
+  );
 
   const shift = (days: number) => {
+    if (viewMode === 'week') {
+      setWeekIndex((i) => {
+        const next = i + (days > 0 ? 1 : -1);
+        return Math.min(Math.max(next, 0), Math.max(weekCount - 1, 0));
+      });
+      return;
+    }
     const next = shiftRange(rangeStart, rangeEnd, days);
     setRange(next.rangeStart, next.rangeEnd);
   };
@@ -34,14 +55,33 @@ export function Header({ onNewEvent }: HeaderProps) {
 
       <div className="vb-header__actions">
         <SyncPanel />
-        <div className="vb-nav-pills">
-          <button type="button" className="vb-pill-btn" onClick={() => shift(-7)}>
-            ← שבוע קודם
+
+        <div className="vb-nav-pills" role="group" aria-label="תצוגה">
+          <button
+            type="button"
+            className={`vb-pill-btn ${viewMode === 'all' ? 'vb-pill-btn--fill' : ''}`}
+            onClick={() => setViewMode('all')}
+          >
+            כל השבועות
           </button>
-          <button type="button" className="vb-pill-btn" onClick={() => shift(7)}>
-            שבוע הבא →
+          <button
+            type="button"
+            className={`vb-pill-btn ${viewMode === 'week' ? 'vb-pill-btn--fill' : ''}`}
+            onClick={() => setViewMode('week')}
+          >
+            שבוע אחד
           </button>
         </div>
+
+        <div className="vb-nav-pills">
+          <button type="button" className="vb-pill-btn" onClick={() => shift(-7)}>
+            ← {viewMode === 'week' ? 'שבוע קודם' : 'שבוע קודם'}
+          </button>
+          <button type="button" className="vb-pill-btn" onClick={() => shift(7)}>
+            {viewMode === 'week' ? 'שבוע הבא' : 'שבוע הבא'} →
+          </button>
+        </div>
+
         <motion.button
           type="button"
           className="vb-cta"

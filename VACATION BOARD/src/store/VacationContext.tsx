@@ -12,16 +12,22 @@ import { v4 as uuid } from 'uuid';
 import {
   fetchBoardState,
   getSheetsUrl,
+  hasBuiltInSheetsUrl,
+  mergeBoardStates,
   saveBoardState,
   setSheetsUrl,
   type SyncStatus,
 } from '../api/sheets';
+import { SHARED_SHEETS_URL } from '../config';
 import { defaultState } from '../data/defaultState';
 import type { Activity, Person, VacationState } from '../types';
 import { normalizeDateKey } from '../utils/calendar';
 import { familyShades, nextBranchColor, nextPersonColorInBranch } from '../utils/colors';
 
 const STORAGE_KEY = 'vacation-board-v2';
+const VIEW_KEY = 'vacation-board-view-mode';
+
+export type ViewMode = 'all' | 'week';
 
 function loadLocal(): VacationState {
   try {
@@ -39,7 +45,6 @@ function mergeState(remote: Partial<VacationState>): VacationState {
     defaultState.rangeStart,
   );
   let rangeEnd = normalizeDateKey(remote.rangeEnd, defaultState.rangeEnd);
-  // לוח הקיץ — עד סוף אוגוסט
   if (rangeEnd < defaultState.rangeEnd) {
     rangeEnd = defaultState.rangeEnd;
   }
@@ -77,6 +82,11 @@ interface VacationStore extends VacationState {
   syncStatus: SyncStatus;
   syncError: string;
   sheetsUrl: string;
+  hasBuiltInUrl: boolean;
+  viewMode: ViewMode;
+  weekIndex: number;
+  setViewMode: (mode: ViewMode) => void;
+  setWeekIndex: (index: number | ((n: number) => number)) => void;
   toggleBranchVisibility: (branchId: string) => void;
   togglePersonVisibility: (personId: string) => void;
   setPersonColor: (personId: string, color: string) => void;
@@ -95,36 +105,69 @@ interface VacationStore extends VacationState {
 const VacationContext = createContext<VacationStore | null>(null);
 
 export function VacationProvider({ children }: { children: ReactNode }) {
+  const initialUrl = getSheetsUrl();
   const [state, setState] = useState<VacationState>(loadLocal);
-  const [sheetsUrl, setSheetsUrlState] = useState(getSheetsUrl);
+  const [sheetsUrl, setSheetsUrlState] = useState(initialUrl);
   const [syncStatus, setSyncStatus] = useState<SyncStatus>(
-    getSheetsUrl() ? 'loading' : 'local',
+    initialUrl ? 'loading' : 'local',
   );
   const [syncError, setSyncError] = useState('');
+  const [viewMode, setViewModeState] = useState<ViewMode>(() => {
+    const v = localStorage.getItem(VIEW_KEY);
+    return v === 'week' ? 'week' : 'all';
+  });
+  const [weekIndex, setWeekIndex] = useState(0);
+
   const dirtyRef = useRef(false);
   const skipNextSave = useRef(false);
-  const readyRef = useRef(!getSheetsUrl());
+  const readyRef = useRef(!initialUrl);
   const updatedAtRef = useRef('');
   const fingerprintRef = useRef(stateFingerprint(loadLocal()));
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const stateRef = useRef(state);
+  stateRef.current = state;
 
-  // גיבוי מקומי תמיד
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }, [state]);
 
+  const setViewMode = useCallback((mode: ViewMode) => {
+    setViewModeState(mode);
+    localStorage.setItem(VIEW_KEY, mode);
+  }, []);
+
   const pushToSheets = useCallback(
     async (next: VacationState, url = sheetsUrl) => {
       if (!url) return;
-      // בלי להבהב "שומר" בכל שינוי קטן — רק בשגיאה/הצלחה שקטה
       try {
-        const { updatedAt } = await saveBoardState(url, next);
+        // לפני שמירה — מושכים מהשרת ומוזגים כדי לא לדרוס שינויים של אחרים
+        let payload = next;
+        try {
+          const remote = await fetchBoardState(url);
+          if (
+            remote.updatedAt &&
+            remote.updatedAt !== updatedAtRef.current
+          ) {
+            const merged = mergeState(
+              mergeBoardStates(mergeState(remote.state), next),
+            );
+            payload = merged;
+            skipNextSave.current = true;
+            fingerprintRef.current = stateFingerprint(merged);
+            setState(merged);
+          }
+        } catch {
+          /* אם הקריאה נכשלה — ממשיכים עם השמירה המקומית */
+        }
+
+        const { updatedAt } = await saveBoardState(url, payload);
         updatedAtRef.current = updatedAt;
-        fingerprintRef.current = stateFingerprint(next);
+        fingerprintRef.current = stateFingerprint(payload);
         dirtyRef.current = false;
         setSyncStatus('synced');
         setSyncError('');
       } catch (err) {
+        dirtyRef.current = false; // לא לחסום polling אחרי כשל
         setSyncStatus('error');
         setSyncError(err instanceof Error ? err.message : 'שמירה נכשלה');
       }
@@ -140,7 +183,7 @@ export function VacationProvider({ children }: { children: ReactNode }) {
       if (saveTimer.current) clearTimeout(saveTimer.current);
       saveTimer.current = setTimeout(() => {
         void pushToSheets(next);
-      }, 1200);
+      }, 1000);
     },
     [sheetsUrl, pushToSheets],
   );
@@ -154,7 +197,6 @@ export function VacationProvider({ children }: { children: ReactNode }) {
     setSyncStatus('synced');
     setSyncError('');
 
-    // לא מעדכנים state אם אין שינוי אמיתי — מונע הבהוב
     if (fp === fingerprintRef.current) return;
 
     fingerprintRef.current = fp;
@@ -169,6 +211,7 @@ export function VacationProvider({ children }: { children: ReactNode }) {
       setSyncStatus('local');
       return;
     }
+    setSyncStatus((s) => (s === 'synced' ? s : 'loading'));
     try {
       const { state: remote, updatedAt } = await fetchBoardState(url);
       applyRemote(remote, updatedAt);
@@ -181,26 +224,35 @@ export function VacationProvider({ children }: { children: ReactNode }) {
 
   const connectSheets = useCallback(
     async (url: string) => {
-      setSheetsUrl(url);
-      setSheetsUrlState(url);
+      // אם אין כתובת משובצת — שומרים מקומית כגיבוי זמני
+      if (!hasBuiltInSheetsUrl()) {
+        setSheetsUrl(url);
+      }
+      setSheetsUrlState(getSheetsUrl() || url);
+      const activeUrl = SHARED_SHEETS_URL.trim() || url;
       readyRef.current = false;
       setSyncStatus('loading');
       try {
-        const { state: remote, updatedAt } = await fetchBoardState(url);
+        const { state: remote, updatedAt } = await fetchBoardState(activeUrl);
         const hasRemoteData =
           (remote.people?.length ?? 0) > 0 ||
           (remote.activities?.length ?? 0) > 0 ||
-          (remote.branches?.length ?? 0) > 1;
+          (remote.branches?.length ?? 0) > 0;
 
         if (hasRemoteData) {
-          applyRemote(remote, updatedAt);
+          const merged = mergeState(
+            mergeBoardStates(mergeState(remote), stateRef.current),
+          );
+          updatedAtRef.current = updatedAt;
+          // דוחפים מיזוג כדי לא לאבד אף צד
+          await saveBoardState(activeUrl, merged);
+          applyRemote(merged, new Date().toISOString());
         } else {
-          const local = loadLocal();
-          await pushToSheets(local, url);
+          const local = stateRef.current;
+          await pushToSheets(local, activeUrl);
           skipNextSave.current = true;
           readyRef.current = true;
           fingerprintRef.current = stateFingerprint(local);
-          setState(local);
           setSyncStatus('synced');
           setSyncError('');
         }
@@ -214,33 +266,43 @@ export function VacationProvider({ children }: { children: ReactNode }) {
     [applyRemote, pushToSheets],
   );
 
-  // טעינה ראשונית + polling עדין
+  // חיבור אוטומטי לכתובת המשובצת + polling תכוף
   useEffect(() => {
-    if (!sheetsUrl) return;
+    const url = getSheetsUrl();
+    if (!url) return;
+    setSheetsUrlState(url);
     void refreshFromSheets();
 
     const id = window.setInterval(() => {
-      if (document.hidden || dirtyRef.current) return;
+      if (document.hidden) return;
       void (async () => {
         try {
-          const { state: remote, updatedAt } = await fetchBoardState(sheetsUrl);
-          if (
-            updatedAt &&
-            updatedAt !== updatedAtRef.current &&
-            !dirtyRef.current
-          ) {
-            applyRemote(remote, updatedAt);
+          const { state: remote, updatedAt } = await fetchBoardState(url);
+          if (!updatedAt || updatedAt === updatedAtRef.current) return;
+          if (dirtyRef.current) {
+            // בזמן עריכה — ממזגים במקום לדרוס
+            const merged = mergeState(
+              mergeBoardStates(mergeState(remote), stateRef.current),
+            );
+            updatedAtRef.current = updatedAt;
+            const fp = stateFingerprint(merged);
+            if (fp !== fingerprintRef.current) {
+              fingerprintRef.current = fp;
+              skipNextSave.current = true;
+              setState(merged);
+            }
+            return;
           }
+          applyRemote(remote, updatedAt);
         } catch {
           /* שקט */
         }
       })();
-    }, 45000);
+    }, 8000);
 
     return () => window.clearInterval(id);
-  }, [sheetsUrl, refreshFromSheets, applyRemote]);
+  }, [refreshFromSheets, applyRemote]);
 
-  // שמירה אוטומטית אחרי שינוי מקומי
   useEffect(() => {
     if (skipNextSave.current) {
       skipNextSave.current = false;
@@ -372,6 +434,11 @@ export function VacationProvider({ children }: { children: ReactNode }) {
       syncStatus,
       syncError,
       sheetsUrl,
+      hasBuiltInUrl: hasBuiltInSheetsUrl(),
+      viewMode,
+      weekIndex,
+      setViewMode,
+      setWeekIndex,
       toggleBranchVisibility,
       togglePersonVisibility,
       setPersonColor,
@@ -391,6 +458,9 @@ export function VacationProvider({ children }: { children: ReactNode }) {
       syncStatus,
       syncError,
       sheetsUrl,
+      viewMode,
+      weekIndex,
+      setViewMode,
       toggleBranchVisibility,
       togglePersonVisibility,
       setPersonColor,

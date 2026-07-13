@@ -1,11 +1,12 @@
 import { motion } from 'framer-motion';
-import type { Activity, Person } from '../types';
+import type { Activity, Person, TimeOfDay } from '../types';
 import { TIME_LABELS } from '../types';
 import {
-  activityColor,
   activityParticipantsLabel,
+  activityStripeColors,
   getVisibleSpan,
   isMultiDay,
+  stripeBackground,
 } from '../utils/calendar';
 
 function participantCount(activity: Activity): number {
@@ -16,12 +17,16 @@ function participantCount(activity: Activity): number {
   return activity.personIds.length;
 }
 
-/** אירוע אישי/זוגי — קו דק בלי טקסט, פרטים בריחוף */
 function isSlimPeople(activity: Activity): boolean {
   return activity.participantMode === 'people' && participantCount(activity) <= 2;
 }
 
-/** בוקר/צהריים/ערב — דק יותר מכל-היום */
+function isSharedEvent(activity: Activity): boolean {
+  if (activity.participantMode === 'all') return true;
+  if (activity.participantMode === 'branch') return activity.branchIds.length >= 1;
+  return activity.personIds.length >= 2;
+}
+
 function isPartDay(activity: Activity): boolean {
   return activity.timeOfDay !== 'all-day';
 }
@@ -29,9 +34,8 @@ function isPartDay(activity: Activity): boolean {
 interface ActivityPillProps {
   activity: Activity;
   people: Person[];
-  branches: { id: string; name: string }[];
+  branches: { id: string; name: string; color?: string }[];
   onClick: () => void;
-  index?: number;
 }
 
 export function ActivityPill({
@@ -40,10 +44,12 @@ export function ActivityPill({
   branches,
   onClick,
 }: ActivityPillProps) {
-  const color = activityColor(activity, people);
+  const colors = activityStripeColors(activity, people, branches);
+  const bg = stripeBackground(colors);
   const who = activityParticipantsLabel(activity, people, branches);
   const slim = isSlimPeople(activity);
   const thin = isPartDay(activity) || slim;
+  const shared = isSharedEvent(activity) && colors.length > 1;
   const tip = [
     activity.title,
     TIME_LABELS[activity.timeOfDay],
@@ -59,8 +65,8 @@ export function ActivityPill({
         type="button"
         className="vb-activity-pill vb-activity-pill--slim"
         style={{
-          background: color,
-          boxShadow: `0 2px 8px ${color}55`,
+          background: shared ? bg : colors[0],
+          boxShadow: `0 2px 8px ${colors[0]}55`,
         }}
         onClick={onClick}
         title={tip}
@@ -76,10 +82,10 @@ export function ActivityPill({
   return (
     <motion.button
       type="button"
-      className={`vb-activity-pill ${thin ? 'vb-activity-pill--thin' : ''}`}
+      className={`vb-activity-pill ${thin ? 'vb-activity-pill--thin' : ''} ${shared ? 'vb-activity-pill--striped' : ''}`}
       style={{
-        background: `linear-gradient(135deg, ${color}, ${color}cc)`,
-        boxShadow: `0 4px 14px ${color}55`,
+        background: bg,
+        boxShadow: `0 4px 14px ${colors[0]}55`,
       }}
       onClick={onClick}
       title={tip}
@@ -110,7 +116,7 @@ export function ActivityPill({
 interface MultiDayBarProps {
   activity: Activity;
   people: Person[];
-  branches: { id: string; name: string }[];
+  branches: { id: string; name: string; color?: string }[];
   dayIndex: number;
   rangeStart: string;
   rangeEnd: string;
@@ -130,31 +136,27 @@ export function MultiDayBar({
   onClick,
   lane,
 }: MultiDayBarProps) {
-  const color = activityColor(activity, people);
+  const colors = activityStripeColors(activity, people, branches);
+  const bg = stripeBackground(colors);
   const span = getVisibleSpan(activity, rangeStart, rangeEnd);
   const who = activityParticipantsLabel(activity, people, branches);
   const slim = isSlimPeople(activity);
+  const shared = isSharedEvent(activity) && colors.length > 1;
   const widthPct = Math.max(span * colWidthPct - 1.2, colWidthPct - 1.2);
   const startPct = dayIndex * colWidthPct + 0.6;
-  const tip = [
-    activity.title,
-    activity.location,
-    who,
-  ]
-    .filter(Boolean)
-    .join(' · ');
+  const tip = [activity.title, activity.location, who].filter(Boolean).join(' · ');
 
   return (
     <motion.button
       type="button"
-      className={`vb-multiday-bar ${slim ? 'vb-multiday-bar--slim' : ''}`}
+      className={`vb-multiday-bar ${slim ? 'vb-multiday-bar--slim' : ''} ${shared ? 'vb-multiday-bar--striped' : ''}`}
       style={{
         width: `${widthPct}%`,
         insetInlineStart: `${startPct}%`,
         top: slim ? lane * 18 + 6 : lane * 32 + 8,
         height: slim ? 10 : 26,
-        background: `linear-gradient(90deg, ${color}, ${color}dd)`,
-        boxShadow: `0 4px 12px ${color}44`,
+        background: bg,
+        boxShadow: `0 4px 12px ${colors[0]}44`,
       }}
       onClick={onClick}
       title={tip}
@@ -188,3 +190,5 @@ export function isBarStart(
     activity.endDate >= rangeStart
   );
 }
+
+export const TIME_SLOTS: TimeOfDay[] = ['all-day', 'morning', 'noon', 'evening'];
