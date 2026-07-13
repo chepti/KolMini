@@ -218,6 +218,62 @@ button {
   padding: 0.35rem;
 }
 
+.vb-sync-btn {
+  border: 2px solid rgba(78, 205, 196, 0.45);
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 999px;
+  padding: 0.45rem 0.85rem;
+  font-weight: 600;
+  font-size: 0.82rem;
+  color: var(--ink);
+}
+
+.vb-sync-btn--synced {
+  border-color: #6bcb77;
+  background: #eafaf0;
+}
+
+.vb-sync-btn--saving,
+.vb-sync-btn--loading {
+  border-color: #ffd93d;
+  background: #fff8dc;
+}
+
+.vb-sync-btn--error {
+  border-color: #ff6b6b;
+  background: #ffe8e8;
+  color: #c0392b;
+}
+
+.vb-sync-btn--local {
+  border-color: rgba(255, 142, 83, 0.4);
+}
+
+.vb-sync-modal .vb-sync-help {
+  margin: 0 0 0.85rem;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.vb-sync-modal code {
+  font-size: 0.85em;
+  background: #fff3cd;
+  padding: 0.1rem 0.35rem;
+  border-radius: 6px;
+}
+
+.vb-sync-msg {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #0a7a4b;
+  font-weight: 600;
+}
+
+.vb-sync-msg--err {
+  color: #c0392b;
+}
+
 /* Layout */
 .vb-layout {
   position: relative;

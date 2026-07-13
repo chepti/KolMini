@@ -9,9 +9,15 @@ npm install
 npm run dev
 ```
 
+## שמירה משותפת (Google Sheets)
+
+הוראות מלאות ב־[`apps-script/README.md`](./apps-script/README.md).
+
+בקצרה: יוצרים גיליון → מדביקים את `apps-script/Code.gs` ב־Apps Script → מפרסמים Web App → מדביקים את הכתובת בלוח (כפתור Sheets).
+
 ## GitHub Pages
 
-האתר מתפרסם אוטומטית ל־https://chepti.github.io/KolMini/  
+https://chepti.github.io/KolMini/  
 (Settings → Pages → Source: GitHub Actions)
 
 ## יכולות

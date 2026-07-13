@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { useVacation } from '../store/VacationContext';
 import { shiftRange } from '../utils/calendar';
+import { SyncPanel } from './SyncPanel';
 
 interface HeaderProps {
   onNewEvent: () => void;
@@ -32,6 +33,7 @@ export function Header({ onNewEvent }: HeaderProps) {
       </div>
 
       <div className="vb-header__actions">
+        <SyncPanel />
         <div className="vb-nav-pills">
           <button type="button" className="vb-pill-btn" onClick={() => shift(-7)}>
             ← שבוע קודם
