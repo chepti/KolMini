@@ -166,6 +166,29 @@ button {
 .vb-nav-pills {
   display: flex;
   gap: 0.4rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.vb-week-indicator {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--ink);
+  padding: 0 0.35rem;
+  white-space: nowrap;
+}
+
+.vb-pill-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.vb-pill-btn:disabled:hover {
+  background: rgba(255, 255, 255, 0.85);
+  transform: none;
+  box-shadow: none;
 }
 
 .vb-pill-btn {
@@ -693,11 +716,84 @@ button {
 }
 
 .vb-board--week .vb-week {
-  padding: 0.75rem;
+  padding: 1rem 0.85rem 1.1rem;
+  min-height: min(70vh, 720px);
+  align-items: stretch;
+}
+
+.vb-board--week .vb-week__grid {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.vb-board--week .vb-week__side {
+  flex-basis: 2rem;
+}
+
+.vb-board--week .vb-week__badge {
+  font-size: 0.85rem;
+  padding: 0.65rem 0.28rem;
+}
+
+.vb-board--week .vb-week__body {
+  gap: 0.45rem;
+  margin-top: 0.35rem;
+  flex: 1;
 }
 
 .vb-board--week .vb-slot-pack {
-  gap: 0.15rem;
+  gap: 0.35rem;
+}
+
+.vb-board--week .vb-day-head {
+  padding: 0.55rem 0.3rem 0.6rem;
+}
+
+.vb-board--week .vb-day-head__weekday {
+  font-size: 0.92rem;
+}
+
+.vb-board--week .vb-day-head__heb {
+  font-size: 0.95rem;
+}
+
+.vb-board--week .vb-day-head__greg {
+  font-size: 0.78rem;
+}
+
+.vb-board--week .vb-day-col {
+  min-height: 72px;
+  padding: 0.35rem 0.3rem;
+  gap: 0.3rem;
+}
+
+.vb-board--week .vb-activity-pill--spacious {
+  padding: 0.55rem 0.75rem;
+}
+
+.vb-board--week .vb-activity-pill--spacious .vb-activity-pill__title {
+  font-size: 0.95rem;
+}
+
+.vb-board--week .vb-activity-pill--spacious .vb-activity-pill__meta,
+.vb-board--week .vb-activity-pill--spacious .vb-activity-pill__who,
+.vb-board--week .vb-activity-pill--spacious .vb-activity-pill__desc {
+  font-size: 0.75rem;
+}
+
+.vb-board--week .vb-activity-pill--slim.vb-activity-pill--spacious {
+  height: 14px;
+  min-height: 14px;
+}
+
+.vb-board--week .vb-multiday-bar__title {
+  font-size: 0.92rem;
+}
+
+.vb-board--week .vb-multiday-bar__meta {
+  font-size: 0.74rem;
 }
 
 .vb-activity-pill--striped,

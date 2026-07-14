@@ -148,9 +148,11 @@ export function CalendarBoard({ onEdit, onNewAtDate }: CalendarBoardProps) {
                         ? 0
                         : Math.max(...laneMap.values()) + 1;
                     const barRowHeight =
-                      laneCount === 0 ? 0 : laneCount * 30 + 4;
+                    laneCount === 0
+                      ? 0
+                      : laneCount * (spacious ? 42 : 30) + (spacious ? 10 : 4);
 
-                    const dayPills = weekDays.map((day) => {
+                  const dayPills = weekDays.map((day) => {
                       if (!day) return [] as Activity[];
                       const key = toDateKey(day);
                       return visible.filter(
@@ -187,6 +189,7 @@ export function CalendarBoard({ onEdit, onNewAtDate }: CalendarBoardProps) {
                                     rangeEnd={weekEnd}
                                     colWidthPct={100 / weekDays.length}
                                     lane={laneMap.get(a.id) ?? 0}
+                                    spacious={spacious}
                                     onClick={() => onEdit(a)}
                                   />
                                 ));
@@ -216,6 +219,7 @@ export function CalendarBoard({ onEdit, onNewAtDate }: CalendarBoardProps) {
                                       activity={a}
                                       people={people}
                                       branches={branches}
+                                      spacious={spacious}
                                       onClick={() => onEdit(a)}
                                     />
                                   ))}

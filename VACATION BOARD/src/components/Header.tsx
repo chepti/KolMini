@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { useMemo } from 'react';
 import { useVacation } from '../store/VacationContext';
-import { chunkIntoWeeks, shiftRange } from '../utils/calendar';
+import { chunkIntoWeeks } from '../utils/calendar';
 import { SyncPanel } from './SyncPanel';
 import { GoogleCalendarPanel } from './GoogleCalendarPanel';
 
@@ -13,10 +13,10 @@ export function Header({ onNewEvent }: HeaderProps) {
   const {
     rangeStart,
     rangeEnd,
-    setRange,
     resetDemo,
     viewMode,
     setViewMode,
+    weekIndex,
     setWeekIndex,
   } = useVacation();
 
@@ -25,17 +25,8 @@ export function Header({ onNewEvent }: HeaderProps) {
     [rangeStart, rangeEnd],
   );
 
-  const shift = (days: number) => {
-    if (viewMode === 'week') {
-      setWeekIndex((i) => {
-        const next = i + (days > 0 ? 1 : -1);
-        return Math.min(Math.max(next, 0), Math.max(weekCount - 1, 0));
-      });
-      return;
-    }
-    const next = shiftRange(rangeStart, rangeEnd, days);
-    setRange(next.rangeStart, next.rangeEnd);
-  };
+  const canPrev = weekIndex > 0;
+  const canNext = weekIndex < weekCount - 1;
 
   return (
     <header className="vb-header">
@@ -75,14 +66,33 @@ export function Header({ onNewEvent }: HeaderProps) {
           </button>
         </div>
 
-        <div className="vb-nav-pills">
-          <button type="button" className="vb-pill-btn" onClick={() => shift(-7)}>
-            ← {viewMode === 'week' ? 'שבוע קודם' : 'שבוע קודם'}
-          </button>
-          <button type="button" className="vb-pill-btn" onClick={() => shift(7)}>
-            {viewMode === 'week' ? 'שבוע הבא' : 'שבוע הבא'} →
-          </button>
-        </div>
+        {viewMode === 'week' && (
+          <div className="vb-nav-pills vb-nav-pills--week" role="group" aria-label="מעבר בין שבועות">
+            <button
+              type="button"
+              className="vb-pill-btn"
+              disabled={!canPrev}
+              onClick={() => setWeekIndex((i) => Math.max(0, i - 1))}
+              title="לשבוע הקודם בטווח הקיץ"
+            >
+              ← שבוע קודם
+            </button>
+            <span className="vb-week-indicator" aria-live="polite">
+              שבוע {weekIndex + 1} מתוך {Math.max(weekCount, 1)}
+            </span>
+            <button
+              type="button"
+              className="vb-pill-btn"
+              disabled={!canNext}
+              onClick={() =>
+                setWeekIndex((i) => Math.min(Math.max(weekCount - 1, 0), i + 1))
+              }
+              title="לשבוע הבא בטווח הקיץ"
+            >
+              שבוע הבא →
+            </button>
+          </div>
+        )}
 
         <motion.button
           type="button"

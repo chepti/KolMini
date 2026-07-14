@@ -36,6 +36,7 @@ interface ActivityPillProps {
   people: Person[];
   branches: { id: string; name: string; color?: string }[];
   onClick: () => void;
+  spacious?: boolean;
 }
 
 export function ActivityPill({
@@ -43,6 +44,7 @@ export function ActivityPill({
   people,
   branches,
   onClick,
+  spacious,
 }: ActivityPillProps) {
   const colors = activityStripeColors(activity, people, branches);
   const bg = stripeBackground(colors);
@@ -64,7 +66,7 @@ export function ActivityPill({
     return (
       <motion.button
         type="button"
-        className="vb-activity-pill vb-activity-pill--slim"
+        className={`vb-activity-pill vb-activity-pill--slim ${spacious ? 'vb-activity-pill--spacious' : ''}`}
         style={{
           background: shared ? bg : colors[0],
           boxShadow: `0 2px 8px ${colors[0]}55`,
@@ -83,7 +85,7 @@ export function ActivityPill({
   return (
     <motion.button
       type="button"
-      className={`vb-activity-pill ${thin ? 'vb-activity-pill--thin' : ''} ${shared ? 'vb-activity-pill--striped' : ''}`}
+      className={`vb-activity-pill ${thin ? 'vb-activity-pill--thin' : ''} ${shared ? 'vb-activity-pill--striped' : ''} ${spacious ? 'vb-activity-pill--spacious' : ''}`}
       style={{
         background: bg,
         boxShadow: `0 4px 14px ${colors[0]}55`,
@@ -127,6 +129,7 @@ interface MultiDayBarProps {
   colWidthPct: number;
   onClick: () => void;
   lane: number;
+  spacious?: boolean;
 }
 
 export function MultiDayBar({
@@ -139,6 +142,7 @@ export function MultiDayBar({
   colWidthPct,
   onClick,
   lane,
+  spacious,
 }: MultiDayBarProps) {
   const colors = activityStripeColors(activity, people, branches);
   const bg = stripeBackground(colors);
@@ -157,8 +161,8 @@ export function MultiDayBar({
   ]
     .filter(Boolean)
     .join(' · ');
-  const barHeight = slim ? 12 : 26;
-  const laneGap = slim ? 16 : 30;
+  const barHeight = slim ? (spacious ? 14 : 12) : spacious ? 34 : 26;
+  const laneGap = slim ? (spacious ? 22 : 16) : spacious ? 42 : 30;
 
   return (
     <motion.button
