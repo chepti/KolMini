@@ -3,6 +3,7 @@ import { useMemo } from 'react';
 import { useVacation } from '../store/VacationContext';
 import { chunkIntoWeeks, shiftRange } from '../utils/calendar';
 import { SyncPanel } from './SyncPanel';
+import { GoogleCalendarPanel } from './GoogleCalendarPanel';
 
 interface HeaderProps {
   onNewEvent: () => void;
@@ -55,6 +56,7 @@ export function Header({ onNewEvent }: HeaderProps) {
 
       <div className="vb-header__actions">
         <SyncPanel />
+        <GoogleCalendarPanel />
 
         <div className="vb-nav-pills" role="group" aria-label="תצוגה">
           <button

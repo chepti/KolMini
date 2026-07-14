@@ -235,6 +235,53 @@ button {
   color: var(--ink);
 }
 
+.vb-gcal-btn {
+  border: 2px solid rgba(69, 183, 209, 0.45);
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 999px;
+  padding: 0.45rem 0.85rem;
+  font-weight: 600;
+  font-size: 0.82rem;
+  color: var(--ink);
+}
+
+.vb-gcal-btn:hover {
+  border-color: #45b7d1;
+  background: #e8f7fb;
+}
+
+.vb-gcal-steps {
+  margin: 0.75rem 0 1rem;
+  padding-inline-start: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.92rem;
+  line-height: 1.45;
+  color: var(--ink);
+}
+
+.vb-gcal-url {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-weight: 600;
+  font-size: 0.88rem;
+  margin-bottom: 0.75rem;
+}
+
+.vb-gcal-url input {
+  font-weight: 500;
+  font-size: 0.78rem;
+}
+
+.vb-gcal-note {
+  margin: 0.85rem 0 0;
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  line-height: 1.4;
+}
+
 .vb-sync-btn--synced {
   border-color: #6bcb77;
   background: #eafaf0;

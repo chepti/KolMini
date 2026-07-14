@@ -7,6 +7,11 @@
  *    - Execute as: Me
  *    - Who has access: Anyone
  * 4. העתיקו את כתובת ה-Web App והדביקו בלוח החופש (כפתור "Sheets")
+ *
+ * יומן גוגל (מנוי חי):
+ * אותה כתובת + ?format=ics
+ * לדוגמה: https://script.google.com/macros/s/…/exec?format=ics
+ * בגוגל יומן → יומנים אחרים → + → מכתובת URL
  */
 
 var SHEET_SETTINGS = 'הגדרות';
@@ -17,6 +22,10 @@ var SHEET_ACTIVITIES = 'פעילויות';
 function doGet(e) {
   try {
     ensureSheets_();
+    var format = e && e.parameter && e.parameter.format;
+    if (String(format || '').toLowerCase() === 'ics') {
+      return icsOutput_(readState_());
+    }
     var state = readState_();
     return json_({ ok: true, state: state, updatedAt: getUpdatedAt_() });
   } catch (err) {
@@ -54,6 +63,156 @@ function json_(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(
     ContentService.MimeType.JSON,
   );
+}
+
+/** הזנת יומן חיה — Google Calendar מוסיפים כיומן מנוי מה-URL עם ?format=ics */
+function icsOutput_(state) {
+  var ics = buildIcs_(state);
+  return ContentService.createTextOutput(ics).setMimeType(ContentService.MimeType.ICAL);
+}
+
+function pad2_(n) {
+  return n < 10 ? '0' + n : String(n);
+}
+
+function nextDateKey_(dateKey) {
+  var parts = String(dateKey).split('-');
+  var d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+  d.setDate(d.getDate() + 1);
+  return d.getFullYear() + '-' + pad2_(d.getMonth() + 1) + '-' + pad2_(d.getDate());
+}
+
+function toIcsDate_(dateKey) {
+  return String(dateKey).replace(/-/g, '');
+}
+
+function escapeIcs_(value) {
+  return String(value || '')
+    .replace(/\\/g, '\\\\')
+    .replace(/\n/g, '\\n')
+    .replace(/,/g, '\\,')
+    .replace(/;/g, '\\;');
+}
+
+function timeLabel_(slot) {
+  if (slot === 'morning') return 'בוקר';
+  if (slot === 'noon') return 'צהריים';
+  if (slot === 'evening') return 'ערב';
+  return 'כל היום';
+}
+
+function participantsLabel_(activity, people, branches) {
+  var mode = activity.participantMode || 'people';
+  if (mode === 'all') return 'כולם';
+  if (mode === 'branch') {
+    return (activity.branchIds || [])
+      .map(function (id) {
+        for (var i = 0; i < branches.length; i++) {
+          if (branches[i].id === id) return branches[i].name;
+        }
+        return id;
+      })
+      .join(', ');
+  }
+  return (activity.personIds || [])
+    .map(function (id) {
+      for (var i = 0; i < people.length; i++) {
+        if (people[i].id === id) return people[i].name;
+      }
+      return id;
+    })
+    .join(', ');
+}
+
+function isVisible_(activity, people, hiddenBranches, hiddenPeople) {
+  var mode = activity.participantMode || 'people';
+  if (mode === 'all') return true;
+  if (mode === 'branch') {
+    return (activity.branchIds || []).some(function (id) {
+      return hiddenBranches.indexOf(id) === -1;
+    });
+  }
+  return (activity.personIds || []).some(function (id) {
+    if (hiddenPeople.indexOf(id) !== -1) return false;
+    for (var i = 0; i < people.length; i++) {
+      if (people[i].id === id) {
+        return hiddenBranches.indexOf(people[i].branchId) === -1;
+      }
+    }
+    return false;
+  });
+}
+
+function eventTimes_(activity) {
+  var slot = activity.timeOfDay || 'all-day';
+  if (slot === 'all-day') {
+    return {
+      start: 'DTSTART;VALUE=DATE:' + toIcsDate_(activity.startDate),
+      end: 'DTEND;VALUE=DATE:' + toIcsDate_(nextDateKey_(activity.endDate)),
+    };
+  }
+  var hours = {
+    morning: { s: '080000', e: '120000' },
+    noon: { s: '120000', e: '160000' },
+    evening: { s: '160000', e: '210000' },
+  };
+  var h = hours[slot] || hours.morning;
+  return {
+    start:
+      'DTSTART;TZID=Asia/Jerusalem:' + toIcsDate_(activity.startDate) + 'T' + h.s,
+    end: 'DTEND;TZID=Asia/Jerusalem:' + toIcsDate_(activity.endDate) + 'T' + h.e,
+  };
+}
+
+function stampUtc_() {
+  return Utilities.formatDate(new Date(), 'UTC', "yyyyMMdd'T'HHmmss'Z'");
+}
+
+function buildIcs_(state) {
+  var people = state.people || [];
+  var branches = state.branches || [];
+  var hiddenBranches = state.hiddenBranches || [];
+  var hiddenPeople = state.hiddenPeople || [];
+  var stamp = stampUtc_();
+  var lines = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//KolMini//Vacation Board//HE',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    'X-WR-CALNAME:' + escapeIcs_('לוח החופש'),
+    'X-WR-TIMEZONE:Asia/Jerusalem',
+    'BEGIN:VTIMEZONE',
+    'TZID:Asia/Jerusalem',
+    'BEGIN:STANDARD',
+    'TZOFFSETFROM:+0200',
+    'TZOFFSETTO:+0200',
+    'TZNAME:IST',
+    'DTSTART:19700101T000000',
+    'END:STANDARD',
+    'END:VTIMEZONE',
+  ];
+
+  (state.activities || []).forEach(function (activity) {
+    if (!isVisible_(activity, people, hiddenBranches, hiddenPeople)) return;
+    var times = eventTimes_(activity);
+    var who = participantsLabel_(activity, people, branches);
+    var desc = [timeLabel_(activity.timeOfDay), who ? 'משתתפים: ' + who : '', 'מקור: לוח החופש המשפחתי']
+      .filter(Boolean)
+      .join('\n');
+    lines.push('BEGIN:VEVENT');
+    lines.push('UID:' + activity.id + '@vacation-board.kolmini');
+    lines.push('DTSTAMP:' + stamp);
+    lines.push(times.start);
+    lines.push(times.end);
+    lines.push('SUMMARY:' + escapeIcs_(activity.title));
+    lines.push('DESCRIPTION:' + escapeIcs_(desc));
+    if (activity.location) lines.push('LOCATION:' + escapeIcs_(activity.location));
+    lines.push('END:VEVENT');
+  });
+
+  lines.push('END:VCALENDAR');
+  return lines.join('\r\n') + '\r\n';
 }
 
 function ss_() {
