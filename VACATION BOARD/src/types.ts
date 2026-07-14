@@ -23,6 +23,8 @@ export interface Activity {
   endDate: string;
   timeOfDay: TimeOfDay;
   location?: string;
+  /** פירוט חופשי — למשל תוכנית לפי ימים */
+  description?: string;
   participantMode: ParticipantMode;
   branchIds: string[];
   personIds: string[];

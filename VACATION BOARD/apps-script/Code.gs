@@ -197,7 +197,12 @@ function buildIcs_(state) {
     if (!isVisible_(activity, people, hiddenBranches, hiddenPeople)) return;
     var times = eventTimes_(activity);
     var who = participantsLabel_(activity, people, branches);
-    var desc = [timeLabel_(activity.timeOfDay), who ? 'משתתפים: ' + who : '', 'מקור: לוח החופש המשפחתי']
+    var desc = [
+      activity.description || '',
+      timeLabel_(activity.timeOfDay),
+      who ? 'משתתפים: ' + who : '',
+      'מקור: לוח החופש המשפחתי',
+    ]
       .filter(Boolean)
       .join('\n');
     lines.push('BEGIN:VEVENT');
@@ -235,6 +240,7 @@ function ensureSheets_() {
     'branchIds',
     'personIds',
     'color',
+    'description',
   ]);
 }
 
@@ -319,6 +325,7 @@ function readState_() {
       branchIds: parseList_(r[7]),
       personIds: parseList_(r[8]),
       color: r[9] ? String(r[9]) : '',
+      description: r[10] ? String(r[10]) : '',
     };
   });
 
@@ -332,6 +339,7 @@ function readState_() {
     activities: activities.map(function (a) {
       if (!a.location) delete a.location;
       if (!a.color) delete a.color;
+      if (!a.description) delete a.description;
       return a;
     }),
   };
@@ -364,6 +372,7 @@ function writeState_(state) {
       'branchIds',
       'personIds',
       'color',
+      'description',
     ],
     (state.activities || []).map(function (a) {
       return [
@@ -377,6 +386,7 @@ function writeState_(state) {
         JSON.stringify(a.branchIds || []),
         JSON.stringify(a.personIds || []),
         a.color || '',
+        a.description || '',
       ];
     }),
   );

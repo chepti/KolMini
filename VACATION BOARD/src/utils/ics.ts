@@ -121,6 +121,7 @@ export function buildVacationIcs(
     );
     const { startLine, endLine } = eventTimes(activity);
     const descParts = [
+      activity.description,
       TIME_LABELS[activity.timeOfDay],
       who ? `משתתפים: ${who}` : '',
       'מקור: לוח החופש המשפחתי',

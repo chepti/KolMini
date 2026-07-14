@@ -872,10 +872,20 @@ button {
 }
 
 .vb-activity-pill__meta,
-.vb-activity-pill__who {
+.vb-activity-pill__who,
+.vb-activity-pill__desc {
   font-size: 0.65rem;
   opacity: 0.92;
   line-height: 1.2;
+}
+
+.vb-activity-pill__desc {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  opacity: 0.95;
+  font-weight: 500;
 }
 
 @media (max-width: 900px) {
@@ -943,6 +953,25 @@ button {
   gap: 0.35rem;
   font-weight: 600;
   font-size: 0.9rem;
+}
+
+.vb-textarea {
+  width: 100%;
+  min-height: 4.5rem;
+  resize: vertical;
+  border: 2px solid rgba(255, 142, 83, 0.28);
+  border-radius: 14px;
+  padding: 0.65rem 0.8rem;
+  font: inherit;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--ink);
+  line-height: 1.4;
+}
+
+.vb-textarea:focus {
+  outline: none;
+  border-color: #ff8e53;
+  box-shadow: 0 0 0 3px rgba(255, 142, 83, 0.2);
 }
 
 .vb-modal__row {

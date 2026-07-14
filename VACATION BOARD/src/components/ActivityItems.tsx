@@ -52,6 +52,7 @@ export function ActivityPill({
   const shared = isSharedEvent(activity) && colors.length > 1;
   const tip = [
     activity.title,
+    activity.description,
     TIME_LABELS[activity.timeOfDay],
     activity.location,
     who,
@@ -100,6 +101,9 @@ export function ActivityPill({
             {TIME_LABELS[activity.timeOfDay]}
             {activity.location ? ` · ${activity.location}` : ''}
           </span>
+          {activity.description && (
+            <span className="vb-activity-pill__desc">{activity.description}</span>
+          )}
           <span className="vb-activity-pill__who">{who}</span>
         </>
       )}
@@ -146,6 +150,7 @@ export function MultiDayBar({
   const startPct = dayIndex * colWidthPct + 0.6;
   const tip = [
     activity.title,
+    activity.description,
     TIME_LABELS[activity.timeOfDay],
     activity.location,
     who,
@@ -178,6 +183,7 @@ export function MultiDayBar({
           <span className="vb-multiday-bar__meta">
             {TIME_LABELS[activity.timeOfDay]}
             {activity.location ? ` · ${activity.location}` : ''}
+            {activity.description ? ` · ${activity.description}` : ''}
             {who ? ` · ${who}` : ''}
           </span>
         </>

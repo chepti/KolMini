@@ -19,6 +19,7 @@ function emptyForm(defaultDate?: string) {
     endDate: defaultDate ?? today,
     timeOfDay: 'morning' as TimeOfDay,
     location: '',
+    description: '',
     participantMode: 'people' as ParticipantMode,
     branchIds: [] as string[],
     personIds: [] as string[],
@@ -33,6 +34,7 @@ function fromActivity(a: Activity) {
     endDate: a.endDate,
     timeOfDay: a.timeOfDay,
     location: a.location ?? '',
+    description: a.description ?? '',
     participantMode: a.participantMode,
     branchIds: [...a.branchIds],
     personIds: [...a.personIds],
@@ -78,6 +80,7 @@ export function EventModal({ open, onClose, editActivity, defaultDate }: EventMo
       endDate: end,
       timeOfDay: form.timeOfDay,
       location: form.location.trim() || undefined,
+      description: form.description.trim() || undefined,
       participantMode: form.participantMode,
       branchIds: form.participantMode === 'branch' ? form.branchIds : [],
       personIds: form.participantMode === 'people' ? form.personIds : [],
@@ -191,6 +194,17 @@ export function EventModal({ open, onClose, editActivity, defaultDate }: EventMo
                   value={form.location}
                   onChange={(e) => setForm({ ...form, location: e.target.value })}
                   placeholder="בבית / חוף / ירושלים..."
+                />
+              </label>
+
+              <label>
+                תיאור
+                <textarea
+                  className="vb-textarea"
+                  value={form.description}
+                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                  placeholder="יום שלישי מפלצת, רביעי גן סאקר..."
+                  rows={3}
                 />
               </label>
 
