@@ -495,6 +495,27 @@ button {
   gap: 0.35rem;
   font-weight: 600;
   font-size: 0.92rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.vb-person-remove {
+  border: none;
+  background: transparent;
+  color: #c07878;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  font-size: 1.15rem;
+  line-height: 1;
+  opacity: 0.55;
+  flex-shrink: 0;
+}
+
+.vb-person-remove:hover {
+  opacity: 1;
+  background: rgba(255, 107, 107, 0.18);
+  color: #c0392b;
 }
 
 .vb-kid-tag {

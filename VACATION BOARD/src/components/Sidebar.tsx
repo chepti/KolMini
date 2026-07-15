@@ -44,6 +44,7 @@ export function Sidebar() {
     setPersonColor,
     setBranchColor,
     addPerson,
+    removePerson,
     addBranch,
   } = useVacation();
 
@@ -67,6 +68,11 @@ export function Sidebar() {
     setNewName('');
     setAddingTo(null);
     setIsChild(true);
+  };
+
+  const confirmRemovePerson = (personId: string, name: string) => {
+    const ok = window.confirm(`למחוק את ${name} מהמשפחה?`);
+    if (ok) removePerson(personId);
   };
 
   return (
@@ -195,6 +201,16 @@ export function Sidebar() {
                             {person.name}
                             {person.isChild && <span className="vb-kid-tag">ילד/ה</span>}
                           </span>
+
+                          <button
+                            type="button"
+                            className="vb-person-remove"
+                            onClick={() => confirmRemovePerson(person.id, person.name)}
+                            title={`מחק את ${person.name}`}
+                            aria-label={`מחק את ${person.name}`}
+                          >
+                            ×
+                          </button>
                         </div>
                       );
                     })}

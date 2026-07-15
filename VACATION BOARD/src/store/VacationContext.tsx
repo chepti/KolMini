@@ -92,6 +92,7 @@ interface VacationStore extends VacationState {
   setPersonColor: (personId: string, color: string) => void;
   setBranchColor: (branchId: string, color: string) => void;
   addPerson: (person: Omit<Person, 'id' | 'color'> & { color?: string }) => void;
+  removePerson: (personId: string) => void;
   addBranch: (name: string) => void;
   addActivity: (activity: Omit<Activity, 'id'>) => void;
   updateActivity: (id: string, patch: Partial<Activity>) => void;
@@ -383,6 +384,18 @@ export function VacationProvider({ children }: { children: ReactNode }) {
     [patch],
   );
 
+  const removePerson = useCallback((personId: string) => {
+    patch((prev) => ({
+      ...prev,
+      people: prev.people.filter((p) => p.id !== personId),
+      hiddenPeople: prev.hiddenPeople.filter((id) => id !== personId),
+      activities: prev.activities.map((a) => ({
+        ...a,
+        personIds: a.personIds.filter((id) => id !== personId),
+      })),
+    }));
+  }, [patch]);
+
   const addBranch = useCallback((name: string) => {
     patch((prev) => ({
       ...prev,
@@ -444,6 +457,7 @@ export function VacationProvider({ children }: { children: ReactNode }) {
       setPersonColor,
       setBranchColor,
       addPerson,
+      removePerson,
       addBranch,
       addActivity,
       updateActivity,
@@ -466,6 +480,7 @@ export function VacationProvider({ children }: { children: ReactNode }) {
       setPersonColor,
       setBranchColor,
       addPerson,
+      removePerson,
       addBranch,
       addActivity,
       updateActivity,
