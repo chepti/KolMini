@@ -118,16 +118,16 @@ if (!headers_sent()) {
   .hero h1 .small-line{font-size:clamp(24px,4vw,46px); line-height:1.25;}
 
   .hero-flex{position:relative;}
-  .hero-copy{padding-right:clamp(320px,44vw,600px);}
-  .hero-cutout{position:absolute; right:0; bottom:0; z-index:2; width:clamp(340px,44vw,600px); line-height:0;}
+  .hero-copy{padding-right:clamp(200px,26vw,340px);}
+  .hero-cutout{position:absolute; right:0; bottom:0; z-index:2; width:clamp(210px,26vw,340px); line-height:0;}
   .hero-cutout img{width:100%; display:block;}
   @media(max-width:760px){
-    .hero-copy{padding-right:60vw;}
-    .hero-cutout{width:60vw;}
+    .hero-copy{padding-right:36vw;}
+    .hero-cutout{width:36vw;}
   }
   @media(max-width:480px){
-    .hero-copy{padding-right:66vw;}
-    .hero-cutout{width:68vw;}
+    .hero-copy{padding-right:40vw;}
+    .hero-cutout{width:42vw;}
   }
 
   .hero-sub{
@@ -432,7 +432,7 @@ if (!headers_sent()) {
   </div>
 
   <div class="hero-cutout rv rv-right d1">
-    <img src="https://estersultan.com/kibud-horim/images/esther-cutout-3.png" alt="אסתר סולטן">
+    <img src="https://estersultan.com/kibud-horim/images/esther-cutout-4.png" alt="אסתר סולטן">
   </div>
 </section>
 
