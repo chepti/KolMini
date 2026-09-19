@@ -118,15 +118,15 @@ if (!headers_sent()) {
   .hero h1 .small-line{font-size:clamp(24px,4vw,46px); line-height:1.25;}
 
   .hero-flex{position:relative;}
-  .hero-copy{padding-right:clamp(200px,26vw,340px);}
-  .hero-cutout{position:absolute; right:0; bottom:0; z-index:2; width:clamp(210px,26vw,340px); line-height:0;}
+  .hero-copy{padding-left:clamp(200px,26vw,340px);}
+  .hero-cutout{position:absolute; left:0; right:auto; bottom:0; z-index:2; width:clamp(210px,26vw,340px); line-height:0;}
   .hero-cutout img{width:100%; display:block;}
   @media(max-width:760px){
-    .hero-copy{padding-right:36vw;}
+    .hero-copy{padding-left:36vw;}
     .hero-cutout{width:36vw;}
   }
   @media(max-width:480px){
-    .hero-copy{padding-right:40vw;}
+    .hero-copy{padding-left:40vw;}
     .hero-cutout{width:42vw;}
   }
 
