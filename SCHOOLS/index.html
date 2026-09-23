@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ליווי בית ספרי – בינה מלאכותית בהוראה | חפציה בן ארצי</title>
+<meta name="description" content="הצעה לליווי בית ספרי בבינה מלאכותית בהוראה: קורס לכל הצוות, קבוצת תמיכה שנתית, הרצאת פתיחה, מפגשים מקוונים וחודש אתגר.">
+<meta property="og:title" content="ליווי בית ספרי: בינה מלאכותית בהוראה | חפציה בן ארצי">
+<meta property="og:description" content="קורס לכל הצוות, קבוצת תמיכה שנתית, הרצאת פתיחה, מפגשים מקוונים וחודש אתגר. בחרו רכיבים וקבלו הצעה.">
+<meta property="og:image" content="https://chepti.com/schools/hero.webp">
+<meta property="og:url" content="https://chepti.com/schools/">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600;700&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f7f3ee; --paper:#fffdfa; --ink:#27303f; --ink-2:#56606f; --ink-3:#868c98;
+  --line:#ebe4da; --line-2:#dcd2c4;
+  --navy:#3d5a8a; --navy-2:#4d6c9e; --accent:#e08a5a; --accent-soft:#fbeadf;
+  --ok:#2f7a55; --ok-soft:#e3f1e9;
+  --shadow:0 1px 2px rgba(29,36,51,.05),0 8px 24px rgba(29,36,51,.06);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#14171d; --paper:#1b1f27; --ink:#eceae4; --ink-2:#b9bcc4; --ink-3:#8b909b;
+    --line:#2c313b; --line-2:#3a404c;
+    --navy:#8fb1dc; --navy-2:#a9c4e6; --accent:#e0955c; --accent-soft:#3a2a1e;
+    --ok:#6cc093; --ok-soft:#1d3228;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#14171d; --paper:#1b1f27; --ink:#eceae4; --ink-2:#b9bcc4; --ink-3:#8b909b;
+  --line:#2c313b; --line-2:#3a404c;
+  --navy:#8fb1dc; --navy-2:#a9c4e6; --accent:#e0955c; --accent-soft:#3a2a1e;
+  --ok:#6cc093; --ok-soft:#1d3228;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Assistant",system-ui,sans-serif;font-size:17px;line-height:1.65}
+h1,h2,h3{font-family:"Fredoka","Assistant",sans-serif;font-weight:600;line-height:1.3;margin:0;color:var(--ink)}
+a{color:var(--navy)}
+.icon{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.wrap{max-width:1040px;margin:0 auto;padding:0 16px}
+
+/* top bar */
+.topbar{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.topbar .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;height:60px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;color:var(--ink);text-decoration:none}
+.brand-mark{width:34px;height:34px;border-radius:50%;background:var(--navy);color:var(--paper);display:grid;place-items:center}
+.brand-mark .icon{width:18px;height:18px}
+.brand small{display:block;font-weight:500;color:var(--ink-3);font-size:13px;line-height:1.1}
+.top-actions{display:flex;gap:8px}
+
+.btn{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:9px 18px;font:inherit;font-weight:600;font-size:15px;border:1px solid var(--line-2);background:var(--paper);color:var(--ink);cursor:pointer;text-decoration:none;transition:background .15s,border-color .15s,transform .1s}
+.btn:hover{border-color:var(--navy)}
+.btn:active{transform:translateY(1px)}
+.btn .icon{width:18px;height:18px}
+.btn-primary{background:var(--navy);border-color:var(--navy);color:var(--paper)}
+.btn-primary:hover{background:var(--navy-2);border-color:var(--navy-2)}
+.btn-accent{background:var(--accent);border-color:var(--accent);color:#fff}
+@media (max-width:560px){.btn .label-long{display:none}}
+
+/* document header */
+.doc-head{padding:48px 0 36px}
+.hero{display:grid;grid-template-columns:1.25fr 1fr;gap:36px;align-items:center}
+.hero-img{margin:0;border-radius:32px;overflow:hidden;aspect-ratio:4/3;background:var(--accent-soft);border:1px solid var(--line);box-shadow:var(--shadow)}
+.hero-img img{width:100%;height:100%;object-fit:cover;display:block}
+.hero.no-img{grid-template-columns:1fr}
+.hero.no-img .hero-img{display:none}
+@media (max-width:820px){.hero{grid-template-columns:1fr}.hero-img{max-width:460px}}
+.kicker{display:inline-flex;align-items:center;gap:8px;color:var(--accent);font-weight:700;font-size:14px;letter-spacing:.02em}
+.doc-head h1{font-size:clamp(30px,4.6vw,44px);margin:14px 0 16px;max-width:760px}
+.lead{font-size:19px;color:var(--ink-2);max-width:720px;margin:0}
+.meta{display:flex;flex-wrap:wrap;gap:10px 28px;margin-top:28px;padding-top:20px;border-top:1px solid var(--line);font-size:15px;color:var(--ink-2)}
+.meta div{display:flex;align-items:center;gap:8px}
+.meta .icon{width:17px;height:17px;color:var(--ink-3)}
+.meta strong{color:var(--ink)}
+#forSchool[hidden]{display:none}
+
+/* sections */
+section{padding:40px 0;border-top:1px solid var(--line)}
+.sec-head{display:flex;align-items:baseline;gap:14px;margin-bottom:22px}
+.sec-num{font-family:"Fredoka","Assistant",sans-serif;color:var(--accent);font-size:22px;font-weight:700;min-width:28px}
+.sec-head h2{font-size:28px}
+.sec-sub{color:var(--ink-2);margin:-10px 0 24px;max-width:720px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow)}
+
+/* about */
+.about{display:grid;grid-template-columns:1.4fr 1fr;gap:28px;align-items:start}
+.about p{margin:0 0 14px;color:var(--ink-2)}
+.facts{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fact{padding:16px;border-radius:14px;background:var(--paper);border:1px solid var(--line)}
+.fact b{display:block;font-family:"Fredoka","Assistant",sans-serif;font-size:26px;color:var(--navy);line-height:1.1}
+.fact span{font-size:14px;color:var(--ink-2)}
+@media (max-width:760px){.about{grid-template-columns:1fr}}
+
+/* timeline */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;counter-reset:s}
+.step{padding:20px;position:relative}
+.step .ic{width:42px;height:42px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;margin-bottom:12px}
+.step h3{font-size:19px;margin-bottom:6px}
+.step p{margin:0;font-size:15px;color:var(--ink-2)}
+.step .when{display:inline-block;margin-bottom:8px;font-size:13px;font-weight:600;color:var(--ink-3)}
+@media (max-width:860px){.steps{grid-template-columns:1fr 1fr}}
+@media (max-width:520px){.steps{grid-template-columns:1fr}}
+
+/* pricing */
+.pricing{display:grid;grid-template-columns:1fr 320px;gap:24px;align-items:start}
+@media (max-width:900px){.pricing{grid-template-columns:1fr}}
+.items{display:flex;flex-direction:column;gap:12px}
+.item{display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:start;padding:20px;cursor:pointer;transition:border-color .15s,background .15s}
+.item:hover{border-color:var(--line-2)}
+.item.on{border-color:var(--navy);background:color-mix(in srgb,var(--navy) 4%,var(--paper))}
+.item input{position:absolute;opacity:0;pointer-events:none}
+.check{width:26px;height:26px;border-radius:50%;border:2px solid var(--line-2);display:grid;place-items:center;margin-top:2px;transition:all .15s;color:transparent}
+.item.on .check{background:var(--navy);border-color:var(--navy);color:var(--paper)}
+.check .icon{width:15px;height:15px;stroke-width:3}
+.item h3{font-size:20px;display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.tag{font-family:"Assistant",sans-serif;font-size:12px;font-weight:700;padding:2px 10px;border-radius:999px;background:var(--accent-soft);color:var(--accent)}
+.tag.ok{background:var(--ok-soft);color:var(--ok)}
+.item p{margin:6px 0 0;color:var(--ink-2);font-size:15.5px}
+.item ul{margin:10px 0 0;padding:0 18px 0 0;color:var(--ink-2);font-size:15px}
+.item li{margin:2px 0}
+.price{text-align:left;white-space:nowrap}
+.price b{font-family:"Fredoka","Assistant",sans-serif;font-size:24px;color:var(--ink)}
+.price small{display:block;color:var(--ink-3);font-size:13px}
+.qty{display:inline-flex;align-items:center;gap:4px;margin-top:10px;border:1px solid var(--line-2);border-radius:999px;padding:2px}
+.qty button{width:30px;height:30px;border-radius:50%;border:0;background:transparent;color:var(--ink);cursor:pointer;display:grid;place-items:center}
+.qty button:hover{background:var(--line)}
+.qty button .icon{width:16px;height:16px}
+.qty output{min-width:22px;text-align:center;font-weight:700}
+@media (max-width:560px){.item{grid-template-columns:auto 1fr}.price{grid-column:2;text-align:right}}
+
+.summary{position:sticky;top:80px;padding:22px}
+.summary h3{font-size:20px;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.sum-list{list-style:none;margin:0;padding:0;font-size:15px}
+.sum-list li{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line)}
+.sum-list li.empty{color:var(--ink-3);justify-content:center;border:0}
+.sum-total{display:flex;justify-content:space-between;align-items:baseline;margin-top:14px;font-weight:700}
+.sum-total b{font-family:"Fredoka","Assistant",sans-serif;font-size:30px;color:var(--navy)}
+.sum-note{font-size:13px;color:var(--ink-3);margin:8px 0 16px}
+.summary .btn{width:100%;justify-content:center}
+
+/* units */
+.units{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.unit{display:flex;gap:12px;align-items:flex-start;padding:16px}
+.unit .ic{width:38px;height:38px;border-radius:12px;background:color-mix(in srgb,var(--navy) 10%,transparent);color:var(--navy);display:grid;place-items:center;flex:none}
+.unit h3{font-family:"Assistant",sans-serif;font-size:17px;font-weight:700}
+.unit p{margin:2px 0 0;font-size:14.5px;color:var(--ink-2);line-height:1.5}
+@media (max-width:820px){.units{grid-template-columns:1fr 1fr}}
+@media (max-width:520px){.units{grid-template-columns:1fr}}
+
+/* nivcheret */
+.team{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:center;padding:28px}
+.team p{color:var(--ink-2);margin:0 0 12px}
+.levels{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+.lvl{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:12px;border:1px solid var(--line);font-weight:600;font-size:15px}
+.lvl i{width:12px;height:12px;border-radius:50%;flex:none}
+@media (max-width:820px){.team{grid-template-columns:1fr}}
+.team svg.illu{width:100%;height:auto;max-height:280px}
+
+/* frameworks */
+.frames{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.frame{padding:22px}
+.frame h3{font-size:20px;display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.frame h3 .icon{color:var(--accent)}
+.frame p,.frame li{color:var(--ink-2);font-size:15.5px}
+.frame ul{margin:8px 0 0;padding-right:18px}
+@media (max-width:720px){.frames{grid-template-columns:1fr}}
+
+/* terms */
+.terms{margin:0;padding:0;list-style:none;display:grid;gap:10px}
+.terms li{display:flex;gap:12px;align-items:flex-start;color:var(--ink-2)}
+.terms .icon{color:var(--ok);margin-top:4px}
+
+/* contact */
+.contact{display:grid;grid-template-columns:1fr 1.2fr;gap:28px;padding:28px}
+.contact p{color:var(--ink-2)}
+.form{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form label{display:flex;flex-direction:column;gap:4px;font-size:14px;font-weight:600;color:var(--ink-2)}
+.form .full{grid-column:1/-1}
+.form input,.form textarea,.form select{font:inherit;font-size:16px;padding:10px 14px;border-radius:12px;border:1px solid var(--line-2);background:var(--bg);color:var(--ink)}
+.form textarea{min-height:84px;resize:vertical}
+.form input:focus,.form textarea:focus,.form select:focus{outline:2px solid color-mix(in srgb,var(--navy) 40%,transparent);border-color:var(--navy)}
+.form-actions{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:10px;margin-top:4px}
+.chosen{font-size:14px;color:var(--ink-3);grid-column:1/-1}
+@media (max-width:820px){.contact{grid-template-columns:1fr}.form{grid-template-columns:1fr}}
+
+/* footer */
+footer{margin-top:40px;border-top:1px solid var(--line);padding:26px 0 34px;color:var(--ink-3);font-size:14.5px}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:14px}
+footer a{color:var(--ink-2);font-weight:600;text-decoration:none}
+footer a:hover{color:var(--navy)}
+.credit{display:flex;align-items:center;gap:8px}
+
+[data-tip]{position:relative}
+[data-tip]:hover::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 8px);right:50%;transform:translateX(50%);background:var(--ink);color:var(--paper);font-size:13px;font-weight:500;padding:6px 10px;border-radius:8px;white-space:nowrap;z-index:30;pointer-events:none}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--paper);padding:10px 20px;border-radius:999px;font-weight:600;opacity:0;transition:all .25s;z-index:50;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* print = הצעת מחיר */
+@media print{
+  :root{--bg:#fff;--paper:#fff;--shadow:none}
+  body{font-size:12.5pt}
+  .topbar,.no-print,.form-actions,.qty button,footer .feedback{display:none!important}
+  .doc-head{padding:0 0 18px}
+  section{padding:18px 0;break-inside:auto}
+  .card{box-shadow:none}
+  .item,.unit,.step,.frame{break-inside:avoid}
+  .item:not(.on){opacity:.45}
+  .pricing{grid-template-columns:1fr}
+  .summary{position:static;break-inside:avoid}
+  .contact{grid-template-columns:1fr}
+  a{text-decoration:none}
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+    <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M9.94 14.06 8 20l-1.94-5.94L0 12l6.06-1.94L8 4l1.94 6.06L16 12z" transform="translate(2 0) scale(.85)"/><path d="M19 3v4M17 5h4M20 16v4M18 18h4"/></symbol>
+    <symbol id="i-grad" viewBox="0 0 24 24"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 2.5 9 2.5 12 0v-5"/></symbol>
+    <symbol id="i-printer" viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8" rx="1"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></symbol>
+    <symbol id="i-school" viewBox="0 0 24 24"><path d="M14 22v-4a2 2 0 0 0-4 0v4"/><path d="m18 10 4 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-8l4-2"/><path d="M18 5v17M6 5v17"/><path d="m4 6 8-4 8 4"/><circle cx="12" cy="9" r="2"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></symbol>
+    <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10v1a7 7 0 0 1-14 0v-1M12 18v4M8 22h8"/></symbol>
+    <symbol id="i-laptop" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M2 20h20"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22z"/></symbol>
+    <symbol id="i-video" viewBox="0 0 24 24"><path d="m22 8-6 4 6 4V8z"/><rect x="2" y="6" width="14" height="12" rx="2"/></symbol>
+    <symbol id="i-flame" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+    <symbol id="i-map" viewBox="0 0 24 24"><path d="M14.1 6 9.9 4 3 7v13l6.9-3 4.2 2 6.9-3V3z"/><path d="M9.9 4v13M14.1 6v13"/></symbol>
+    <symbol id="i-lightbulb" viewBox="0 0 24 24"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6M10 22h4"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></symbol>
+    <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.09-3.09a2 2 0 0 0-2.82 0L6 21"/></symbol>
+    <symbol id="i-pointer" viewBox="0 0 24 24"><path d="m9 9 5 12 1.8-5.2L21 14z"/><path d="M7.2 2.2 8 5.1M5.1 8l-2.9-.8M14 4.1 12 6M6 12l-1.9 2"/></symbol>
+    <symbol id="i-film" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="2"/><path d="M7 2v20M17 2v20M2 12h20M2 7h5M2 17h5M17 17h5M17 7h5"/></symbol>
+    <symbol id="i-zap" viewBox="0 0 24 24"><path d="M13 2 3 14h9l-1 8 10-12h-9z"/></symbol>
+    <symbol id="i-clipboard" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></symbol>
+    <symbol id="i-folder" viewBox="0 0 24 24"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2z"/></symbol>
+    <symbol id="i-briefcase" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></symbol>
+    <symbol id="i-award" viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><path d="M15.48 12.89 17 22l-5-3-5 3 1.52-9.11"/></symbol>
+    <symbol id="i-compass" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m16.24 7.76-2.12 6.36-6.36 2.12 2.12-6.36z"/></symbol>
+    <symbol id="i-receipt" viewBox="0 0 24 24"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1z"/><path d="M16 8H8M16 12H8M13 16H8"/></symbol>
+    <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
+    <symbol id="i-mail" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></symbol>
+    <symbol id="i-message" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></symbol>
+  </defs>
+</svg>
+
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="#top">
+      <span class="brand-mark"><svg class="icon"><use href="#i-sparkles"/></svg></span>
+      <span>ליווי בית ספרי<small>חפציה בן ארצי · בינה מלאכותית בהוראה</small></span>
+    </a>
+    <div class="top-actions">
+      <button class="btn" onclick="window.print()" data-tip="שמירה כ-PDF או הדפסה של ההצעה"><svg class="icon"><use href="#i-printer"/></svg><span class="label-long">הצעה להדפסה</span></button>
+      <a class="btn btn-primary" href="#contact"><svg class="icon"><use href="#i-send"/></svg>יצירת קשר</a>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+  <div class="wrap">
+
+    <div class="doc-head">
+      <div class="hero" id="hero">
+      <div>
+      <span class="kicker"><svg class="icon"><use href="#i-grad"/></svg>הצעה לליווי בית ספרי · שנת הלימודים תשפ״ז</span>
+      <h1>בינה מלאכותית בהוראה: ליווי צוות בית הספר לאורך כל השנה</h1>
+      <p class="lead">קורס מקוון מתעדכן לכל חדר המורים, קבוצת תמיכה שנתית, ומפגשים שבונים ביטחון ושגרה של שימוש בכלי בינה מלאכותית בהוראה. בית הספר בוחר את הרכיבים שמתאימים לו.</p>
+      </div>
+      <figure class="hero-img"><img src="hero.webp" alt="חדר מורים לומד יחד בינה מלאכותית" onerror="document.getElementById('hero').classList.add('no-img')"></figure>
+      </div>
+      <div class="meta">
+        <div id="forSchool" hidden><svg class="icon"><use href="#i-school"/></svg>הוכן עבור: <strong id="forSchoolName"></strong></div>
+        <div><svg class="icon"><use href="#i-calendar"/></svg>תאריך: <strong id="today"></strong></div>
+        <div><svg class="icon"><use href="#i-user"/></svg>מלווה: <strong>חפציה בן ארצי</strong></div>
+        <div><svg class="icon"><use href="#i-link"/></svg>אתר הקורס: <a href="https://tikshuv.chepti.com/aia" target="_blank" rel="noopener"><strong>tikshuv.chepti.com/aia</strong></a></div>
+      </div>
+    </div>
+
+    <!-- 1 -->
+    <section id="about">
+      <div class="sec-head"><span class="sec-num">1</span><h2>על מה מדובר</h2></div>
+      <div class="about">
+        <div>
+          <p>הקורס „בינה מלאכותית בהוראה” של חפציה בן ארצי פועל כבר כשנתיים ומתעדכן כל הזמן. מבנה הפרקים יציב, והתוכן שבתוכם משתנה עם השטח: כלים שיורדים מהמדף מוחלפים, כלים חדשים נכנסים, וההמלצות מתעדכנות לפי מה שהכי מתאים היום לכל משימה של מורה.</p>
+          <p>בקיץ האחרון נפתח הקורס לשלושה שבועות כאתגר פתוח למורים, ומורים רבים ביקשו להביא אותו לצוות בית הספר. ההצעה הזו מאפשרת בדיוק את זה: הקורס לכל הצוות, עם ליווי שנתי והתאמה לקצב ולמסגרת של בית הספר.</p>
+          <p>הלמידה מעשית: בכל יחידה המורה מתנסה בכלים על חומרים מהכיתה שלה, ומגישה תוצר שאפשר להשתמש בו כבר למחרת.</p>
+        </div>
+        <div class="facts">
+          <div class="fact"><b>9</b><span>יחידות לימוד בנושאי הוראה</span></div>
+          <div class="fact"><b>תוצר</b><span>בכל יחידה, שימושי לכיתה</span></div>
+          <div class="fact"><b>שנה</b><span>של ליווי בקבוצת וואטסאפ</span></div>
+          <div class="fact"><b>מתעדכן</b><span>כלים והמלצות לאורך השנה</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2 -->
+    <section id="how">
+      <div class="sec-head"><span class="sec-num">2</span><h2>מהלך השנה</h2></div>
+      <p class="sec-sub">מסלול טיפוסי. הקצב, הסדר והיקף החובה נקבעים יחד עם הנהלת בית הספר.</p>
+      <div class="steps">
+        <div class="step card">
+          <span class="ic"><svg class="icon"><use href="#i-mic"/></svg></span>
+          <span class="when">פתיחה</span>
+          <h3>מפגש השקה</h3>
+          <p>הרצאה פיזית בבית הספר: תמונת מצב, השראה, ומה מחכה לצוות. הגשר הראשון שמוריד חששות.</p>
+        </div>
+        <div class="step card">
+          <span class="ic"><svg class="icon"><use href="#i-laptop"/></svg></span>
+          <span class="when">לאורך השנה</span>
+          <h3>למידה ביחידות</h3>
+          <p>הצוות לומד את יחידות הקורס בקצב שנקבע, ובכל יחידה מגיש תוצר.</p>
+        </div>
+        <div class="step card">
+          <span class="ic"><svg class="icon"><use href="#i-chat"/></svg></span>
+          <span class="when">שוטף</span>
+          <h3>ליווי ותמיכה</h3>
+          <p>קבוצת וואטסאפ פעילה לשאלות, עדכונים וטיפים, ומפגשים מקוונים לפי הצורך.</p>
+        </div>
+        <div class="step card">
+          <span class="ic"><svg class="icon"><use href="#i-flame"/></svg></span>
+          <span class="when">חודש נבחר</span>
+          <h3>חודש אתגר</h3>
+          <p>טיפ או משימה קטנה בכל יום. מעלה מודעות ומכניס לתהליך גם את מי שעוד לא קפץ למים.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3 -->
+    <section id="pricing">
+      <div class="sec-head"><span class="sec-num">3</span><h2>רכיבי ההצעה ומחירים</h2></div>
+      <p class="sec-sub no-print">סמנו את הרכיבים הרצויים. הסיכום מתעדכן מיד, ואפשר לשלוח אותו אליי בסוף העמוד או לשמור כ-PDF.</p>
+      <div class="pricing">
+        <div class="items" id="items"></div>
+        <aside class="summary card">
+          <h3><svg class="icon"><use href="#i-receipt"/></svg>סיכום הבחירה</h3>
+          <ul class="sum-list" id="sumList"></ul>
+          <div class="sum-total"><span>סה״כ</span><b id="sumTotal">0 ₪</b></div>
+          <p class="sum-note" id="vatNote">המחירים בש״ח. לצוותים קטנים ניתן מחיר מותאם לקורס.</p>
+          <a class="btn btn-primary no-print" href="#contact"><svg class="icon"><use href="#i-send"/></svg>המשך לשליחת הבחירה</a>
+        </aside>
+      </div>
+    </section>
+
+    <!-- 4 -->
+    <section id="units">
+      <div class="sec-head"><span class="sec-num">4</span><h2>יחידות הקורס</h2></div>
+      <p class="sec-sub">תשע יחידות, כל אחת עומדת בפני עצמה ומסתיימת בתוצר. בית הספר יכול לקבוע יחידות חובה או לאפשר בחירה חופשית.</p>
+      <div class="units">
+        <div class="unit card"><span class="ic"><svg class="icon"><use href="#i-lightbulb"/></svg></span><div><h3>התייעצות ותכנון</h3><p>הבינה כשותפה לתכנון שיעור, יחידה ורעיונות.</p></div></div>
+        <div class="unit card"><span class="ic"><svg class="icon"><use href="#i-book"/></svg></span><div><h3>חומרי ליבה</h3><p>דפי עבודה, טקסטים והתאמות לרמות שונות.</p></div></div>
+        <div class="unit card"><span class="ic"><svg class="icon"><use href="#i-image"/></svg></span><div><h3>ויזואליה ותרשימים</h3><p>תמונות, אינפוגרפיקות ותרשימים להמחשה.</p></div></div>
+        <div class="unit card"><span class="ic"><svg class="icon"><use href="#i-pointer"/></svg></span><div><h3>אינטראקטיבי</h3><p>משחקים, חידונים ופעילויות לתלמידים.</p></div></div>
+        <div class="unit card"><span class="ic"><svg class="icon"><use href="#i-film"/></svg></span><div><h3>מדיה, וידאו ואודיו</h3><p>סרטונים, פודקאסטים וקריינות.</p></div></div>
+        <div class="unit card"><span class="ic"><svg class="icon"><use href="#i-zap"/></svg></span><div><h3>אפליקציות ואוטומציה</h3><p>כלים קטנים שבונים לבד, וחיסכון בזמן.</p></div></div>
+        <div class="unit card"><span class="ic"><svg class="icon"><use href="#i-clipboard"/></svg></span><div><h3>הערכה</h3><p>מחוונים, משוב והערכה חכמה.</p></div></div>
+        <div class="unit card"><span class="ic"><svg class="icon"><use href="#i-briefcase"/></svg></span><div><h3>ארגון וניהול</h3><p>מיילים, סיכומים, לוחות זמנים ועבודה שוטפת.</p></div></div>
+        <div class="unit card"><span class="ic"><svg class="icon"><use href="#i-folder"/></svg></span><div><h3>תיק עבודות</h3><p>ריכוז התוצרים לפורטפוליו אישי.</p></div></div>
+      </div>
+    </section>
+
+    <!-- 5 -->
+    <section id="team">
+      <div class="sec-head"><span class="sec-num">5</span><h2>הנבחרת: מפת הידע של הצוות</h2></div>
+      <div class="team card">
+        <div>
+          <p>כחלק מהליווי, הצוות מקבל גישה לאפליקציה שבה כל מורה מסמנת, בבת אחת או בהדרגה לאורך השנה, את מצבה בכל אחד מנושאי הבינה המלאכותית בהוראה.</p>
+          <p>ההנהלה רואה תמונה מרוכזת: באילו תחומים כדאי להתמקד, ומי בצוות יכול ללמד את מי. כך נוצרות חברותות פנימיות, והידע נשאר בבית הספר גם אחרי שהליווי מסתיים.</p>
+          <div class="levels">
+            <div class="lvl"><i style="background:#2f7a55"></i>שולטת</div>
+            <div class="lvl"><i style="background:#c8763a"></i>רוצה ללמוד</div>
+            <div class="lvl"><i style="background:#9aa1ad"></i>עוד לא מכירה</div>
+            <div class="lvl"><i style="background:#1f3a5f"></i>מוכנה ללמד אחרים</div>
+          </div>
+        </div>
+        <svg class="illu" viewBox="0 0 360 260" role="img" aria-label="איור: רשת של מורים המחוברים בחברותות">
+          <defs>
+            <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f6e7da"/><stop offset="1" stop-color="#e9eef6"/></linearGradient>
+          </defs>
+          <rect x="10" y="10" width="340" height="240" rx="22" fill="url(#g1)" stroke="#d3ccbe" stroke-width="2"/>
+          <g stroke="#1f3a5f" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="2 7" opacity=".55" fill="none">
+            <path d="M92 80 L180 130"/><path d="M268 78 L180 130"/><path d="M92 190 L180 130"/><path d="M268 192 L180 130"/><path d="M92 80 L92 190"/><path d="M268 78 L268 192"/>
+          </g>
+          <g stroke="#1d2433" stroke-width="2.5">
+            <circle cx="180" cy="130" r="34" fill="#1f3a5f"/>
+            <circle cx="92" cy="80" r="26" fill="#2f7a55"/>
+            <circle cx="268" cy="78" r="26" fill="#c8763a"/>
+            <circle cx="92" cy="190" r="26" fill="#c8763a"/>
+            <circle cx="268" cy="192" r="26" fill="#2f7a55"/>
+          </g>
+          <g fill="#fffdf9" stroke="#1d2433" stroke-width="2">
+            <circle cx="180" cy="120" r="10"/><path d="M162 150c2-11 10-16 18-16s16 5 18 16z"/>
+            <circle cx="92" cy="73" r="7"/><path d="M79 94c1-8 7-12 13-12s12 4 13 12z"/>
+            <circle cx="268" cy="71" r="7"/><path d="M255 92c1-8 7-12 13-12s12 4 13 12z"/>
+            <circle cx="92" cy="183" r="7"/><path d="M79 204c1-8 7-12 13-12s12 4 13 12z"/>
+            <circle cx="268" cy="185" r="7"/><path d="M255 206c1-8 7-12 13-12s12 4 13 12z"/>
+          </g>
+          <g transform="translate(206 92)" stroke="#1d2433" stroke-width="2" stroke-linejoin="round">
+            <path d="M8 0 L10.5 5.5 L16 6 L12 10 L13 16 L8 13 L3 16 L4 10 L0 6 L5.5 5.5 Z" fill="#f2c14e"/>
+          </g>
+        </svg>
+      </div>
+    </section>
+
+    <!-- 6 -->
+    <section id="frames">
+      <div class="sec-head"><span class="sec-num">6</span><h2>מסגרת בבית הספר</h2></div>
+      <p class="sec-sub">בתי ספר משלבים את הליווי בדרכים שונות. אפשר לבחור את המסגרת, או לשלב בין השתיים.</p>
+      <div class="frames">
+        <div class="frame card">
+          <h3><svg class="icon"><use href="#i-award"/></svg>השתלמות מוסדית</h3>
+          <p>הקורס משמש כהשתלמות בית ספרית, בהכרה של שעות אקדמיות דרך מרכז פסג״ה.</p>
+          <ul>
+            <li>הגשת תוצר בכל יחידה היא חובה</li>
+            <li>סילבוס וטפסי פסג״ה מוכנים בליווי שלי</li>
+            <li>נדרש אישור של מרכז הפסג״ה לפני הפתיחה</li>
+          </ul>
+        </div>
+        <div class="frame card">
+          <h3><svg class="icon"><use href="#i-compass"/></svg>העשרה לצוות</h3>
+          <p>הקורס פתוח לכל הצוות כמשאב ללמידה עצמית, בלי חובת הגשה.</p>
+          <ul>
+            <li>כל מורה לומדת בקצב ובנושאים שלה</li>
+            <li>חודש האתגר והנבחרת מניעים השתתפות</li>
+            <li>אפשר לעבור להשתלמות מוסדית בהמשך</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7 -->
+    <section id="terms">
+      <div class="sec-head"><span class="sec-num">7</span><h2>תנאים</h2></div>
+      <ul class="terms">
+        <li><svg class="icon"><use href="#i-check"/></svg><span>ההצעה בתוקף לשנת הלימודים תשפ״ז. המחירים סופיים בש״ח: עוסקת פטורה, ללא תוספת מע״מ.</span></li>
+        <li><svg class="icon"><use href="#i-check"/></svg><span>הגישה לקורס ולקבוצת הוואטסאפ פתוחה לכל אנשי הצוות החינוכי של בית הספר, ללא הגבלת מספר משתתפים.</span></li>
+        <li><svg class="icon"><use href="#i-check"/></svg><span>לצוותים קטנים ניתן מחיר מותאם לרכיב הקורס. פרטו את מספר אנשי הצוות בפנייה.</span></li>
+        <li><svg class="icon"><use href="#i-check"/></svg><span>מועד מפגש הפתיחה, המפגשים המקוונים וחודש האתגר נקבעים בתיאום עם בית הספר.</span></li>
+        <li><svg class="icon"><use href="#i-check"/></svg><span>הקורס מתעדכן במהלך השנה, והצוות מקבל את העדכונים באופן שוטף ללא עלות נוספת.</span></li>
+      </ul>
+    </section>
+
+    <!-- 8 -->
+    <section id="contact">
+      <div class="sec-head"><span class="sec-num">8</span><h2>יצירת קשר והזמנה</h2></div>
+      <div class="contact card">
+        <div>
+          <p>מלאו את הפרטים ושלחו. הבחירה שסימנתם בסעיף 3 מצורפת אוטומטית להודעה, ואחזור אליכם לתיאום שיחה קצרה ולהתאמה סופית.</p>
+          <p>אפשר גם לפנות ישירות לחפציה בן ארצי: <a href="mailto:chepti@gmail.com">chepti@gmail.com</a> · <a href="https://wa.me/972544477081" target="_blank" rel="noopener">054-4477081</a></p>
+        </div>
+        <form class="form" id="form" onsubmit="return false">
+          <label>שם בית הספר<input id="fSchool" required></label>
+          <label>יישוב<input id="fCity"></label>
+          <label>שם איש/אשת הקשר<input id="fName" required></label>
+          <label>תפקיד<input id="fRole" placeholder="מנהל/ת, רכז/ת תקשוב…"></label>
+          <label>טלפון<input id="fPhone" type="tel" inputmode="tel"></label>
+          <label>מספר אנשי צוות (בערך)<input id="fStaff" type="number" min="1" inputmode="numeric"></label>
+          <label class="full">מסגרת מבוקשת
+            <select id="fFrame">
+              <option value="">עוד לא הוחלט</option>
+              <option>השתלמות מוסדית (פסג״ה)</option>
+              <option>העשרה לצוות</option>
+              <option>שילוב של השתיים</option>
+            </select>
+          </label>
+          <label class="full">הערות<textarea id="fNotes" placeholder="מועדים מועדפים, שאלות, בקשות מיוחדות…"></textarea></label>
+          <p class="chosen" id="chosenLine"></p>
+          <div class="form-actions">
+            <button class="btn btn-primary" id="sendMail"><svg class="icon"><use href="#i-mail"/></svg>שליחה במייל</button>
+            <button class="btn" id="sendWa" hidden><svg class="icon"><use href="#i-message"/></svg>שליחה בוואטסאפ</button>
+            <button class="btn" id="copyBtn" data-tip="העתקת הסיכום להדבקה בכל מקום"><svg class="icon"><use href="#i-copy"/></svg>העתקה</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span class="credit"><svg class="icon"><use href="#i-sparkles"/></svg>נבנה על ידי <a href="https://chepti.com" target="_blank" rel="noopener">חולמים תקשוב</a></span>
+    <a class="btn feedback" id="feedbackBtn" href="mailto:chepti@gmail.com?subject=%D7%9E%D7%A9%D7%95%D7%91%20%D7%A2%D7%9C%20%D7%93%D7%A3%20%D7%9C%D7%99%D7%95%D7%95%D7%99%20%D7%91%D7%AA%D7%99%20%D7%A1%D7%A4%D7%A8"><svg class="icon"><use href="#i-message"/></svg>משוב</a>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===== הגדרות: לעדכן כאן ===== */
+const CONFIG = {
+  email: 'chepti@gmail.com',
+  whatsapp: '972544477081',          // מספר בפורמט בינלאומי, למשל '972501234567'. ריק = כפתור וואטסאפ מוסתר
+  vatNote: 'המחירים סופיים בש״ח (עוסקת פטורה, ללא מע״מ). לצוותים קטנים ניתן מחיר מותאם לקורס.'
+};
+
+const ITEMS = [
+  { id:'course', icon:'i-grad', title:'קורס לכל הצוות + ליווי שנתי', price:3000, unit:'לשנה', base:true, on:true,
+    desc:'גישה לקורס „בינה מלאכותית בהוראה” לכל אנשי הצוות, עם קבוצת תמיכה בוואטסאפ לאורך כל השנה.',
+    bullets:['9 יחידות לימוד מתעדכנות, עם תוצר בכל יחידה','קבוצת וואטסאפ לשאלות, עדכוני כלים וטיפים','גישה לנבחרת: מפת הידע של הצוות','ליווי בהגשת סילבוס וטפסים לפסג״ה, לפי הצורך'] },
+  { id:'opening', icon:'i-mic', title:'הרצאת פתיחה פיזית', price:2000, unit:'חד פעמי', on:false,
+    desc:'מפגש השראה בבית הספר: תמונת מצב של הבינה המלאכותית בחינוך, מה אפשר לעשות כבר מחר, ומה מחכה לצוות בשנה הקרובה.' },
+  { id:'online', icon:'i-video', title:'מפגש מקוון', price:700, unit:'למפגש', qty:true, max:6, on:false,
+    desc:'מפגש זום לצוות: התעמקות בנושא שבית הספר בוחר, תרגול משותף או מענה לשאלות שעלו בדרך.' },
+  { id:'challenge', icon:'i-flame', title:'חודש אתגר', price:1500, unit:'לחודש', on:false,
+    desc:'חודש שבו בית הספר מרים את הנושא: בכל יום טיפ או אתגר קטן. מכניס לתהליך גם מורים שמהססים, ובונה ביטחון בצעדים קטנים.' }
+];
+
+const state = {};
+const $ = s => document.querySelector(s);
+const fmt = n => n.toLocaleString('he-IL') + ' ₪';
+
+/* URL: ?school=שם&items=course,opening,online:2 */
+const params = new URLSearchParams(location.search);
+const preset = params.get('items');
+ITEMS.forEach(it => state[it.id] = { on: it.on, qty: 1 });
+if (preset) {
+  ITEMS.forEach(it => state[it.id].on = false);
+  preset.split(',').forEach(p => {
+    const [id, q] = p.split(':');
+    if (state[id]) { state[id].on = true; if (q) state[id].qty = Math.max(1, +q || 1); }
+  });
+}
+const school = params.get('school');
+if (school) { $('#forSchool').hidden = false; $('#forSchoolName').textContent = school; $('#fSchool').value = school; }
+$('#today').textContent = new Date().toLocaleDateString('he-IL', { day:'numeric', month:'long', year:'numeric' });
+$('#vatNote').textContent = CONFIG.vatNote;
+if (CONFIG.whatsapp) $('#sendWa').hidden = false;
+
+function renderItems() {
+  $('#items').innerHTML = ITEMS.map(it => {
+    const s = state[it.id];
+    return `<label class="item card ${s.on ? 'on' : ''}" data-id="${it.id}">
+      <input type="checkbox" ${s.on ? 'checked' : ''}>
+      <span class="check"><svg class="icon"><use href="#i-check"/></svg></span>
+      <div>
+        <h3>${it.title}${it.base ? '<span class="tag">רכיב הבסיס</span>' : ''}</h3>
+        <p>${it.desc}</p>
+        ${it.bullets ? `<ul>${it.bullets.map(b => `<li>${b}</li>`).join('')}</ul>` : ''}
+        ${it.qty ? `<div class="qty" onclick="event.preventDefault();event.stopPropagation()">
+          <button type="button" data-q="-1" aria-label="פחות"><svg class="icon"><use href="#i-minus"/></svg></button>
+          <output>${s.qty}</output>
+          <button type="button" data-q="1" aria-label="עוד"><svg class="icon"><use href="#i-plus"/></svg></button>
+        </div>` : ''}
+      </div>
+      <div class="price"><b>${fmt(it.price)}</b><small>${it.unit}</small></div>
+    </label>`;
+  }).join('');
+}
+
+function selected() {
+  return ITEMS.filter(it => state[it.id].on).map(it => {
+    const q = it.qty ? state[it.id].qty : 1;
+    return { ...it, q, total: it.price * q, label: it.qty && q > 1 ? `${it.title} × ${q}` : it.title };
+  });
+}
+
+function renderSummary() {
+  const sel = selected();
+  $('#sumList').innerHTML = sel.length
+    ? sel.map(s => `<li><span>${s.label}</span><span>${fmt(s.total)}</span></li>`).join('')
+    : '<li class="empty">עוד לא נבחרו רכיבים</li>';
+  const total = sel.reduce((a, s) => a + s.total, 0);
+  $('#sumTotal').textContent = fmt(total);
+  $('#chosenLine').textContent = sel.length ? 'נבחרו: ' + sel.map(s => s.label).join(' · ') + ' | סה״כ ' + fmt(total) : 'לא נבחרו רכיבים בסעיף 3';
+}
+
+$('#items').addEventListener('click', e => {
+  const qb = e.target.closest('[data-q]');
+  const card = e.target.closest('.item');
+  if (!card) return;
+  const id = card.dataset.id, it = ITEMS.find(x => x.id === id);
+  if (qb) {
+    const s = state[id];
+    s.qty = Math.min(it.max || 9, Math.max(1, s.qty + +qb.dataset.q));
+    s.on = true;
+  } else {
+    e.preventDefault();
+    state[id].on = !state[id].on;
+  }
+  renderItems(); renderSummary();
+});
+
+function buildMessage() {
+  const v = id => $(id).value.trim();
+  const sel = selected();
+  const total = sel.reduce((a, s) => a + s.total, 0);
+  return [
+    'פנייה לחפציה בן ארצי – ליווי בית ספרי: בינה מלאכותית בהוראה',
+    '',
+    `בית ספר: ${v('#fSchool')}${v('#fCity') ? ', ' + v('#fCity') : ''}`,
+    `איש/אשת קשר: ${v('#fName')}${v('#fRole') ? ' (' + v('#fRole') + ')' : ''}`,
+    v('#fPhone') ? `טלפון: ${v('#fPhone')}` : '',
+    v('#fStaff') ? `מספר אנשי צוות: ${v('#fStaff')}` : '',
+    v('#fFrame') ? `מסגרת: ${v('#fFrame')}` : '',
+    '',
+    'רכיבים שנבחרו:',
+    ...(sel.length ? sel.map(s => `• ${s.label}: ${fmt(s.total)}`) : ['• (לא נבחרו)']),
+    `סה״כ: ${fmt(total)}`,
+    v('#fNotes') ? '\nהערות: ' + v('#fNotes') : ''
+  ].filter(l => l !== '').join('\n').replace('רכיבים שנבחרו:', '\nרכיבים שנבחרו:');
+}
+
+function valid() {
+  if (!$('#fSchool').value.trim() || !$('#fName').value.trim()) {
+    toast('נא למלא שם בית ספר ושם איש/אשת קשר');
+    ($('#fSchool').value.trim() ? $('#fName') : $('#fSchool')).focus();
+    return false;
+  }
+  return true;
+}
+
+$('#sendMail').addEventListener('click', () => {
+  if (!valid()) return;
+  const subject = 'ליווי בית ספרי – ' + $('#fSchool').value.trim();
+  location.href = `mailto:${CONFIG.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(buildMessage())}`;
+});
+$('#sendWa').addEventListener('click', () => {
+  if (!valid()) return;
+  window.open(`https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(buildMessage())}`, '_blank');
+});
+$('#copyBtn').addEventListener('click', async () => {
+  try { await navigator.clipboard.writeText(buildMessage()); toast('הסיכום הועתק'); }
+  catch { toast('לא ניתן להעתיק בדפדפן זה'); }
+});
+
+let tt;
+function toast(msg) {
+  const t = $('#toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(tt); tt = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+renderItems(); renderSummary();
+</script>
+</body>
+</html>
