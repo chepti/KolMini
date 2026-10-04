@@ -14,7 +14,7 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="חולמים תקשוב">
 <meta property="og:title" content="פרומפטים לסגנונות אמנות ב-AI, כל אחד לצד התמונה שלו">
-<meta property="og:description" content="78 סגנונות בקריקטורה, ספרי ילדים ואנימה. רואים את התוצאה, מעתיקים את הפרומפט בלחיצה.">
+<meta property="og:description" content="213 סגנונות ב-9 קטגוריות, מקריקטורה ועד אמנות קלאסית. רואים את התוצאה, מעתיקים את הפרומפט בלחיצה.">
 <meta property="og:image" content="https://chepti.com/picprompt/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -22,7 +22,7 @@
 <meta property="og:locale" content="he_IL">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="פרומפטים לסגנונות אמנות ב-AI, כל אחד לצד התמונה שלו">
-<meta name="twitter:description" content="78 סגנונות בקריקטורה, ספרי ילדים ואנימה. רואים את התוצאה, מעתיקים את הפרומפט בלחיצה.">
+<meta name="twitter:description" content="213 סגנונות ב-9 קטגוריות, מקריקטורה ועד אמנות קלאסית. רואים את התוצאה, מעתיקים את הפרומפט בלחיצה.">
 <meta name="twitter:image" content="https://chepti.com/picprompt/og-image.png">
 <style>
 :root{
@@ -129,7 +129,7 @@ footer a{color:var(--ink);font-weight:700;text-underline-offset:3px}
 <header class="hero">
   <div class="wrap">
     <h1>סגנונות אמנות ב-AI — פרומפט ליד התמונה שלו</h1>
-    <p>במקום לקרוא הסברים ארוכים, בוחרים קטגוריה, רואים את התוצאה, ומעתיקים את הפרומפט בלחיצה. גרסת ניסוי: שלוש קטגוריות.</p>
+    <p>במקום לקרוא הסברים ארוכים, בוחרים קטגוריה, רואים את התוצאה, ומעתיקים את הפרומפט בלחיצה.</p>
 
     <div class="credit" role="note">
       <div class="badge"><svg class="i"><use href="#i-heart"/></svg></div>
@@ -172,14 +172,18 @@ const SHEETS = {
   cartoon: BASE + "8ed70df7-1099-49c7-a4c2-b851878d185b.jpg",
   kids:    BASE + "de3ebede-c0e9-4a8c-a3ba-d2b4936eba79.jpg",
   anime:   BASE + "f052dee0-8c11-4b01-b303-bdf207aff07e.jpg",
+  modern:  BASE + "b574a0ae-6bc1-44a1-bc15-e570d3b2cc9f.jpg",
+  char:    BASE + "d6bd2f4e-1086-427a-845e-07d6c0ca08ba.jpg",
 };
-const SHEET_W = 2000, SHEET_H = 1116;
+const DIMS = { cartoon:[2000,1116], kids:[2000,1116], anime:[2000,1116], modern:[2000,2000], char:[2000,1493] };
 
 /* חיתוכים בפיקסלים של התמונה המקורית: x, y, רוחב, גובה */
 const CROPS = {
   cartoon: [[58,175,350,233],[434,175,368,245],[828,175,344,229],[1203,175,356,237],[1590,175,350,233]],
   kids:    [[76,16,510,340],[746,16,510,340],[1416,16,510,340],[76,394,510,340],[746,394,510,340],[1416,394,510,340],[76,762,510,340],[746,762,510,340],[1416,762,510,340]],
   anime:   [[75,90,420,280],[553,90,420,280],[1028,90,420,280],[1505,90,420,280],[75,620,420,280],[553,620,420,280],[1028,620,420,280],[1505,620,420,280]],
+  modern:  [[60,130,830,553],[1035,130,830,553],[60,1105,830,553],[1035,1105,830,553]],
+  char:    [[50,100,900,600],[1050,95,900,600],[40,790,900,600],[1060,800,900,600]],
 };
 
 const CATS = [
@@ -206,6 +210,51 @@ const CATS = [
       {he:"תקופה וז'אנר", en:"Era & Genre-Specific", p:[["retro 80s anime, film grain, muted neon palette","anime",2],["cyberpunk anime, neon rim light, high contrast","anime",4],["mecha anime, hard surface details, dramatic perspective"],["magical girl style, sparkles, pastel gradients, glossy highlights","anime",6],["dark fantasy anime, moody palette, sharp shadows"],["seinen style, more realistic proportions, subtle shading","anime",7]]},
       {he:"וריאציות אמנותיות", en:"Artistic Variations", p:[["ink brush manga, expressive brush strokes, high contrast"],["watercolor anime illustration, soft washes + crisp line art"],["anime concept art, painterly, soft edges, atmospheric depth"],["anime cel frame, slight grain, limited palette"]]},
       {he:"שימושים ייעודיים", en:"Specialty Applications", p:[["visual novel sprite style, clean line, simple shading, transparent bg"],["isekai fantasy anime, bright light, saturated colors"]]},
+    ]},
+  { id:"comic", he:"קומיקס", en:"Comic & Graphic Novel", groups:[
+      {he:"קומיקס קלאסי", en:"Classic Comics", p:[["classic comic book, bold inks, halftone dots, primary colors"],["modern graphic novel, clean inks, flat shading, muted palette"],["noir comic, heavy shadows, high contrast, rain, neon signs"],["indie comic, sketchy lines, watercolor washes"],["superhero comic, dynamic foreshortening, bold highlights"]]},
+      {he:"מסורות אירופיות", en:"European Traditions", p:[["european bande dessinee, clean line, flat colors, detailed backgrounds"],["ligne claire (clear line), consistent line weight, flat colors, minimal shading"],["retro pulp cover art, painted look, dramatic composition"]]},
+      {he:"הפקה וסטוריבורד", en:"Production & Storyboard", p:[["comic panel storyboard style, rough pencil, speech bubbles"],["inked storyboard frames, loose lines, grayscale wash"],["crosshatch comic shading, pen lines, textured shadows"]]},
+      {he:"אפקטי דפוס", en:"Print-Effect Styles", p:[["risograph comic, limited palette, misregistration texture"],["newspaper comic strip, simple line, flat color"],["graphic memoir style, soft line, muted color, quiet scenes"]]},
+      {he:"היברידי וז'אנרים", en:"Hybrid & Genre Styles", p:[["dark manga + western ink hybrid, heavy blacks, sharp line"],["watercolor graphic novel, painterly washes, ink outlines"],["neon cyberpunk comic, bright highlights, hard edges"],["sci-fi comic cover, airbrush gradients, chrome highlights"],["horror comic, gritty texture, heavy shadow, film grain"],["cute comic, thick outline, soft palette, simple backgrounds"]]},
+      {he:"טכני ועריכתי", en:"Technical & Editorial", p:[["“screentone” manga shading, dot patterns, ink line art"],["editorial cartoon, exaggerated features, bold lines"],["political cartoon ink wash, pen lines + ink shading"],["fantasy map illustration, ink lines, parchment texture"],["“comic splash page” composition, dramatic framing, action lines"]]},
+    ]},
+  { id:"classic", he:"אמנות קלאסית", en:"Classic Art Movements", groups:[
+      {he:"אימפרסיוניזם ופוסט-אימפרסיוניזם", en:"Impressionism & Post-Impressionism", p:[["impressionist oil painting, broken brushstrokes, light-filled color"],["post-impressionist, bold color blocks, expressive strokes"]]},
+      {he:"אמנות דקורטיבית", en:"Decorative Arts", p:[["art nouveau illustration, decorative lines, floral motifs, poster look"],["art deco poster, geometric forms, bold symmetry, luxury palette"]]},
+      {he:"מסורות ציור היסטוריות", en:"Historical Painting Traditions", p:[["romanticism painting, dramatic light, epic mood"],["renaissance portrait, soft chiaroscuro, classical composition"],["baroque painting, dramatic chiaroscuro, rich shadows"],["rococo pastel painting, ornate details, soft colors"]]},
+      {he:"זרמי אמנות מודרנית", en:"Modern Art Movements", p:[["surrealism, dream logic, uncanny objects"],["cubism, fragmented forms, geometric planes"],["futurism, motion lines, speed, angular forms"],["expressionism, bold strokes, emotional color"],["pop art, bold outlines, flat colors, comic dots"],["minimalism, simple forms, lots of negative space"]]},
+      {he:"מופשט וניסיוני", en:"Abstract & Experimental", p:[["abstract expressionism, energetic paint, gestural strokes"],["pointillism, dot-based color mixing, textured surface"],["op art, optical patterns, high contrast"],["suprematism, abstract shapes, minimal composition"],["color field painting, large flat color areas"],["metafictional collage, mixed media layers"]]},
+      {he:"זרמי עיצוב", en:"Design Movements", p:[["constructivist poster, propaganda layout, bold typography feel"],["bauhaus design, primary shapes, clean geometry"],["dada collage, cut-and-paste chaos, typography fragments"]]},
+      {he:"תרבותי ומסורתי", en:"Cultural & Traditional", p:[["symbolist painting, mystical mood, ornate imagery"],["naive folk art, simple perspective, bright colors"],["ukiyo-e woodblock print, flat color, bold outlines, patterned backgrounds"]]},
+      {he:"ספקטרום הריאליזם", en:"Realism Spectrum", p:[["romantic landscape painting, glowing skies, atmospheric depth"],["realism oil painting, detailed textures, natural light"],["hyperrealism, extreme detail, photo-like finish"],["fauvism, wild color, simplified forms"]]},
+    ]},
+  { id:"trad", he:"חומרים מסורתיים", en:"Traditional Media & Craft", groups:[
+      {he:"שרטוט וסקיצות", en:"Drawing & Sketching", p:[["graphite pencil sketch, light shading, paper texture"],["charcoal drawing, smudged shadows, gritty texture"],["ink pen sketch, hatching, sketchbook vibe"],["brush pen illustration, expressive line, ink bleed"]]},
+      {he:"חומרי ציור", en:"Painting Media", p:[["watercolor wash, transparent layers, soft edges"],["gouache painting, matte opacity, visible strokes"],["oil painting, thick impasto, canvas texture"],["acrylic painting, bold strokes, matte finish"],["pastel drawing, chalky texture, blended gradients"],["marker rendering, smooth gradients, design sketch vibe"]]},
+      {he:"הדפס", en:"Printmaking", p:[["linocut print, bold carved lines, high contrast"],["woodcut print, rough edges, carved texture"],["screenprint poster, flat inks, slight misregistration"],["risograph print, limited palette, grain, misaligned layers"]]},
+      {he:"מלאכה ותלת־ממד", en:"Crafts & 3D", p:[["paper cutout collage, layered paper edges, soft shadows"],["fabric applique, stitched edges, textile texture"],["embroidery illustration, thread texture, stitched lines"],["clay sculpture render, hand-molded texture, studio light"],["stop-motion puppet, fabric/foam texture, miniature set"],["origami style, folded paper geometry, crisp edges"]]},
+      {he:"טכניקות מיוחדות", en:"Specialty Techniques", p:[["stained glass art, bold lead lines, glowing color"],["mosaic art, tile texture, irregular pieces"],["scratchboard illustration, white-on-black etched lines"],["sumi-e ink painting, minimal brush strokes, empty space"],["calligraphy brush illustration, expressive strokes, ink pooling"]]},
+    ]},
+  { id:"retro", he:"רטרו ופוסטרים", en:"Retro & Poster Art", groups:[
+      {he:"טיולים ואמצע המאה", en:"Travel & Mid-Century", p:[["vintage travel poster, flat shapes, bold typography vibe"],["mid-century modern poster, geometric shapes, muted palette"],["swiss design poster, clean grid, minimal type feel"]]},
+      {he:"עתידנות וניאון", en:"Futurism & Neon", p:[["retro futurism poster, chrome gradients, neon accents"],["synthwave poster, magenta/cyan neon, grid horizon"],["vaporwave collage, pastel neon, glitch accents"]]},
+      {he:"לפי תקופה", en:"Era-Specific", p:[["y2k glossy sticker style, shiny gradients, bubbly shapes"],["80s airbrush illustration, smooth gradients, glossy highlights"],["70s psychedelic poster, wavy lines, saturated palette"]]},
+      {he:"תעמולה ורחוב", en:"Propaganda & Street", p:[["propaganda poster style, bold shapes, dramatic lighting"],["stencil street art, high contrast, spray texture"],["graffiti character, bold color, spray paint texture"]]},
+      {he:"עריכה ודפוס", en:"Editorial & Print", p:[["editorial magazine illustration, clean shapes, strong concept"],["newspaper print texture, halftone, rough paper"],["vintage comic cover, worn edges, faded ink"]]},
+      {he:"בהשראת הדפס", en:"Printmaking-Inspired", p:[["woodblock poster, carved lines, limited colors"],["risograph zine style, grainy ink, limited palette"]]},
+      {he:"מסחרי וקולנועי", en:"Commercial & Cinematic", p:[["minimalist product poster, lots of negative space, clean layout"],["cinematic movie poster illustration, dramatic composition, title-safe space"],["retro ad illustration, clean shading, optimistic vibe"]]},
+    ]},
+  { id:"modern", he:"דיגיטל מודרני", en:"Modern Digital Art", groups:[
+      {he:"קונספט ארט וציורי", en:"Concept Art & Painterly", p:[["painterly concept art, atmospheric depth, soft edges","modern",0],["semi-realistic digital painting, smooth blending, detailed features"],["stylized digital painting, exaggerated shapes, painterly light"],["matte painting, cinematic environment, detailed lighting"],["fantasy concept art, epic scale, dramatic skies"],["sci-fi concept art, hard surface details, neon accents"],["cozy digital illustration, soft palette, warm light"]]},
+      {he:"וקטורי ונקי", en:"Vector & Clean", p:[["minimal vector illustration, flat shapes, crisp edges","modern",1],["gradient mesh illustration, smooth modern gradients"],["3D-to-2D toon shader look, crisp edges, stylized shading"],["“clean UI illustration” style, corporate-ish but modern"],["isometric illustration, 30-45 degree angle, clean geometry"]]},
+      {he:"פיקסלים ולואו-פולי", en:"Pixel & Low-Poly", p:[["low-poly illustration, faceted shapes, simple lighting"],["pixel art illustration, 16-bit palette, crisp pixels","modern",2],["voxel art, blocky 3D pixels, simple shading"]]},
+      {he:"מבוסס אפקטים", en:"Effect-Driven", p:[["neon line illustration, glowing outlines, dark background","modern",3],["holographic iridescent style, rainbow sheen, glossy highlights"],["dreamy soft-focus illustration, bloom, gentle gradients"],["dark moody illustration, desaturated palette, rim light"],["“storybook 3D render” style, soft materials, bright light"]]},
+    ]},
+  { id:"char", he:"דפי דמות ואנימציה", en:"Character Sheet & Animation", groups:[
+      {he:"דפי דמות ודגמים", en:"Sheets & Models", p:[["character turnaround sheet, front side back views, clean background","char",0],["expression sheet, same head, multiple emotions, consistent lighting","char",1],["model sheet, consistent line weight, flat colors, callouts","char",2],["pose sheet, 8-12 poses, neutral background"],["3D character turnaround, studio light, neutral gray background"],["stop-motion puppet sheet, fabric texture, studio light"],["game character concept sheet, notes, props, silhouettes"],["paper doll character sheet, cutout limbs, pins/joints visible"]]},
+      {he:"פריימים והפקה", en:"Frames & Production", p:[["storyboard frames, rough line, grayscale wash","char",3],["clean animatic frame, flat shading, clear silhouettes"],["keyframe illustration, strong pose, cinematic lighting"],["toon shaded 3D character, crisp outlines, cel shading"],["“production ready” flat colors, clean edges, no noise"]]},
+      {he:"רקעים", en:"Backgrounds", p:[["animation background painting, painterly environment, soft depth"],["cel background style, soft gradients, minimal texture"]]},
     ]},
 ];
 
@@ -235,7 +284,8 @@ function fit(media){
   const cw = media.clientWidth, ch = media.clientHeight;
   if (!cw || !ch) return;
   const s = Math.max(cw / w, ch / h);
-  img.style.width  = SHEET_W * s + "px"; img.style.height = SHEET_H * s + "px";
+  const [SW, SH] = media._dim;
+  img.style.width  = SW * s + "px"; img.style.height = SH * s + "px";
   img.style.left = (-x*s - (w*s - cw)/2) + "px"; img.style.top = (-y*s - (h*s - ch)/2) + "px";
 }
 const ro = new ResizeObserver(es => es.forEach(e => fit(e.target)));
@@ -244,7 +294,7 @@ function mediaFor(sheet, idx, alt){
   const m = el("div","media");
   const img = new Image();
   img.src = SHEETS[sheet]; img.alt = alt; img.loading = "lazy"; img.referrerPolicy = "no-referrer"; img.draggable = false;
-  const clip = el("div","clip"); clip.appendChild(img); m.appendChild(clip); m._crop = CROPS[sheet][idx];
+  const clip = el("div","clip"); clip.appendChild(img); m.appendChild(clip); m._crop = CROPS[sheet][idx]; m._dim = DIMS[sheet];
   ro.observe(m);
   return m;
 }
