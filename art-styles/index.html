@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>מדריך פרומפטים לסגנונות אמנות</title>
+<meta name="description" content="פרומפטים לסגנונות אמנות ב-AI, כל אחד לצד התמונה שנוצרה איתו. מבוסס על מדריך של Neolemon.">
+<style>
+:root{
+  --bg:#faf7f2; --surface:#ffffff; --surface-2:#f3eee6; --ink:#1f2430; --ink-2:#5b6272;
+  --line:#e4ddd0; --accent:#e8590c; --accent-ink:#ffffff; --accent-soft:#fff0e6; --ok:#2b8a3e;
+  --shadow:0 1px 2px rgba(31,36,48,.06),0 6px 18px rgba(31,36,48,.06);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#16181d; --surface:#1f2229; --surface-2:#272b34; --ink:#eceef3; --ink-2:#a2a8b6;
+    --line:#333844; --accent:#ff8a4c; --accent-ink:#1a1206; --accent-soft:#2f2218; --ok:#69db7c;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 18px rgba(0,0,0,.35);
+  }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:150px}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Heebo","Assistant",system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.55}
+.wrap{max-width:1180px;margin:0 auto;padding:0 16px}
+svg.i{width:1.15em;height:1.15em;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+header.hero{padding:34px 0 18px}
+.hero h1{font-size:clamp(1.7rem,4.2vw,2.6rem);margin:0 0 6px;line-height:1.15;letter-spacing:-.01em}
+.hero p{margin:0;color:var(--ink-2);max-width:62ch}
+
+.credit{display:flex;gap:14px;align-items:center;margin-top:20px;padding:14px 18px;background:var(--accent-soft);
+  border:1.5px solid var(--accent);border-radius:20px}
+.credit .badge{width:42px;height:42px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;flex:none}
+.credit .badge svg{width:22px;height:22px}
+.credit b{display:block;font-size:.95rem}
+.credit span{color:var(--ink-2);font-size:.88rem}
+.credit a{color:var(--accent);font-weight:700;text-underline-offset:3px}
+
+nav.top{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--line);padding:10px 0 8px}
+.pills{display:flex;gap:8px;flex-wrap:wrap}
+.pill{font:inherit;display:inline-flex;align-items:center;gap:7px;padding:8px 16px;border-radius:999px;border:1.5px solid var(--line);
+  background:var(--surface);color:var(--ink);cursor:pointer;font-weight:600;font-size:.92rem;text-decoration:none;transition:.15s}
+.pill:hover{border-color:var(--accent)}
+.pill[aria-current="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.pill .n{font-weight:500;opacity:.75;font-size:.8rem}
+.chips{margin-top:8px}
+.chips .pill{padding:5px 12px;font-size:.82rem;font-weight:500;background:transparent}
+.chips .pill:hover{background:var(--surface)}
+
+main{padding:26px 0 40px}
+.cat-intro{margin:0 0 6px;color:var(--ink-2)}
+.group{margin:34px 0 0}
+.group h2{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:0 0 14px;font-size:1.25rem}
+.group h2 small{color:var(--ink-2);font-weight:500;font-size:.85rem;direction:ltr}
+.strip{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x proximity;padding:4px 2px 16px;scrollbar-width:thin;outline-offset:4px}
+.strip .card{flex:0 0 250px;scroll-snap-align:start}
+.arrows{display:flex;gap:6px;margin-inline-start:auto}
+.pill.arrow{padding:6px 9px}
+.media.photo img{position:static;width:100%;height:100%;object-fit:cover}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:22px;overflow:hidden;box-shadow:var(--shadow);display:flex;flex-direction:column}
+.media{position:relative;aspect-ratio:3/2;background:var(--surface-2);overflow:hidden}
+.media .clip{position:absolute;inset:0;overflow:hidden}
+.media img{position:absolute;max-width:none;display:block;user-select:none}
+.body{padding:12px 14px 14px;display:flex;flex-direction:column;gap:10px;flex:1}
+.body h3{margin:0;font-size:.95rem;direction:ltr;text-align:left;text-transform:capitalize}
+.prompt{direction:ltr;text-align:left;margin:0;font-family:ui-monospace,Consolas,"SF Mono",monospace;font-size:.82rem;line-height:1.5;
+  background:var(--surface-2);border-radius:14px;padding:10px 12px;flex:1;overflow-wrap:anywhere}
+.copy{font:inherit;display:inline-flex;align-items:center;justify-content:center;gap:7px;align-self:flex-start;padding:7px 14px;border-radius:999px;
+  border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;font-size:.85rem;font-weight:600;transition:.15s}
+.copy:hover{border-color:var(--accent);color:var(--accent)}
+.copy.done{background:var(--ok);border-color:var(--ok);color:#fff}
+.more{margin-top:16px}
+.more h4{margin:0 0 8px;font-size:.85rem;color:var(--ink-2);font-weight:600;display:flex;align-items:center;gap:7px}
+.rows{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:10px}
+.row{display:flex;gap:10px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:8px 10px 8px 8px}
+.row .prompt{background:transparent;padding:0 4px;font-size:.8rem}
+.row .copy{padding:6px 10px;flex:none}
+.tip{position:relative}
+.tip[data-tip]:hover::after,.tip[data-tip]:focus-visible::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 8px);inset-inline-start:50%;transform:translateX(50%);
+  white-space:nowrap;background:var(--ink);color:var(--bg);font-size:.75rem;font-weight:500;padding:5px 10px;border-radius:999px;z-index:30;pointer-events:none}
+.note{display:inline-flex;gap:7px;align-items:center;color:var(--ink-2);font-size:.82rem;margin-top:10px}
+
+footer.site{border-top:1px solid var(--line);background:var(--surface-2);padding:22px 0}
+footer .in{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
+footer p{margin:0;font-size:.88rem;color:var(--ink-2)}
+footer a{color:var(--ink);font-weight:700;text-underline-offset:3px}
+.attrib{margin-top:14px;padding-top:14px;border-top:1px dashed var(--line);font-size:.82rem;color:var(--ink-2)}
+.toast{position:fixed;inset-inline:0;bottom:22px;margin:auto;width:max-content;max-width:90vw;background:var(--ink);color:var(--bg);padding:9px 18px;border-radius:999px;
+  font-size:.88rem;opacity:0;transform:translateY(12px);transition:.2s;pointer-events:none;z-index:50}
+.toast.show{opacity:1;transform:none}
+@media (max-width:700px){.pills{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}.pills .pill{flex:none}nav.top{padding:8px 0 6px}}
+@media (max-width:560px){.credit{align-items:flex-start}.rows{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-chevron-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+  <symbol id="i-chevron-left" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-link" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
+  <symbol id="i-heart" viewBox="0 0 24 24"><path d="M19 14c1.5-1.5 3-3.2 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.8 0-3 .5-4.5 2-1.5-1.5-2.7-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4 3 5.5l7 7Z"/></symbol>
+  <symbol id="i-msg" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol>
+  <symbol id="i-text" viewBox="0 0 24 24"><path d="M17 6.1H3"/><path d="M21 12.1H3"/><path d="M15.1 18H3"/></symbol>
+  <symbol id="i-palette" viewBox="0 0 24 24"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.9 0 1.6-.7 1.6-1.6 0-.4-.2-.8-.4-1.1-.3-.3-.4-.7-.4-1.1 0-.9.7-1.6 1.6-1.6H16c3.1 0 5.5-2.4 5.5-5.5C21.5 6.1 17.4 2 12 2z"/></symbol>
+</svg>
+
+<header class="hero">
+  <div class="wrap">
+    <h1>סגנונות אמנות ב-AI — פרומפט ליד התמונה שלו</h1>
+    <p>במקום לקרוא הסברים ארוכים, בוחרים קטגוריה, רואים את התוצאה, ומעתיקים את הפרומפט בלחיצה. גרסת ניסוי: שלוש קטגוריות.</p>
+
+    <div class="credit" role="note">
+      <div class="badge"><svg class="i"><use href="#i-heart"/></svg></div>
+      <div>
+        <b>המקור: Neolemon — “180+ AI Art Style Prompts”</b>
+        <span>כל הפרומפטים והתמונות שייכים ל-Neolemon. התמונות נטענות ישירות מהאתר שלהם, וכאן הן רק חתוכות לפי פאנל.
+          <a href="https://www.neolemon.com/blog/list-of-art-styles-for-ai-prompts/" target="_blank" rel="noopener">למדריך המלא במקור</a></span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<nav class="top" aria-label="קטגוריות">
+  <div class="wrap">
+    <div class="pills" id="cats"></div>
+    <div class="pills chips" id="chips"></div>
+  </div>
+</nav>
+
+<main>
+  <div class="wrap" id="view"></div>
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <div class="in">
+      <p>נבנה על ידי <a href="https://chepti.com" target="_blank" rel="noopener">חולמים תקשוב</a></p>
+      <button class="pill tip" id="fb" data-tip="נשמח לשמוע מה חסר או לא ברור"><svg class="i"><use href="#i-msg"/></svg>משוב</button>
+    </div>
+    <p class="attrib">תוכן הפרומפטים והתמונות: <a href="https://www.neolemon.com/blog/list-of-art-styles-for-ai-prompts/" target="_blank" rel="noopener">Neolemon — List of Art Styles for AI Prompts</a>. © Neolemon, כל הזכויות שמורות להם.</p>
+  </div>
+</footer>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const FEEDBACK_URL = "mailto:chepti@gmail.com?subject=" + encodeURIComponent("משוב על מדריך הפרומפטים לסגנונות אמנות");
+
+const BASE = "https://cdn.outrank.so/a363af2d-ce82-496c-ac35-a8ac2ea73c99/";
+const SHEETS = {
+  cartoon: BASE + "8ed70df7-1099-49c7-a4c2-b851878d185b.jpg",
+  kids:    BASE + "de3ebede-c0e9-4a8c-a3ba-d2b4936eba79.jpg",
+  anime:   BASE + "f052dee0-8c11-4b01-b303-bdf207aff07e.jpg",
+};
+const SHEET_W = 2000, SHEET_H = 1116;
+
+/* חיתוכים בפיקסלים של התמונה המקורית: x, y, רוחב, גובה */
+const CROPS = {
+  cartoon: [[58,175,350,233],[434,175,368,245],[828,175,344,229],[1203,175,356,237],[1590,175,350,233]],
+  kids:    [[76,16,510,340],[746,16,510,340],[1416,16,510,340],[76,394,510,340],[746,394,510,340],[1416,394,510,340],[76,762,510,340],[746,762,510,340],[1416,762,510,340]],
+  anime:   [[75,90,420,280],[553,90,420,280],[1028,90,420,280],[1505,90,420,280],[75,620,420,280],[553,620,420,280],[1028,620,420,280],[1505,620,420,280]],
+};
+
+const CATS = [
+  { id:"cartoon", he:"קריקטורה", en:"Cartoon",
+    groups:[
+      {he:"מודרני ושטוח", en:"Modern & Flat", p:[["modern flat cartoon, thick outline, flat colors, minimal shading","cartoon",0],["saturday morning cartoon style, bold shapes, bright palette"],["retro 90s cartoon, simple shading, playful proportions"],["rubber hose animation style, bendy limbs, black outlines, vintage vibe"]]},
+      {he:"קמעות ומותגים", en:"Mascot & Brand-Friendly", p:[["cute mascot illustration, big eyes, clean vector edges","cartoon",1],["minimal line cartoon, thin outline, flat color blocks"],["webtoon style, clean linework, soft gradients, bright highlights"],["clean cel animation style, flat shading, crisp edges"],["“sticker mascot” style, thick outline, flat colors, high contrast"]]},
+      {he:"גאומטרי ומסוגנן", en:"Geometric & Stylized", p:[["geometric cartoon, simplified shapes, limited palette","cartoon",2],["pastel cartoon, soft colors, gentle shading, rounded forms"],["bold outline cartoon, chunky linework, flat fills"],["lineless cartoon, soft edges, simple gradients"]]},
+      {he:"לפי מטרה", en:"Purpose-Specific", p:[["“kids educational show” style, friendly shapes, clean textures","cartoon",3],["mockup-friendly cartoon (for marketing), minimal detail, empty space"],["“app icon” character style, super simplified, glossy highlight"],["“emoji” character style, smooth gradients, simple face"]]},
+      {he:"מרקמים ואמנותי", en:"Textured & Artistic", p:[["paper texture cartoon, flat colors + subtle paper grain","cartoon",4],["marker doodle cartoon, sketchy lines, fun energy"],["clay cartoon (2.5D), soft materials, studio light"]]},
+      {he:"אנימציה וטלוויזיה", en:"Animation & TV-Inspired", p:[["preschool show cartoon, simple shapes, big features, primary colors, friendly proportions"],["soft 3D animated film look, smooth global illumination, expressive faces, plush materials"],["classic hand-drawn cartoon, expressive linework, warm colors, friendly proportions"],["modern 3D cartoon, soft lighting, rounded forms, cheerful colors"],["social media mascot cartoon, simple flat, clean edges, scaling-friendly"],["explainer video cartoon, minimal detail, clean shapes, brand-friendly"],["kids tv show cartoon, energetic posing, exaggerated proportions, vibrant flat colors"],["streaming kids cartoon, flat 2D, bold outline, simple shading, bright palette"]]},
+    ]},
+  { id:"kids", he:"ספרי ילדים", en:"Children’s Book",    groups:[
+      {he:"צבעי מים וצבע", en:"Watercolor & Paint-Based", p:[["watercolor storybook illustration, soft pencil outline, pastel palette, paper grain","kids",0],["gouache storybook illustration, opaque paint, rounded shapes, warm palette","kids",1],["colored pencil illustration, visible pencil texture, gentle shading"],["ink + watercolor wash, clean ink outlines, soft color bleeds"],["lineless storybook illustration, soft edges, painterly shading"]]},
+      {he:"עבודת יד וקולאז'", en:"Craft & Collage", p:[["cut paper collage, layered paper shapes, visible edges, handmade texture","kids",2],["felt craft collage, stitched felt texture, cozy handmade look"],["chalk pastel illustration, dusty texture, soft gradients"],["crayon illustration, waxy strokes, kidlike texture (but controlled)"]]},
+      {he:"שטוח ומינימלי", en:"Flat & Minimal", p:[["picture book flat illustration, minimal shading, bold simple shapes","kids",3],["scandinavian children’s illustration, minimal palette, lots of white space"],["retro storybook (60s), muted colors, simple forms, print texture","kids",5]]},
+      {he:"מצב רוח ונושא", en:"Mood & Theme-Based", p:[["whimsical fairytale illustration, soft glow, warm highlights","kids",8],["cozy cottagecore illustration, warm interior light, gentle details","kids",4],["educational storybook illustration, clean shapes, high readability"],["bedtime book illustration, low contrast, soft lighting, calm palette"],["gentle winter storybook illustration, cool palette, soft snow texture"],["jungle adventure storybook illustration, lush greens, playful shapes"]]},
+      {he:"התמחויות ופורמט", en:"Specialty & Format", p:[["“sticker book” illustration, thick outline, flat colors, white border"],["kawaii story illustration, chibi proportions, pastel palette, simple shading","kids",7],["claymation storybook look, soft clay texture, studio lighting","kids",6],["puppet stop-motion look, fabric texture, tiny set diorama vibe"],["“board book” style, big shapes, minimal textures, high contrast"],["pop-up book illustration, paper folds, layered depth, shadowed edges"]]},
+      {he:"טבע וקלאסי", en:"Nature & Classic", p:[["watercolor + ink botanical storybook, delicate linework, natural palette"],["kid comic strip, simple panels, friendly expressions, clean lines"],["soft 3D kids animation look, rounded forms, plush materials, bright light"],["vintage etching-style storybook, fine lines, sepia wash"],["minimalist bedtime silhouette, limited palette, soft gradients"],["folktale illustration, woodcut-inspired shapes, earthy colors"]]},
+    ]},
+  { id:"anime", he:"אנימה ומנגה", en:"Anime & Manga",    groups:[
+      {he:"מראות אנימה בסיסיים", en:"Core Anime Looks", p:[["anime key visual, crisp linework, cel shading, vibrant palette","anime",0],["anime watercolor background + cel character, painterly bg, crisp character"],["modern shounen style, strong linework, dramatic lighting, action framing"],["slice-of-life anime, soft light, gentle colors, cozy scenes"],["studio ghibli-inspired vibe (use cautiously), painterly backgrounds, warm light","anime",3]]},
+      {he:"ייחודי למנגה", en:"Manga-Specific", p:[["manga panel, black and white, screentone shading, ink lines","anime",1],["clean manga line art, minimal screentone, strong silhouettes"],["chibi anime, big head small body, simple shading","anime",5]]},
+      {he:"תקופה וז'אנר", en:"Era & Genre-Specific", p:[["retro 80s anime, film grain, muted neon palette","anime",2],["cyberpunk anime, neon rim light, high contrast","anime",4],["mecha anime, hard surface details, dramatic perspective"],["magical girl style, sparkles, pastel gradients, glossy highlights","anime",6],["dark fantasy anime, moody palette, sharp shadows"],["seinen style, more realistic proportions, subtle shading","anime",7]]},
+      {he:"וריאציות אמנותיות", en:"Artistic Variations", p:[["ink brush manga, expressive brush strokes, high contrast"],["watercolor anime illustration, soft washes + crisp line art"],["anime concept art, painterly, soft edges, atmospheric depth"],["anime cel frame, slight grain, limited palette"]]},
+      {he:"שימושים ייעודיים", en:"Specialty Applications", p:[["visual novel sprite style, clean line, simple shading, transparent bg"],["isekai fantasy anime, bright light, saturated colors"]]},
+    ]},
+];
+
+const $ = s => document.querySelector(s);
+const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
+const icon = n => `<svg class="i" aria-hidden="true"><use href="#i-${n}"/></svg>`;
+const titleOf = t => t.split(",")[0].replace(/[“”]/g,"");
+const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+
+function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove("show"),1800); }
+
+function copyBtn(text){
+  const b = el("button","copy tip",icon("copy")+"<span>העתק</span>");
+  b.dataset.tip = "מעתיק את הפרומפט ללוח";
+  b.addEventListener("click", async () => {
+    try { await navigator.clipboard.writeText(text); }
+    catch { const ta=el("textarea"); ta.value=text; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); ta.remove(); }
+    b.classList.add("done"); b.innerHTML = icon("check")+"<span>הועתק</span>";
+    setTimeout(()=>{ b.classList.remove("done"); b.innerHTML = icon("copy")+"<span>העתק</span>"; }, 1500);
+  });
+  return b;
+}
+
+/* חיתוך: התמונה כולה נטענת מהמקור וממוקמת כך שרק הפאנל נראה */
+function fit(media){
+  const clip = media.firstChild, img = clip.firstChild, [x,y,w,h] = media._crop;
+  const cw = media.clientWidth, ch = media.clientHeight;
+  if (!cw || !ch) return;
+  const s = Math.max(cw / w, ch / h);
+  img.style.width  = SHEET_W * s + "px"; img.style.height = SHEET_H * s + "px";
+  img.style.left = (-x*s - (w*s - cw)/2) + "px"; img.style.top = (-y*s - (h*s - ch)/2) + "px";
+}
+const ro = new ResizeObserver(es => es.forEach(e => fit(e.target)));
+
+function mediaFor(sheet, idx, alt){
+  const m = el("div","media");
+  const img = new Image();
+  img.src = SHEETS[sheet]; img.alt = alt; img.loading = "lazy"; img.referrerPolicy = "no-referrer"; img.draggable = false;
+  const clip = el("div","clip"); clip.appendChild(img); m.appendChild(clip); m._crop = CROPS[sheet][idx];
+  ro.observe(m);
+  return m;
+}
+
+/* תמונות שנוצרו בנפרד: img/<שם-הסגנון>.jpg (או png/webp). אם הקובץ קיים, הוא מתווסף לכרטיס */
+function addLocalImage(card, prompt, catId){
+  const name = "img/" + slug(titleOf(prompt));
+  const tryExt = exts => {
+    if (!exts.length) return;
+    const im = new Image();
+    im.onload = () => {
+      const m = el("div","media photo");
+      im.alt = titleOf(prompt); m.appendChild(im); card.prepend(m);
+    };
+    im.onerror = () => tryExt(exts.slice(1));
+    im.src = name + "." + exts[0];
+  };
+  tryExt(["jpg","png","webp"]);
+}
+
+function render(cat){
+  const v = $("#view"); v.innerHTML = "";
+
+  const chips = $("#chips"); chips.innerHTML = "";
+  cat.groups.forEach(g => {
+    const id = cat.id+"-"+slug(g.en);
+    const a = el("a","pill",g.he); a.href = "#"+cat.id+"/"+slug(g.en);
+    a.addEventListener("click", ev => { ev.preventDefault(); history.replaceState(null,"","#"+cat.id+"/"+slug(g.en)); document.getElementById(id).scrollIntoView(); });
+    chips.appendChild(a);
+  });
+
+  cat.groups.forEach(g => {
+    const sec = el("section","group"); sec.id = cat.id+"-"+slug(g.en);
+    sec.appendChild(el("h2","",`${g.he} <small>${g.en}</small>`));
+    const strip = el("div","strip"); strip.tabIndex = 0;
+    const nav = el("div","arrows");
+    [["next","chevron-right","הבא",-1],["prev","chevron-left","הקודם",1]].forEach(([k,ic,tip,dir]) => {
+      const b = el("button","pill arrow tip",icon(ic)); b.dataset.tip = tip; b.setAttribute("aria-label",tip);
+      b.addEventListener("click", () => strip.scrollBy({left: dir * strip.clientWidth * .8, behavior:"smooth"}));
+      nav.appendChild(b);
+    });
+    sec.firstChild.appendChild(nav);
+
+    g.p.forEach(([t,sheet,idx]) => {
+      const c = el("article","card");
+      if (sheet) c.appendChild(mediaFor(sheet, idx, titleOf(t)));
+      const b = el("div","body");
+      b.appendChild(el("h3","",titleOf(t)));
+      const p = el("p","prompt"); p.textContent = t; b.appendChild(p);
+      b.appendChild(copyBtn(t)); c.appendChild(b); strip.appendChild(c);
+      if (!sheet) addLocalImage(c, t, cat.id);
+    });
+    sec.appendChild(strip);
+    v.appendChild(sec);
+  });
+}
+
+function build(){
+  const nav = $("#cats");
+  CATS.forEach(c => {
+    const n = c.groups.reduce((a,g)=>a+g.p.length,0);
+    const b = el("button","pill",`${icon("palette")}${c.he} <span class="n">${n}</span>`);
+    b.dataset.id = c.id;
+    b.addEventListener("click", () => go(c.id));
+    nav.appendChild(b);
+  });
+}
+function go(id, sub){
+  const cat = CATS.find(c => c.id === id) || CATS[0];
+  document.querySelectorAll("#cats .pill").forEach(b => b.setAttribute("aria-current", b.dataset.id === cat.id));
+  render(cat);
+  history.replaceState(null,"","#"+cat.id+(sub?"/"+sub:""));
+  if (sub){ const t = document.getElementById(cat.id+"-"+sub); if (t) requestAnimationFrame(()=>t.scrollIntoView()); }
+  else window.scrollTo(0,0);
+}
+
+$("#fb").addEventListener("click", () => {
+  if (FEEDBACK_URL) location.href = FEEDBACK_URL;
+  else toast("יעד המשוב עדיין לא הוגדר");
+});
+
+build();
+const [h0, h1] = location.hash.slice(1).split("/");
+go(h0, h1);
+</script>
+</body>
+</html>
